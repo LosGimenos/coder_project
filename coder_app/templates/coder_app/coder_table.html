@@ -1,0 +1,35 @@
+<h2>Available Coders</h2>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hovered table-striped tablesorter">
+                <thead>
+                    <tr>
+                        <th class="header">Coder First Name</th>
+                        <th class="header">Coder Middle Name</th>
+                        <th class="header">Coder Last Name</th>
+                        <th class="header">Coder Username</th>
+                        <th class="header">Coder Email</th>
+                        <th class="header">Coder Rating</th>
+                        <th class="header"></th>
+                        <th class="header"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if coder_data %}
+                        {% for coder in coder_data %}
+                        <tr>
+                            <td>{{ coder.first_name }}</td>
+                            <td>{{ coder.middle_name }}</td>
+                            <td>{{ coder.last_name }}</td>
+                            <td>{{ coder.username }}</td>
+                            <td>{{ coder.email }}</td>
+                            <td>{{ coder.rating }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td><p>No Available Coders</p></td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>

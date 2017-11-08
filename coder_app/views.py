@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from django.shortcuts import render, redirect, HttpResponse
-from .models import Project, Tag, Variable
+from .models import Project, Tag, Variable, Coder
 import json
 
 def index(request):
@@ -282,3 +282,23 @@ def edit_variable(request, variable_id, project_id):
             'project_id': project_id,
             'choice_data': choice_data
         })
+
+def submit_new_coder(request):
+    if request.method == 'POST':
+        first_name = request.POST.get('coder-first-name')
+        middle_name = request.POST.get('coder-middle-name')
+        last_name = request.POST.get('coder-last-name')
+        email_value = request.POST.get('coder-email')
+
+        c = Coder(
+            first_name=first_name,
+            middle_name=middle_name,
+            last_name=last_name,
+            email=email_value
+        )
+        c.save()
+
+    coder_data = Coder.objects.all()
+
+
+    return render(request, 'coder_app/add_coder.html', {'coder_data': coder_data})

@@ -24,8 +24,12 @@ class VariableLibrary(models.Model):
     variable = models.ManyToManyField(Variable)
 
 class Coder(models.Model):
-    name = models.CharField(max_length=300, blank=True, null=True)
+    first_name = models.CharField(max_length=300, blank=True, null=True)
+    middle_name = models.CharField(max_length=300, blank=True, null=True)
+    last_name = models.CharField(max_length=300, blank=True, null=True)
     email = models.EmailField(blank=True, null=True, unique=True)
+    rating = models.DecimalField(max_digits=3, decimal_places=1, default=10.0)
+    username = models.CharField(max_length=300, blank=True, null=True)
 
 class RowStatus(models.Model):
     is_completed = models.BooleanField(default=False)
