@@ -1,0 +1,16 @@
+{% extends "coder_app/base.html" %}
+
+{% block content %}
+
+    <h1>Add New Project</h1>
+
+    <form action={% url 'submit_new_project' %} class="input-group" method="post">
+        {% csrf_token %}
+        <label for="project-name">Project Name</label>
+        <input class="input-group" type="input" name="project-name" /> <br />
+        <label for="project-rate">Rate</label>
+        <input class="input-group" type="input" name="project-rate" /> <br />
+        <input class='btn btn-primary' type="submit" value="Submit"/>
+    </form>
+
+{% endblock %}

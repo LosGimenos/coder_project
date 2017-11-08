@@ -1,0 +1,45 @@
+{% extends "coder_app/base.html" %}
+
+{% block content %}
+    <h2>Add Variable</h2>
+
+    <form action={% url 'submit_new_variable' %} class="input-group" method="post">
+        {% csrf_token %}
+        <input class='btn btn-primary' type="submit" name="submit_variable" value="Submit Variable"/><br />
+        <input style="display:none;" name="variable_id" value={{ variable_id }} />
+        <input style="display:none;" name="project_id" value={{ project_id }} />
+        <label for="project-name">Variable Name</label>
+        <input class="input-group" type="input" name="variable-name" /> <br />
+        <label for="variable-description">Description</label>
+        <textarea class="form-control" name="variable-description"></textarea> <br />
+        <label for="variable-instructions">Instructions</label>
+        <textarea class="form-control" name="variable-instructions"></textarea> <br />
+        <label>Answer Style</label> <br />
+        <label class="radio-inline">
+            <input type="radio" name="variable_answer_option" value="multiple_choice">Multiple Choice</label>
+        <label class="radio-inline">
+            <input type="radio" name="variable_answer_option" value="freeform">Freeform</label> <br />
+        <div class="input-group options-wrapper">
+        </div>
+        <label for="variable-tags">Tags</label>
+    </form>
+
+    <form id='add-tag' class="input-group col-sm-4" method="post" action={% url 'submit_new_variable' %}>
+        {% csrf_token %}
+        <input class="form-control" type="input" name="variable-tag" />
+            <span class="input-group-btn">
+                <input class='btn btn-default' type='submit' name='add_tag' value="Add Tag" />
+            </span>
+    </form>
+    <br />
+     <div class="form-control tag-wrapper" style="width: 35%;">
+         <p>No tags for this variable</p>
+     </div>
+     <br />
+
+    {% load static %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+    <script src="{% static 'token_injector.js' %}"></script>
+    <script src="{% static 'tagSubmitHandler.js' %}"></script>
+    <script src="{% static 'freeformToggle.js' %}"></script>
+{% endblock %}

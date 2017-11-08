@@ -1,0 +1,71 @@
+{% extends "coder_app/base.html" %}
+
+{% block content %}
+
+<h3>Edit Project</h3>
+
+    <form action={% url 'edit_project' project_id=id %} class="input-group" method="post">
+        {% csrf_token %}
+        <label for="project-name">Project Name</label>
+        <input class="input-group" type="input" name="project-name" value='{{ project_data.name }}' /> <br />
+        <label for="project-rate">Rate</label>
+        <input class="input-group" type="input" name="project-rate" value={{ project_data.rate }} /> <br />
+        <input class='btn btn-primary' type="submit" value="Submit"/>
+    </form>
+
+    <hr />
+
+    <h3>Variables Attached to Project "{{ project_data.name }}"</h3>
+
+    <form action={% url 'submit_new_variable' %} method='post'>
+        {% csrf_token %}
+        <input style="display: none;" name="project_for_variable" value={{ id }} />
+        <input class="btn btn-primary" type='submit' name='add_variable' value="Add Variable"/>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hovered table-striped tablesorter">
+            <thead>
+            <tr>
+                <th class="header">Variable Name</th>
+                <th class="header">Multiple Choice or Freeform</th>
+                <th class="header">Description</th>
+                <th class="header"></th>
+                <th class="header"></th>
+            </tr>
+            </thead>
+            {% if variable_data %}
+                {% for variable in variable_data %}
+                    <tbody>
+                        <tr>
+                            <td>{{ variable.name }}</td>
+                            <td>{{ variable.multiple_or_freeform }}</td>
+                            <td>{{ variable.description }}</td>
+                            <td>
+                                <a href={% url 'edit_variable' variable_id=variable.id project_id=id %}><span>Edit</span>
+                            </td>
+                            <td>
+                                <form action={% url 'edit_project' project_id=id %} method='post'>
+                                    {% csrf_token %}
+                                    <input
+                                            type="submit"
+                                            class="btn btn-danger btn-xs"
+                                            name="delete_project_button"
+                                            value='X' />
+                                    <input style="display:none;" name="delete_variable" value={{ variable.id }} />
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                {% endfor %}
+            {% else  %}
+                <tbody>
+                    <tr>
+                        <td>There are no current Variables attached to this Project</td>
+                    </tr>
+                </tbody>
+            {% endif %}
+        </table>
+    </div>
+
+{% endblock %}
