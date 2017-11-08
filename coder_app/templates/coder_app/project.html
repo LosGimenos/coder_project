@@ -4,13 +4,39 @@
 
     <h1>Add New Project</h1>
 
-    <form action={% url 'submit_new_project' %} class="input-group" method="post">
+    <form action={% url 'coder_app:submit_new_project' %} class="input-group" method="post">
         {% csrf_token %}
         <label for="project-name">Project Name</label>
         <input class="input-group" type="input" name="project-name" /> <br />
         <label for="project-rate">Rate</label>
         <input class="input-group" type="input" name="project-rate" /> <br />
         <input class='btn btn-primary' type="submit" value="Submit"/>
+        <br />
+
+        <h2>Available Coders</h2>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hovered table-striped tablesorter">
+                <thead>
+                    <tr>
+                        <th class="header">Coder Name</th>
+                        <th class="header">Coder Username</th>
+                        <th class="header">Coder email</th>
+                        <th class="header">Coder Rating</th>
+                        <th class="header"></th>
+                        <th class="header"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if coder_data %}
+
+                    {% else %}
+                        <tr>
+                            <td><p>No Available Coders</p></td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
     </form>
 
 {% endblock %}

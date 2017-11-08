@@ -6,8 +6,6 @@ const tag_wrapper = document.querySelector('.tag-wrapper');
 
 tagSubmit.addEventListener('submit', e => {
     e.preventDefault();
-    console.log($(variable_id_input).val(), 'trying to print this variable id');
-    console.log($(project_id_input).val(), 'trying to print this project id');
 
     $.ajax({
         url: '/coder_project/variables',
@@ -23,11 +21,46 @@ tagSubmit.addEventListener('submit', e => {
             console.log(json, 'this is the json')
 
             $(tagSubmit).trigger('reset');
-            let tagString = '';
+            tag_wrapper.innerHTML = '';
             json.tag_data.forEach(tag => {
-                tagString = tagString + '\#' + tag.name + ', ';
+                const tagString = '\#' + tag.name + ', ';
+                const tagNode = $(`<span></span>`).addClass('tag-node').text(tagString);
+                $(tagNode).attr('name', tag.id);
+                $(tagNode).hover((e) => {
+                  $( e.target ).css({
+                    "border": "1px solid red"
+                  });
+                $(tagNode).click((e) => {
+                  e.preventDefault();
+                  const tagId = e.currentTarget.getAttribute('name');
+                  $.ajax({
+                    url: '/coder_project/variables',
+                    type: 'POST',
+                    data: {
+                      'delete_tag': 'delete_tag',
+                      'tag_id': tagId,
+                      'variable_id': $(variable_id_input).val(),
+                      'project_id': $(project_id_input).val()
+                    },
+
+                    success: function(json) {
+                      const tagToRemove = $(`[name="${json.tag_id}"]`);
+                      tagToRemove.remove();
+                    },
+                      error: function(xhr,errmsg,err) {
+                        console.log(xhr,errmsg,err);
+                      }
+                  })
+
+                });
+                }, (e) => {
+                    $( e.target ).css({
+                      "border": "none"
+                     });
+                  }
+                );
+                $(tag_wrapper).append(tagNode);
             });
-            tag_wrapper.innerHTML = tagString;
 
             $(variable_id_input).val(json.variable_id);
             $(project_id_input).val(json.project_id);

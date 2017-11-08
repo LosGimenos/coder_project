@@ -92,7 +92,7 @@ def submit_new_variable(request):
         tag_data_list = []
 
         for tag in tag_data:
-            tag_data_list.append({'name': tag.name})
+            tag_data_list.append({'name': tag.name, 'id': tag.id})
 
         return HttpResponse(
             json.dumps({
@@ -103,6 +103,27 @@ def submit_new_variable(request):
             }),
             content_type="application/json"
         )
+
+    elif request.method == 'POST' and request.POST.get('delete_tag') == 'delete_tag':
+        tag_id = request.POST.get('tag_id')
+        project_id = request.POST.get('project_id')
+        variable_id = request.POST.get('variable_id')
+
+        print(tag_id, variable_id, 'these are the ids')
+
+        variable = Variable.objects.get(id=variable_id)
+        tag = Tag.objects.get(id=tag_id)
+        variable.tag_set.remove(tag)
+
+        return HttpResponse(
+            json.dumps({
+                'variable_id': variable_id,
+                'project_id': project_id,
+                'tag_id': tag_id,
+                'result': 'successful!'
+            }),
+            content_type="application/json"
+            )
 
     try:
         variable_id = variable.id

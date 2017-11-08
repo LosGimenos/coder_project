@@ -3,7 +3,7 @@
 {% block content %}
     <h2>Edit Variable "{{ variable_data.name }}"</h2>
 
-    <form action={% url 'edit_variable' variable_id=variable_data.id project_id=project_id %} class="input-group" method="post">
+    <form action={% url 'coder_app:edit_variable' variable_id=variable_data.id project_id=project_id %} class="input-group" method="post">
         {% csrf_token %}
         <input class='btn btn-primary' type="submit" name="submit_variable" value="Submit Variable"/><br />
         <input style="display:none;" name="variable_id" value="{{ variable_data.id }}" />
@@ -43,7 +43,7 @@
     <form id='add-tag'
           class="input-group col-sm-4"
           method="post"
-          action={% url 'edit_variable' variable_id=variable_data.id project_id=project_id %}>
+          action={% url 'coder_app:edit_variable' variable_id=variable_data.id project_id=project_id %}>
         {% csrf_token %}
         <input class="form-control" type="input" name="variable-tag" />
             <span class="input-group-btn">

@@ -4,7 +4,7 @@
 
 <h3>Edit Project</h3>
 
-    <form action={% url 'edit_project' project_id=id %} class="input-group" method="post">
+    <form action={% url 'coder_app:edit_project' project_id=id %} class="input-group" method="post">
         {% csrf_token %}
         <label for="project-name">Project Name</label>
         <input class="input-group" type="input" name="project-name" value='{{ project_data.name }}' /> <br />
@@ -17,7 +17,7 @@
 
     <h3>Variables Attached to Project "{{ project_data.name }}"</h3>
 
-    <form action={% url 'submit_new_variable' %} method='post'>
+    <form action={% url 'coder_app:submit_new_variable' %} method='post'>
         {% csrf_token %}
         <input style="display: none;" name="project_for_variable" value={{ id }} />
         <input class="btn btn-primary" type='submit' name='add_variable' value="Add Variable"/>
@@ -42,10 +42,10 @@
                             <td>{{ variable.multiple_or_freeform }}</td>
                             <td>{{ variable.description }}</td>
                             <td>
-                                <a href={% url 'edit_variable' variable_id=variable.id project_id=id %}><span>Edit</span>
+                                <a href={% url 'coder_app:edit_variable' variable_id=variable.id project_id=id %}><span>Edit</span>
                             </td>
                             <td>
-                                <form action={% url 'edit_project' project_id=id %} method='post'>
+                                <form action={% url 'coder_app:edit_project' project_id=id %} method='post'>
                                     {% csrf_token %}
                                     <input
                                             type="submit"

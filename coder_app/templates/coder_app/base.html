@@ -35,15 +35,16 @@
           </button>
           <a class="navbar-brand" href="#">Cambrian Analytics Platform</a>
         </div>
-          {% url 'index' as index_url %}
-          {% url 'submit_new_project' as project_url %}
-          {% url 'submit_new_variable' as variable_url %}
-          {% url 'edit_project' as edit_project_url %}
+          {% url 'coder_app:index' as index_url %}
+          {% url 'coder_app:submit_new_project' as project_url %}
+          {% url 'coder_app:submit_new_variable' as variable_url %}
+          {% url 'coder_app:edit_project' as edit_project_url %}
         <div id="navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
             <li {% if request.path == index_url %} class="active" {% endif %}><a href='{{ index_url }}'>Projects</a></li>
               <li {% if request.path == project_url %} class="active" {% endif %}><a href='{{ project_url }}'>Add Project</a></li>
             <li {% if request.path == variable_url %} class="active" {% endif %}><a href="{{ variable_url }}">Variables</a></li>
+              <li><a href="#">Add Coders</a></li>
             <li><a href="#">Admin Panel</a></li>
           </ul>
         </div><!--/.nav-collapse -->

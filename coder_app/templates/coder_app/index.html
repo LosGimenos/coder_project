@@ -4,7 +4,7 @@
 
     <h3>Your Projects</h3>
 
-    <form action={% url 'submit_new_project' %}>
+    <form action={% url 'coder_app:submit_new_project' %}>
         <input class="btn btn-primary" type="submit" value="Add Project"/>
     </form>
     <div class="table-responsive">
@@ -19,17 +19,17 @@
             </tr>
             </thead>
             {% if project_data %}
-                {% for project in project_data %}
                     <tbody>
+                        {% for project in project_data %}
                         <tr>
                             <td>{{ project.name }}</td>
                             <td>{{ project.rate }}</td>
                             <td>{{ project.contains_adverse_effects }}</td>
                             <td>
-                                <a href={% url 'edit_project' project_id=project.id %}><span>Edit</span></a>
+                                <a href={% url 'coder_app:edit_project' project_id=project.id %}><span>Edit</span></a>
                             </td>
                             <td>
-                                <form action={% url 'index' %} method='post'>
+                                <form action={% url 'coder_app:index' %} method='post'>
                                     {% csrf_token %}
                                     <input
                                             type="submit"
