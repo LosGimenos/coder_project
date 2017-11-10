@@ -1,0 +1,19 @@
+{% extends 'coder_app/base.html' %}
+
+{% block content %}
+    <h2>Your Pending Projects</h2>
+
+    {% for project in project_data %}
+        <a href="#">
+        <div class="row" style="border: 1px solid black">
+            <div class="col-md-6">
+                <h4 style="text-decoration: underline;">{{ project.name }}</h4>
+                <h5>RATE</h5> {{ project.rate }}
+                <h5>TOTAL QUERY COUNT</h5>
+                    {{ project.row_count }}
+            </div>
+        </div>
+        </a>
+        <br />
+    {% endfor %}
+{% endblock %}
