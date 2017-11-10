@@ -1,9 +1,11 @@
 {% extends "coder_app/base.html" %}
 
 {% block content %}
+    {% load static %}
+
     <h2>Add Variable</h2>
 
-    <form action={% url 'submit_new_variable' %} class="input-group" method="post">
+    <form action={% url 'coder_app:submit_new_variable' %} class="input-group" method="post">
         {% csrf_token %}
         <input class='btn btn-primary' type="submit" name="submit_variable" value="Submit Variable"/><br />
         <input style="display:none;" name="variable_id" value={{ variable_id }} />
@@ -24,7 +26,7 @@
         <label for="variable-tags">Tags</label>
     </form>
 
-    <form id='add-tag' class="input-group col-sm-4" method="post" action={% url 'submit_new_variable' %}>
+    <form action={% url 'coder_app:submit_new_variable' %} id='add-tag' class="input-group col-sm-4" method="post" >
         {% csrf_token %}
         <input class="form-control" type="input" name="variable-tag" />
             <span class="input-group-btn">
@@ -37,7 +39,6 @@
      </div>
      <br />
 
-    {% load static %}
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
     <script src="{% static 'token_injector.js' %}"></script>
     <script src="{% static 'tagSubmitHandler.js' %}"></script>

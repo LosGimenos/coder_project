@@ -3,6 +3,38 @@ from __future__ import unicode_literals
 
 from django.db import models
 
+class Coder(models.Model):
+    first_name = models.CharField(max_length=300, blank=True, null=True)
+    middle_name = models.CharField(max_length=300, blank=True, null=True)
+    last_name = models.CharField(max_length=300, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True, unique=True)
+    rating = models.DecimalField(max_digits=3, decimal_places=1, default=10.0)
+    username = models.CharField(max_length=300, blank=True, null=True)
+
+class Project(models.Model):
+    name = models.CharField(max_length=200)
+    rate = models.DecimalField(max_digits=4, decimal_places=2)
+    metadata = models.TextField(blank=True, null=True)
+    contains_adverse_effects = models.BooleanField(default=False)
+    coder = models.ManyToManyField(Coder)
+
+class Column(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True)
+    column_name = models.TextField(null=True, blank=True, db_index=True)
+    column_number = models.IntegerField(db_index=True, null=True)
+    is_binary_variable = models.BooleanField(default=False)
+    true_value = models.TextField(null=True, blank=True, db_index=True)
+    false_value = models.TextField(null=True, blank=True, db_index=True)
+    is_text_variable = models.BooleanField(default=False)
+    is_number_variable = models.BooleanField(default=False)
+    is_date_variable = models.BooleanField(default=False)
+    is_variable = models.BooleanField(default=False)
+
+    def __str__(self):
+        return "Column = %s" % (self.column_name.__str__())
+    class Meta:
+        ordering = ['id']
+
 class Variable(models.Model):
     name = models.CharField(blank=True, null=True, max_length=200)
     description = models.TextField(blank=True, null=True)
@@ -17,19 +49,12 @@ class Variable(models.Model):
     multiple_choice_option_five = models.CharField(blank=True, null=True, max_length=2000)
     multiple_choice_option_six = models.CharField(blank=True, null=True, max_length=2000)
     multiple_choice_option_seven = models.CharField(blank=True, null=True, max_length=2000)
+    column = models.ForeignKey(Column, on_delete=models.CASCADE, null=True)
 
 class VariableLibrary(models.Model):
     name = models.CharField(null=True, max_length=200)
     description = models.TextField(blank=True, null=True)
     variable = models.ManyToManyField(Variable)
-
-class Coder(models.Model):
-    first_name = models.CharField(max_length=300, blank=True, null=True)
-    middle_name = models.CharField(max_length=300, blank=True, null=True)
-    last_name = models.CharField(max_length=300, blank=True, null=True)
-    email = models.EmailField(blank=True, null=True, unique=True)
-    rating = models.DecimalField(max_digits=3, decimal_places=1, default=10.0)
-    username = models.CharField(max_length=300, blank=True, null=True)
 
 class RowStatus(models.Model):
     is_completed = models.BooleanField(default=False)
@@ -61,31 +86,11 @@ class Dataset(models.Model):
     class Meta:
         ordering = ['id']
 
-class Project(models.Model):
-    name = models.CharField(max_length=200)
-    rate = models.DecimalField(max_digits=4, decimal_places=2)
-    metadata = models.TextField(blank=True, null=True)
-    contains_adverse_effects = models.BooleanField(default=False)
-    dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE, null=True)
-    variable = models.ManyToManyField(Variable)
-
-class Column(models.Model):
-    dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE, null=True)
-    column_name = models.TextField(null=True, blank=True, db_index=True)
-    column_number = models.IntegerField(db_index=True, null=True)
-    is_binary_variable = models.BooleanField(default=False)
-    true_value = models.TextField(null=True, blank=True, db_index=True)
-    false_value = models.TextField(null=True, blank=True, db_index=True)
-    is_text_variable = models.BooleanField(default=False)
-    is_number_variable = models.BooleanField(default=False)
-    is_date_variable = models.BooleanField(default=False)
-    def __str__(self):
-        return "Column = %s" % (self.column_name.__str__())
-    class Meta:
-        ordering = ['id']
-
 class Row(models.Model):
-    dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE, null=True)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True)
+    is_locked = models.BooleanField(default=False)
+    is_completed = models.BooleanField(default=False)
+    coder = models.ForeignKey(Coder, null=True)
     row_name = models.TextField(null=True, blank=True, db_index=True)
     row_number = models.IntegerField(db_index=True, null=True)
     matches_filters = models.BooleanField(default=True)
@@ -96,6 +101,7 @@ class Row(models.Model):
         return "Row = %s" % (self.row_name.__str__())
 
 class Data(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True)
     dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE, null=True)
     row = models.ForeignKey(Row, on_delete=models.CASCADE, null=True)
     column = models.ForeignKey(Column, on_delete=models.CASCADE, null=True)
@@ -105,4 +111,4 @@ class Data(models.Model):
     def __str__(self):
         return "Row %s \n" % (self.row.__str__())
     class Meta:
-        index_together = ('dataset', 'row', 'column')
+        index_together = ('project', 'row', 'column')

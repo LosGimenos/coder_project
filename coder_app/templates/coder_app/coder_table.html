@@ -1,4 +1,8 @@
-<h2>Available Coders</h2>
+{% if assigned_or_available == 'assigned' %}
+    <h2>Coders Assigned to Project</h2>
+{% else %}
+    <h2>Available Coders</h2>
+{% endif %}
         <div class="table-responsive">
             <table class="table table-bordered table-hovered table-striped tablesorter">
                 <thead>
@@ -9,8 +13,11 @@
                         <th class="header">Coder Username</th>
                         <th class="header">Coder Email</th>
                         <th class="header">Coder Rating</th>
-                        <th class="header"></th>
-                        <th class="header"></th>
+                        {% if project_edit_view == 'coder' and not assigned_or_available %}
+                            <th class="header">Add To Project</th>
+                            {% else %}
+                            <th class="header"></th>
+                        {% endif %}
                     </tr>
                 </thead>
                 <tbody>
@@ -23,6 +30,17 @@
                             <td>{{ coder.username }}</td>
                             <td>{{ coder.email }}</td>
                             <td>{{ coder.rating }}</td>
+                            {% if project_edit_view == 'coder' and not assigned_or_available %}
+                                <td>
+                                    <input class='input-group' type="checkbox" name="add_to_project" value="{{ coder.id }}">
+                                </td>
+                                {% else %}
+                                <td>
+                                    <a href="{% url 'coder_app:edit_coder' coder_id=coder.id %}?project_id={{ id }}">
+                                        <span>Edit</span>
+                                    </a>
+                                </td>
+                            {% endif %}
                         </tr>
                         {% endfor %}
                     {% else %}
