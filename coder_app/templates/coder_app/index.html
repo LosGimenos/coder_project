@@ -2,54 +2,32 @@
 
 {% block content %}
 
-    <h3>Your Projects</h3>
+    <ul class="nav nav-tabs" role="tablist">
+      <li class='nav-home' role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">Home</a></li>
+      <li class='nav-coders' role="presentation"><a href="#coders" aria-controls="coders" role="tab" data-toggle="tab">Coders</a></li>
+      <li role="presentation"><a href="#">Messages</a></li>
+    </ul>
 
-    <form action={% url 'coder_app:submit_new_project' %}>
-        <input class="btn btn-primary" type="submit" value="Add Project"/>
-    </form>
-    <div class="table-responsive">
-        <table class="table table-bordered table-hovered table-striped tablesorter">
-            <thead>
-            <tr>
-                <th class="header">Project Name</th>
-                <th class="header">Project Rate</th>
-                <th class="header">Contains Adverse Effects</th>
-                <th class="header"></th>
-                <th class="header"></th>
-            </tr>
-            </thead>
-            {% if project_data %}
-                    <tbody>
-                        {% for project in project_data %}
-                        <tr>
-                            <td>{{ project.name }}</td>
-                            <td>{{ project.rate }}</td>
-                            <td>{{ project.contains_adverse_effects }}</td>
-                            <td>
-                                <a href={% url 'coder_app:edit_project' project_id=project.id %}><span>Edit</span></a>
-                            </td>
-                            <td>
-                                <form action={% url 'coder_app:index' %} method='post'>
-                                    {% csrf_token %}
-                                    <input
-                                            type="submit"
-                                            class="btn btn-danger btn-xs"
-                                            name="delete_project_button"
-                                            value='X' />
-                                    <input style="display:none;" name="delete_project" value={{ project.id }} />
-                                </form>
-                            </td>
-                        </tr>
-                    </tbody>
-                {% endfor %}
-            {% else  %}
-                <tbody>
-                    <tr>
-                        <td>There are no current Projects</td>
-                    </tr>
-                </tbody>
-            {% endif %}
-        </table>
+    <div class="tab-content">
+    <div role="tabpanel" class="tab-pane active" id="home">
+        {% include 'coder_app/project_table.html' %}
     </div>
+    <div role="tabpanel" class="tab-pane" id="coders">
+        {% include 'coder_app/coder_table.html' %}
+    </div>
+    <div role="tabpanel" class="tab-pane" id="messages">...</div>
+    <div role="tabpanel" class="tab-pane" id="settings">...</div>
+  </div>
 
 {% endblock %}
+
+<script>
+    $('.nav-home a').click(e => {
+        e.preventDefault();
+        $(this).tab('show')
+    });
+    $('.nav-coders a').click(e => {
+        e.preventDefault();
+        $(this).tab('show')
+    });
+</script>

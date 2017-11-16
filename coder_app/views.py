@@ -20,7 +20,7 @@ def index(request):
             'id': project.id,
             'name': project.name,
             'rate': project.rate,
-            'contains_adverse_effects': project.contains_adverse_effects
+            'contains_adverse_effects': project.contains_adverse_events
         }
         project_data_list.append(project_data)
 
@@ -74,7 +74,11 @@ def submit_new_variable(request):
         project = Project.objects.get(id=project_id)
 
         greatest_col_index = Column.objects.filter(project=project).aggregate(Max('column_number'))
-        greatest_col_index = greatest_col_index['column_number__max'] + 1
+
+        if not greatest_col_index['column_number__max']:
+            greatest_col_index = 1
+        else:
+            greatest_col_index = greatest_col_index['column_number__max'] + 1
 
         column = Column(
             project=project,
@@ -185,7 +189,7 @@ def edit_project(request, project_id):
         'id': p.id,
         'name': p.name,
         'rate': p.rate,
-        'contains_adverse_effects': p.contains_adverse_effects
+        'contains_adverse_effects': p.contains_adverse_events
     }
 
     columns = Column.objects.filter(project=p)

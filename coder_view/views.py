@@ -5,6 +5,8 @@ from django.db.models import Max
 from django.shortcuts import render, redirect, HttpResponse
 from coder_app.models import Project, Tag, Variable, Coder, Row, Column, Data
 import random
+import datetime
+import pytz
 
 def index(request):
     coder_data = Coder.objects.all()
@@ -216,20 +218,35 @@ def project_overview(request, coder_id, project_id, row_id):
 def project_answering(request, coder_id, project_id, row_id, variable_id):
     next_variable_id = request.POST.get('next_variable_id')
 
+    project_data = Project.objects.get(id=project_id)
     row_data = Row.objects.get(id=row_id)
     variable_data = Variable.objects.get(id=variable_id)
-    project_data = Project.objects.get(id=project_id)
     coder = Coder.objects.get(id=coder_id)
 
-    if request.method == 'POST' and not 'start-answer' in request.POST:
-        # save values to Data model
-        column = Column.objects.get(id=variable_id)
+    all_columns_in_project = Column.objects.filter(project=project_data)
+    total_variable_count = all_columns_in_project.count()
+    completed_variable_count = row_data.curr_col_index
 
-        data = Data.objects.get(
+    column_id = variable_data.column_id
+    column = all_columns_in_project.get(id=column_id)
+
+    if request.method == 'POST' and 'start-answer' not in request.POST:
+        # save values to Data model
+
+        date_submitted = datetime.datetime.now().replace(tzinfo=pytz.UTC)
+
+        data = Data.objects.filter(
             project=project_data,
             column=column,
-            row=row_data.id
-        )
+            row=row_data
+        ).first()
+
+        if not data:
+            data = Data(
+                project=project_data,
+                column=column,
+                row=row_data
+            )
 
         if 'variable-freeform' in request.POST:
             data.value = request.POST.get('variable-freeform')
@@ -237,6 +254,7 @@ def project_answering(request, coder_id, project_id, row_id, variable_id):
             selected_choice = request.POST.get('variable-multiple')
             data.value = selected_choice
 
+        data.date = date_submitted
         data.save()
 
         # advance row curr_col_index count
@@ -312,7 +330,9 @@ def project_answering(request, coder_id, project_id, row_id, variable_id):
             'project_id': project_id,
             'variable_data': variable_data,
             'row_id': row_id,
-            'next_variable_id': next_variable_id
+            'next_variable_id': next_variable_id,
+            'total_variable_count': total_variable_count,
+            'completed_variable_count': completed_variable_count
         })
 
 

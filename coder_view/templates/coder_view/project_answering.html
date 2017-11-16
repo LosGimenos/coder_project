@@ -4,6 +4,7 @@
 {% url 'coder_view:coder_project_answering' coder_id project_id next_variable_id as next_variable_url %}
 
 {% block content %}
+    {% include 'coder_view/track_variable_progress.html' %}
     <h2>{{ variable_data.name }}</h2>
 
     <div>
@@ -70,11 +71,13 @@
                 {% endif %}
         {% endif %}
         <br/>
-        <label for="variable-adverse-effects">Contains Adverse Effects?</label>
+        <label for="variable-adverse-effects">Contains Adverse Events?</label>
         <input type="checkbox" name="variable-adverse-effects" />
         <br/>
         <input class="btn btn-primary" type="submit" name="confirm-variable" value="Confirm and Go to Next Prompt->"/>
     </form>
+    <br/>
+    {% include 'coder_view/track_variable_progress.html' %}
     <br/>
     <a href="{% url 'coder_view:coder_splash' coder_id %}">
         <button class="btn btn-primary"><-Back to Project Select</button>

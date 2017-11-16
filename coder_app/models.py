@@ -15,7 +15,7 @@ class Project(models.Model):
     name = models.CharField(max_length=200)
     rate = models.DecimalField(max_digits=4, decimal_places=2)
     metadata = models.TextField(blank=True, null=True)
-    contains_adverse_effects = models.BooleanField(default=False)
+    contains_adverse_events = models.BooleanField(default=False)
     coder = models.ManyToManyField(Coder)
 
 class Column(models.Model):
@@ -112,6 +112,7 @@ class Data(models.Model):
     value = models.TextField(null=True, blank=True)
     date = models.DateTimeField(null=True)
     number = models.FloatField(null=True)
+    coder = models.ForeignKey(Coder, null=True)
     def __str__(self):
         return "Row %s \n" % (self.row.__str__())
     class Meta:
