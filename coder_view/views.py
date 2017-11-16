@@ -254,8 +254,13 @@ def project_answering(request, coder_id, project_id, row_id, variable_id):
             selected_choice = request.POST.get('variable-multiple')
             data.value = selected_choice
 
+        data.coder = coder
         data.date = date_submitted
         data.save()
+
+        # check for adverse events
+        if 'variable-adverse-events' in request.POST:
+            row_data.contains_adverse_events = True
 
         # advance row curr_col_index count
         row_data.curr_col_index = row_data.curr_col_index + 1
@@ -319,7 +324,7 @@ def project_answering(request, coder_id, project_id, row_id, variable_id):
         if not next_variable_id:
             redirect_url = '/coder_view/' + str(coder.id) + '/project_select/'
         else:
-            redirect_url = '/coder_view/' + str(coder.id) + '/project_answering/' + str(project_data.id) + '/project_query/'+ str(row_data.id) + '/variable/' + str(next_variable_id)
+            redirect_url = '/coder_view/' + str(coder.id) + '/project_answering/' + str(project_data.id) + '/project_mention/'+ str(row_data.id) + '/variable/' + str(next_variable_id)
         return redirect(redirect_url)
 
     return render(

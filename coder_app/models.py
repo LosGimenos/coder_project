@@ -102,6 +102,7 @@ class Row(models.Model):
     matches_split = models.BooleanField(default=True)
     matches_split_exclusions = models.BooleanField(default=True)
     curr_col_index = models.IntegerField(default=1)
+    contains_adverse_events = models.BooleanField(default=False)
     def __str__(self):
         return "Row = %s" % (self.row_name.__str__())
 
