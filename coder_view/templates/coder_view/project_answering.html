@@ -14,7 +14,14 @@
     <br />
     <div>
 
-    {% include 'coder_view/cv_iframe_template.html' %}
+    {% if social_data %}
+        {% include 'coder_view/cv_media_viewer_template.html' %}
+    {% else %}
+        <h3>Media Text</h3>
+        <div>
+            <span>{{ media_text }}</span>
+        </div>>
+    {% endif %}
 
     <h3>Description</h3>
     <span><p>{{ variable_data.description }}</p></span>

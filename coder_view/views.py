@@ -7,6 +7,7 @@ from coder_app.models import Project, Tag, Variable, Coder, Row, Column, Data
 import random
 import datetime
 import pytz
+import requests
 
 def index(request):
     coder_data = Coder.objects.all()
@@ -230,6 +231,26 @@ def project_answering(request, coder_id, project_id, row_id, variable_id):
     column_id = variable_data.column_id
     column = all_columns_in_project.get(id=column_id)
 
+    # check media source as Twitter or Instagram
+    if row_data.is_twitter:
+        source = 'twitter'
+    elif row_data.is_instagram:
+        source = 'instagram'
+
+    # make API call to Social Media API
+    media_url = row_data.media_url
+    media_text = row_data.media_text
+    base_instagram_api_url = 'https://api.instagram.com/oembed?url='
+    base_twitter_api_url = 'https://publish.twitter.com/oembed?url='
+
+    if media_url and source == 'twitter':
+        social_api_url = base_twitter_api_url + media_url
+    elif media_url and source == 'instagram':
+        social_api_url = base_instagram_api_url + media_url
+
+    social_api_json = requests.get(social_api_url).json()
+    social_data = social_api_json['html']
+
     if request.method == 'POST' and 'start-answer' not in request.POST:
         # save values to Data model
 
@@ -337,7 +358,10 @@ def project_answering(request, coder_id, project_id, row_id, variable_id):
             'row_id': row_id,
             'next_variable_id': next_variable_id,
             'total_variable_count': total_variable_count,
-            'completed_variable_count': completed_variable_count
+            'completed_variable_count': completed_variable_count,
+            'social_data': social_data,
+            'media_url': media_url,
+            'media_text': media_text
         })
 
 
