@@ -88,6 +88,10 @@ class Dataset(models.Model):
 
 class Row(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True)
+    media_url = models.TextField(null=True, blank=True)
+    media_text = models.TextField(null=True, blank=True)
+    is_twitter = models.BooleanField(default=False)
+    is_instagram = models.BooleanField(default=False)
     is_locked = models.BooleanField(default=False)
     is_completed = models.BooleanField(default=False)
     coder = models.ForeignKey(Coder, null=True)
@@ -97,12 +101,12 @@ class Row(models.Model):
     matches_category = models.BooleanField(default=True)
     matches_split = models.BooleanField(default=True)
     matches_split_exclusions = models.BooleanField(default=True)
+    curr_col_index = models.IntegerField(default=1)
     def __str__(self):
         return "Row = %s" % (self.row_name.__str__())
 
 class Data(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True)
-    dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE, null=True)
     row = models.ForeignKey(Row, on_delete=models.CASCADE, null=True)
     column = models.ForeignKey(Column, on_delete=models.CASCADE, null=True)
     value = models.TextField(null=True, blank=True)

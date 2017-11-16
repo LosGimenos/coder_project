@@ -1,0 +1,27 @@
+{% for project in project_data %}
+    {% if project.is_completed %}
+        <div class="row" style="border: 1px solid black; background-color: #2ecc71;">
+            <div class="col-md-6">
+                <h4 style="text-decoration: underline;">{{ project.name }}</h4>
+                <h5>RATE</h5> {{ project.rate }}
+                <h5>TOTAL QUERY COUNT</h5>
+                <span><p>All Queries Completed</p></span>
+            </div>
+        </div>
+        <br/>
+                {% else %}
+        <a href="{% url 'coder_view:coder_project_overview' coder_id=coder_data.id project_id=project.id row_id=project.row_id%}">
+        <div class="row" style="border: 1px solid black">
+            <div class="col-md-6">
+                <h4 style="text-decoration: underline;">{{ project.name }}</h4>
+                <h5>RATE</h5> {{ project.rate }}
+                <h5>QUERIES COMPLETED</h5>
+                    {{ project.completed_rows_count }} out of {{ project.all_rows_count }}
+            </div>
+        </div>
+        </a>
+        <br />
+
+        <br/>
+    {% endif %}
+{% endfor %}

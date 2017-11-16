@@ -2,7 +2,8 @@
 from __future__ import unicode_literals
 
 from django.shortcuts import render, redirect, HttpResponse
-from .models import Project, Tag, Variable, Coder, Column
+from django.db.models import Max
+from .models import Project, Tag, Variable, Coder, Column, Row, Data
 import json
 
 def index(request):
@@ -72,9 +73,13 @@ def submit_new_variable(request):
         project_id = request.POST.get('project_for_variable')
         project = Project.objects.get(id=project_id)
 
+        greatest_col_index = Column.objects.filter(project=project).aggregate(Max('column_number'))
+        greatest_col_index = greatest_col_index['column_number__max'] + 1
+
         column = Column(
             project=project,
-            is_variable=True
+            is_variable=True,
+            column_number=greatest_col_index
         )
         column.save()
 
@@ -82,6 +87,16 @@ def submit_new_variable(request):
             column=column
         )
         variable.save()
+
+        rows = Row.objects.filter(project=project)
+
+        for row in rows:
+            data = Data(
+                column=column,
+                row=row,
+                project=project
+            )
+            data.save()
 
     elif request.method == 'POST' and request.POST.get('add-tag') == 'add-tag':
         tag_name = request.POST.get('variable-tag')

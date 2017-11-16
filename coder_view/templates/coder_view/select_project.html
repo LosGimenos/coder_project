@@ -1,19 +1,33 @@
 {% extends 'coder_app/base.html' %}
 
 {% block content %}
-    <h2>Your Pending Projects</h2>
+    <h2>Your Projects</h2>
 
-    {% for project in project_data %}
-        <a href="#">
-        <div class="row" style="border: 1px solid black">
-            <div class="col-md-6">
-                <h4 style="text-decoration: underline;">{{ project.name }}</h4>
-                <h5>RATE</h5> {{ project.rate }}
-                <h5>TOTAL QUERY COUNT</h5>
-                    {{ project.row_count }}
-            </div>
-        </div>
-        </a>
-        <br />
-    {% endfor %}
+    <div class="collapse navbar-collapse">
+        <ul class="nav navbar-nav">
+            <li>
+                <form action={% url 'coder_view:coder_splash' coder_data.id %} method="post">
+                    {% csrf_token %}
+                    <input type="submit" name="select-variable-view-button" value="Pending" />
+                    <input style="display: none;" name="pending_projects_view" value="{{ coder_data.id }}" />
+                </form>
+            </li>
+            <li>
+                <form action={% url 'coder_view:coder_splash' coder_data.id %} method="post">
+                    {% csrf_token %}
+                    <input type="submit" name="assigned-coder-view-button" value="Completed" />
+                    <input style="display: none;" name="completed_projects_view" value="{{ coder_data.id }}" />
+                </form>
+            </li>
+            <li>
+                <form action={% url 'coder_view:coder_splash' coder_data.id %} method="post">
+                    {% csrf_token %}
+                    <input type="submit" name="select-coder-view-button" value="All" />
+                    <input style="display: none;" name="all_projects_view" value="{{ coder_data.id }}" />
+                </form>
+            </li>
+        </ul>
+    </div>
+    <br/>
+    {% include 'coder_view/cv_project_table.html' %}
 {% endblock %}
