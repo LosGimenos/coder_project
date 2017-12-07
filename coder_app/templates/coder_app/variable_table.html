@@ -3,9 +3,13 @@
 <form action={% url 'coder_app:submit_new_variable' %} method='post'>
     {% csrf_token %}
     <input style="display: none;" name="project_for_variable" value={{ id }} />
-    <input class="btn btn-primary" type='submit' name='add_variable' value="Add Variable"/>
+    <input class="btn btn-primary" type='submit' name='add_variable' value="Create New Variable"/>
 </form>
-
+<form action="{% url 'coder_app:variable_library' %}" method="post">
+    {% csrf_token %}
+    <input style="display: none;" name="project_for_variable" value={{ id }} />
+    <input class="btn btn-primary" type="submit" name="import_variable" value="Attach Existing Variable" />
+</form>
 <div class="table-responsive">
     <table class="table table-bordered table-hovered table-striped tablesorter">
         <thead>

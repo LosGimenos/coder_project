@@ -1,0 +1,253 @@
+{% extends 'coder_app/base.html' %}
+
+{% block content %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
+
+    {% include 'coder_app/home_tab.html' %}
+    <h3>Attach Variables to Project "{{ project_data.name }}"</h3>
+
+    <div class="row ">
+        <div class="col-md-5">
+            <div class="ui-widget">
+                <label for="variable_name_filter">Add Variable by Name</label>
+                <input id='by_name' class='form-control' type="text" name="variable_name_filter" placeholder="by Name" /><br/>
+            </div>
+            <div class="ui-widget">
+                <label for="tag_filter">Add Variables by Tag</label>
+                <input id='by_tag' class="form-control" type="text" name="tag_filter" placeholder="by Tag" />
+            </div>
+        </div>
+        <div class="col-md-1">
+        </div>
+        <div class="col-md-5">
+            <h4 style="text-align: center;">Selected Tags</h4>
+            <div class="col-md-12 variable--container tag--container">
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+    <div class="col-md-5 variable--container__title"><h3>Filtered Variables</h3></div>
+        <div class="col-md-1"></div>
+        <div class="col-md-5 variable--container__title"><h3 class="variable--container__title-choice">{{ project_data.name }}</h3></div>
+    </div>
+    <div class="row">
+        <div class="col-md-5 variable--container variable--container__filtered">
+        </div>
+        <div class="col-md-1 control--container">
+            <div class="action--button action--button-library">
+                <div class="glyphicon glyphicon-arrow-right">
+                </div>
+            </div>
+            <div class="action--button action--button-back">
+                <div class="glyphicon glyphicon-arrow-left">
+                </div>
+            </div>
+            <div class="action--button action--button-library__all">
+                <div class="glyphicon glyphicon-forward">
+                </div>
+            </div>
+            <div class="action--button action--button-back__all">
+                <div class="glyphicon glyphicon-backward">
+                </div>
+            </div>
+        </div>
+        <div class="col-md-5 variable--container variable--container__to-project">
+        </div>
+    </div>
+    <div class="row" style="margin-top: 1%;">
+    <div class="col-md-5">
+    </div>
+    <div class="col-md-1" style="text-align: center;">
+        <button class="btn btn-success variable--container__submit">Confirm</button>
+    </div>
+    <div class="col-md-5">
+    </div>
+    </div>
+
+    <style>
+    .variable--container {
+        border: 1px solid black;
+        height: 30vh;
+        overflow: scroll;
+    }
+
+    .variable--container__title {
+        text-align: center;
+    }
+
+    .control--container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        border: 1px solid black;
+        height: 30vh;
+    }
+
+    .variable--container span:hover {
+        background-color: grey;
+        cursor: pointer;
+    }
+
+    .action--button {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        height: 25%;
+        text-align: center;
+        width: 100%;
+        cursor: pointer;
+    }
+
+    .action--button:hover {
+        background-color: grey;
+    }
+
+    .selected {
+        background-color: aquamarine;
+    }
+
+    </style>
+
+    {% load static %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script src="{% static 'token_injector.js' %}"></script>
+
+    <script>
+        let variablesToMove = [];
+        const variablesToProjectContainer = $('.variable--container__to-project');
+        const filteredVariablesContainer = $('.variable--container__filtered');
+        const tagContainer = $('.tag--container');
+
+        function addVariableHandlers() {
+            $('.variable--container span').click(e => {
+                e.preventDefault();
+                const variableNode = $(e.currentTarget);
+                const variableNodeName = variableNode.attr('name');
+
+                $(variableNode).toggleClass('selected');
+
+                let isInVariablesToMove = false;
+                let indexToRemove;
+
+                variablesToMove.forEach((variable, index) => {
+                    if (variableNodeName == variable.attr('name')) {
+                        isInVariablesToMove = true;
+                        indexToRemove = index;
+                    }
+                });
+
+                if (isInVariablesToMove) {
+                    variablesToMove.splice(indexToRemove, 1);
+                } else if (!isInVariablesToMove || variablesToMove.length == 0) {
+                    variablesToMove.push(variableNode);
+                }
+            });
+        }
+
+        addVariableHandlers();
+
+        $('.action--button-library').click(e => {
+           e.preventDefault();
+           variablesToMove.forEach(variable => {
+               $(variable).remove();
+               $(variable).addClass('variable--container__name');
+               $('.variable--container__library').prepend(variable);
+           });
+            variablesToMove = [];
+        });
+
+        $('.variable--container__submit').click(e => {
+            e.preventDefault();
+            let variableIdsToAdd = [];
+            let variableNodes = $('.variable--container__name');
+            let variableLibraryId = $('.variable--container__title-choice').attr('name');
+            let isNew = false;
+
+            $(variableNodes).each((index, variableNode) => {
+                console.log(variableNode);
+                let variableId = $(variableNode).attr('name');
+               variableIdsToAdd.push(variableId);
+            });
+            console.log(variableIdsToAdd, 'this is the library id', variableLibraryId);
+
+
+            $.ajax({
+                url: '/coder_project/variable_library',
+                type: 'POST',
+                data: {
+                    variable_ids_to_add: variableIdsToAdd,
+                    variable_library_id: variableLibraryId,
+                    is_new: isNew
+                },
+
+                success: function(json) {
+                    console.log(json);
+                },
+                error: function(xhr,errmsg,err) {
+                    console.log(xhr,errmsg,err);
+                }
+            });
+        })
+
+            $('#by_name').autocomplete({
+                source: "/coder_project/get_variable_names",
+                select: function (event, ui) {
+                    $('#by_name').val('');
+                    $.ajax({
+                        url: '/coder_project/get_variable_names',
+                        type: 'POST',
+                        data: {
+                            'variable_id_to_add': ui.item.id
+                        },
+                        success: function(json) {
+                            let variableData = JSON.parse(json.variable_data)[0];
+                            console.log('this is data', variableData);
+                            let variableNode = $(`<span name='${variableData.pk}'>${variableData.fields.name}</br></span>`)
+                            $(filteredVariablesContainer).append(variableNode);
+                        },
+                        error: function(xhr,errmsg,err) {
+                            console.log(err);
+                        }
+                    });
+
+                    return false;
+                },
+                minLength: 2,
+            })
+
+
+            $('#by_tag').autocomplete({
+               source: "/coder_project/get_tag_names",
+                select: function (event, ui) {
+                    $.ajax({
+                        url: '/coder_project/get_tag_names',
+                        type: 'POST',
+                        data: {
+                            'tag_id_to_add': ui.item.id
+                        },
+                        success: function(json) {
+                            let tagData = json.tag_data;
+                            let variableData = JSON.parse(json.variable_data);
+
+                            let tagNode = $(`<span name='${tagData.id}'>\#${tagData.name}</br></span>`);
+                            $(tagContainer).append(tagNode);
+
+                            $(variableData).each((index, variable) => {
+                                let variableNode = $(`<span name='${variable.pk}'>${variable.fields.name}</br></span>`);
+                                $(filteredVariablesContainer).append(variableNode);
+                            });
+
+                            $('#by_tag').val('');
+                        },
+                        error: function(xhr,errmsg,err) {
+                            console.log(err);
+                        }
+                    })
+                },
+               minLength: 2
+            });
+
+    </script>
+{% endblock %}

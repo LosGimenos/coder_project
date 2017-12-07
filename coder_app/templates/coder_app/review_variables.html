@@ -1,0 +1,118 @@
+{% extends 'coder_app/base.html' %}
+
+{% block content %}
+    {% include 'coder_app/home_tab.html' %}
+    <h3>Review Variable Coded by {{ coder_data.username }}</h3>
+    <h2>{{ variable_data.name }}</h2>
+
+    <div>
+    <h3>Instructions</h3>
+    <span><p>{{ variable_data.instructions }}</p></span>
+    </div>
+    <br />
+    <div>
+
+    {% if social_data %}
+        {% include 'coder_view/cv_media_viewer_template.html' %}
+    {% else %}
+        <h3>Media Text</h3>
+        <div>
+            <span>{{ media_text }}</span>
+        </div>
+    {% endif %}
+
+    <h3>Description</h3>
+    <span><p>{{ variable_data.description }}</p></span>
+    </div>
+    <br />
+    <h3>Answered Prompt</h3>
+    <form action="{% url 'coder_app:select_variable' coder_data.id project_id %}" method="POST">
+        {% csrf_token %}
+        {% if variable_data.is_freeform %}
+        <textarea class='form-control' name='variable-freeform'>{{ answer_data.value }}</textarea>
+            {% elif variable_data.is_multiple_choice %}
+                {% if variable_data.multiple_choice_option_one %}
+                    <label>Choice 1</label><br/>
+                    <input
+                        name="variable-multiple"
+                        type="radio"
+                        value="{{ variable_data.multiple_choice_option_one }}"
+                        {% if variable_data.multiple_choice_option_one == answer_data.value %} checked {% endif %}>
+                    {{ variable_data.multiple_choice_option_one }}</input>
+                    <br/>
+                {% endif %}
+                {% if variable_data.multiple_choice_option_two %}
+                    <label>Choice 2</label><br/>
+                    <input
+                        name="variable-multiple"
+                        type="radio"
+                        value="{{ variable_data.multiple_choice_option_two }}"
+                        {% if variable_data.multiple_choice_option_two == answer_data.value %} checked {% endif %}>
+                    {{ variable_data.multiple_choice_option_two }}</input>
+                    <br/>
+                {% endif %}
+                {% if variable_data.multiple_choice_option_three %}
+                    <label>Choice 3</label><br/>
+                    <input
+                        name="variable-multiple"
+                        type="radio"
+                        value="{{ variable_data.multiple_choice_option_three }}"
+                        {% if variable_data.multiple_choice_option_three == answer_data.value %} checked {% endif %}>
+                    {{ variable_data.multiple_choice_option_three }}</input>
+                    <br/>
+                {% endif %}
+                {% if variable_data.multiple_choice_option_four %}
+                    <label>Choice 4</label><br/>
+                    <input
+                        name="variable-multiple"
+                        type="radio"
+                        value="{{ variable_data.multiple_choice_option_four }}"
+                        {% if variable_data.multiple_choice_option_four == answer_data.value %} checked {% endif %}>
+                    {{ variable_data.multiple_choice_option_four }}</input>
+                    <br/>
+                {% endif %}
+                {% if variable_data.multiple_choice_option_five %}
+                    <label>Choice 5</label><br/>
+                    <input
+                        name="variable-multiple"
+                        type="radio"
+                        value="{{ variable_data.multiple_choice_option_five }}"
+                        {% if variable_data.multiple_choice_option_five == answer_data.value %} checked {% endif %}>
+                    {{ variable_data.multiple_choice_option_five }}</input>
+                    <br/>
+                {% endif %}
+                {% if variable_data.multiple_choice_option_six %}
+                    <label>Choice 6</label><br/>
+                    <input
+                        name="variable-multiple"
+                        type="radio"
+                        value="{{ variable_data.multiple_choice_option_six }}"
+                        {% if variable_data.multiple_choice_option_six == answer_data.value %} checked {% endif %}>
+                    {{ variable_data.multiple_choice_option_six }}</input>
+                    <br/>
+                {% endif %}
+                {% if variable_data.multiple_choice_option_seven %}
+                    <label>Choice 7</label><br/>
+                    <input
+                        name="variable-multiple"
+                        type="radio"
+                        value="{{ variable_data.multiple_choice_option_seven }}"
+                        {% if variable_data.multiple_choice_option_seven == answer_data.value %} checked {% endif %}>
+                    {{ variable_data.multiple_choice_option_seven }}</input>
+                    <br/>
+                {% endif %}
+        {% endif %}
+        <br/>
+        <label for="variable-adverse-events">Contains Adverse Events?</label>
+        <input
+                type="checkbox"
+                name="variable-adverse-events"
+                value="True"
+                {% if mention_data.contains_adverse_events %} checked{% endif %}
+        />
+        <br/>
+        <input class="hidden" value="{{ completed_variable_ids }}" name="completed_variables" />
+        <input type="hidden" name="completed_variable_id" value="{{ answer_data.id }}" />
+        <input class="btn btn-primary" type="submit" name="confirm-variable" value="Submit Changes and Mark Reviewed"/>
+    </form>
+{% endblock %}

@@ -20,7 +20,7 @@
                     <tr>
                         <td>{{ project.name }}</td>
                         <td>{{ project.rate }}</td>
-                        <td>{{ project.contains_adverse_effects }}</td>
+                        <td>{{ project.contains_adverse_events }}</td>
                         <td>
                             <a href={% url 'coder_app:edit_project' project_id=project.id %}><span>Edit</span></a>
                         </td>

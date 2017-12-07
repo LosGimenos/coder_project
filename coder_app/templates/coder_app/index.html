@@ -5,7 +5,7 @@
     <ul class="nav nav-tabs" role="tablist">
       <li class='nav-home' role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">Home</a></li>
       <li class='nav-coders' role="presentation"><a href="#coders" aria-controls="coders" role="tab" data-toggle="tab">Coders</a></li>
-      <li role="presentation"><a href="#">Messages</a></li>
+      <li role="presentation"><a href="#">Variables</a></li>
     </ul>
 
     <div class="tab-content">
@@ -13,7 +13,7 @@
         {% include 'coder_app/project_table.html' %}
     </div>
     <div role="tabpanel" class="tab-pane" id="coders">
-        {% include 'coder_app/coder_table.html' %}
+        {% include 'coder_app/add_coder.html' %}
     </div>
     <div role="tabpanel" class="tab-pane" id="messages">...</div>
     <div role="tabpanel" class="tab-pane" id="settings">...</div>

@@ -1,0 +1,48 @@
+{% extends 'coder_app/base.html' %}
+
+{% block content %}
+    {% include 'coder_app/home_tab.html' %}
+    <div class="table-responsive">
+        <h3>Variables Completed by {{ coder_data.username }} for this Mention</h3>
+    <br/>
+    <table class="table table-bordered table-hovered table-striped tablesorter">
+        <thead>
+        <tr>
+            <th class="header">Variable Name</th>
+            <th class="header">Multiple Choice or Freeform</th>
+            <th class="header">Description</th>
+            <th class="header">Reviewed</th>
+            <th class="header"></th>
+        </tr>
+        </thead>
+        {% if answer_data %}
+            {% for answer in answer_data %}
+                <tbody>
+                    <tr>
+                        <td>{{ answer.variable_data.name }}</td>
+                        <td>{{ answer.variable_data.multiple_or_freeform }}</td>
+                        <td>{{ answer.variable_data.description }}</td>
+                        <td style="text-align: center;">
+                            {% if answer.reviewed %}<span class="glyphicon glyphicon-ok"></span> {% endif %}</td>
+                        <td>
+                            <form action="{% url 'coder_app:review_variables' coder_data.id project_id %}" method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="completed_variable_id" value="{{ answer.id }}" />
+                                <input type="hidden" name="completed_variables" value="{{ completed_variable_ids }}"/>
+                                <input class="btn btn-primary" type="submit" value="Review" />
+                            </form>
+                        </td>
+                    </tr>
+                </tbody>
+            {% endfor %}
+        {% else  %}
+            <tbody>
+                <tr>
+                    <td>There are no current Variables attached to this Project</td>
+                </tr>
+            </tbody>
+        {% endif %}
+    </table>
+        <a href="{% url 'coder_app:select_mention' coder_data.id project_id %}"><button class="btn btn-primary">Back</button></a>
+</div>
+{% endblock %}

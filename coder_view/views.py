@@ -147,6 +147,8 @@ def project_overview(request, coder_id, project_id, row_id):
     else:
         row_data = previous_coder_row[0]
 
+    row_id = row_data.id
+
     # get current column with error handling if column_number does not match row curr_col_index
 
     current_column_index = row_data.curr_col_index
@@ -248,8 +250,11 @@ def project_answering(request, coder_id, project_id, row_id, variable_id):
     elif media_url and source == 'instagram':
         social_api_url = base_instagram_api_url + media_url
 
-    social_api_json = requests.get(social_api_url).json()
-    social_data = social_api_json['html']
+    if media_url:
+        social_api_json = requests.get(social_api_url).json()
+        social_data = social_api_json['html']
+    else:
+        social_data = None
 
     if request.method == 'POST' and 'start-answer' not in request.POST:
         # save values to Data model
@@ -282,6 +287,8 @@ def project_answering(request, coder_id, project_id, row_id, variable_id):
         # check for adverse events
         if 'variable-adverse-events' in request.POST:
             row_data.contains_adverse_events = True
+            row_data.adverse_event_datetime_submitted = datetime.datetime.now().replace(tzinfo=pytz.UTC)
+
 
         # advance row curr_col_index count
         row_data.curr_col_index = row_data.curr_col_index + 1

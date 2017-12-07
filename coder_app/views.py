@@ -3,8 +3,12 @@ from __future__ import unicode_literals
 
 from django.shortcuts import render, redirect, HttpResponse
 from django.db.models import Max
-from .models import Project, Tag, Variable, Coder, Column, Row, Data
+from django.core import serializers
+from .models import Project, Tag, Variable, Coder, Column, Row, Data, VariableLibrary
 import json
+import requests
+import datetime
+import pytz
 
 def index(request):
     if request.method == 'POST' and 'delete_project' in request.POST:
@@ -14,17 +18,18 @@ def index(request):
 
     project_data_list = []
     projects = Project.objects.all()
+    coder_data = Coder.objects.all()
 
     for project in projects:
         project_data = {
             'id': project.id,
             'name': project.name,
             'rate': project.rate,
-            'contains_adverse_effects': project.contains_adverse_events
+            'contains_adverse_events': project.contains_adverse_events
         }
         project_data_list.append(project_data)
 
-    return render(request, 'coder_app/index.html', {'project_data': project_data_list})
+    return render(request, 'coder_app/index.html', {'project_data': project_data_list, 'coder_data': coder_data})
 
 def submit_new_variable(request):
     if request.method == 'POST' and 'submit_variable' in request.POST:
@@ -108,10 +113,13 @@ def submit_new_variable(request):
         variable = Variable.objects.get(id=variable_id)
         project_id = request.POST.get('project_id')
 
-        tag = Tag(
-            name=tag_name
-        )
-        tag.save()
+        tag = Tag.objects.get(name=tag_name)
+
+        if not tag:
+            tag = Tag(
+                name=tag_name
+            )
+            tag.save()
 
         tag.variable.add(variable)
         tag_data = variable.tag_set.all()
@@ -134,8 +142,6 @@ def submit_new_variable(request):
         tag_id = request.POST.get('tag_id')
         project_id = request.POST.get('project_id')
         variable_id = request.POST.get('variable_id')
-
-        print(tag_id, variable_id, 'these are the ids')
 
         variable = Variable.objects.get(id=variable_id)
         tag = Tag.objects.get(id=tag_id)
@@ -171,7 +177,7 @@ def submit_new_project(request):
         project = Project(
             name=project_name,
             rate=project_rate,
-            contains_adverse_effects=False
+            contains_adverse_events=False
         )
 
         project.save()
@@ -280,6 +286,23 @@ def edit_project(request, project_id):
                 'project_edit_view': project_edit_view
             }
         )
+
+    if request.method == 'POST' and 'mentions_view' in request.POST:
+        mention_data = Row.objects.filter(project=p)
+        project_edit_view = 'mention'
+
+        return render(
+            request,
+            'coder_app/edit_project.html',
+            {
+                'variable_data': variable_data_list,
+                'mention_data': mention_data,
+                'id': project_id,
+                'project_data': project_data,
+                'project_edit_view': project_edit_view
+            }
+        )
+        pass
 
     if request.method == 'POST' and 'add_to_project' in request.POST:
         project_id = request.POST.get('project_id')
@@ -412,6 +435,8 @@ def submit_new_coder(request):
         )
         c.save()
 
+        return redirect('/coder_project/')
+
     coder_data = Coder.objects.all()
 
 
@@ -424,6 +449,7 @@ def edit_coder(request, coder_id):
         project_id = None
 
     coder = Coder.objects.get(id=coder_id)
+    projects = coder.project_set.all()
 
     if request.method == 'POST':
         coder.first_name = request.POST.get('coder-first-name')
@@ -440,6 +466,250 @@ def edit_coder(request, coder_id):
             redirect_url = '/coder_project/' + str(project_id) + '/edit_project'
             return redirect(redirect_url)
 
-        return redirect('/coder_project/add_coder')
+        return redirect('/coder_project/')
 
-    return render(request, 'coder_app/edit_coder.html', {'coder': coder, 'project_id': project_id })
+    return render(request, 'coder_app/edit_coder.html', {'coder': coder, 'project_id': project_id, 'projects': projects })
+
+def edit_variable_library(request):
+    variable_data = Variable.objects.all()
+    variable_library_data = VariableLibrary.objects.all()
+
+    if request.method == "POST" and 'import_variable' in request.POST:
+        project_id = request.POST.get('project_for_variable')
+        project_data = Project.objects.get(id=project_id)
+
+        return render(
+            request,
+            'coder_app/variable_library.html',
+            {
+                'project_data': project_data
+            }
+        )
+
+    return render(
+        request,
+        'coder_app/variable_library.html',
+        {
+            'variable_data': variable_data,
+            'variable_library_data': variable_library_data
+        })
+
+def select_mention(request, coder_id, project_id):
+    coder_data = Coder.objects.get(id=coder_id)
+    project_data = Project.objects.get(id=project_id)
+    mention_data = Row.objects.filter(project=project_data)
+    column_data = Column.objects.filter(project=project_data, is_variable=True)
+    total_variable_count = column_data.count()
+
+    for row in mention_data:
+        answer_data = Data.objects.filter(coder=coder_data, row=row)
+        answer_ids = ''
+
+        for index, answer in enumerate(answer_data):
+            answer_ids += str(answer.id)
+            if index + 1 != answer_data.count():
+                answer_ids += ','
+
+
+        row.completed_variables = answer_ids
+        row.completed_variables_count = answer_data.count()
+
+    return render(
+        request,
+        'coder_app/select_mention.html',
+        {
+            'coder_data': coder_data,
+            'project_data': project_data,
+            'mention_data': mention_data,
+            'total_variable_count': total_variable_count
+        })
+
+def review_variables(request, coder_id, project_id):
+    completed_variable_ids = request.POST.get('completed_variables')
+    completed_variable_id = request.POST.get('completed_variable_id')
+
+    coder_data = Coder.objects.get(id=coder_id)
+    answer_data = Data.objects.get(id=int(completed_variable_id))
+    mention_data = Row.objects.get(id=answer_data.row_id)
+    column_data = Column.objects.get(id=answer_data.column_id)
+    variable_data = Variable.objects.get(column=column_data)
+
+    # check media source as Twitter or Instagram
+    if mention_data.is_twitter:
+        source = 'twitter'
+    elif mention_data.is_instagram:
+        source = 'instagram'
+
+    # make API call to Social Media API
+    media_url = mention_data.media_url
+    media_text = mention_data.media_text
+    base_instagram_api_url = 'https://api.instagram.com/oembed?url='
+    base_twitter_api_url = 'https://publish.twitter.com/oembed?url='
+
+    if media_url and source == 'twitter':
+        social_api_url = base_twitter_api_url + media_url
+    elif media_url and source == 'instagram':
+        social_api_url = base_instagram_api_url + media_url
+
+    if media_url:
+        social_api_json = requests.get(social_api_url).json()
+        social_data = social_api_json['html']
+    else:
+        social_data = None
+
+    return render(
+        request,
+        'coder_app/review_variables.html',
+        {
+            'mention_data': mention_data,
+            'answer_data': answer_data,
+            'variable_data': variable_data,
+            'social_data': social_data,
+            'media_text': media_text,
+            'coder_data': coder_data,
+            'project_id': project_id,
+            'completed_variable_ids': completed_variable_ids
+         }
+    )
+
+def select_variable(request, coder_id, project_id):
+    completed_variable_ids = request.POST.get('completed_variables')
+    completed_variables = completed_variable_ids.split(',')
+
+    coder_data = Coder.objects.get(id=coder_id)
+
+    if request.method == "POST" and 'confirm-variable' in request.POST:
+        completed_variable_id = request.POST.get('completed_variable_id')
+        answer = Data.objects.get(id=completed_variable_id)
+
+        if 'variable-freeform' in request.POST:
+            variable_value = request.POST.get('variable-freeform')
+        elif 'variable-multiple' in request.POST:
+            variable_value = request.POST.get('variable-multiple')
+        else:
+            variable_value = None
+
+        has_adverse_events = request.POST.get('variable-adverse-events')
+
+        if has_adverse_events:
+            mention = Row.objects.get(id=answer.row_id)
+
+            if not mention.contains_adverse_events:
+                mention.contains_adverse_events = True
+                mention.adverse_event_datetime_submitted = datetime.datetime.now().replace(tzinfo=pytz.UTC)
+
+                mention.save()
+
+        if answer.value != variable_value:
+            answer.value = variable_value
+            answer.corrected = True
+
+        answer.reviewed = True
+        answer.save()
+
+        total_coder_answer_count = Data.objects.filter(coder=coder_data).count()
+        corrected_coder_answer_count = Data.objects.filter(coder=coder_data, corrected=True).count()
+
+        coder_rating = (100 - ((corrected_coder_answer_count / total_coder_answer_count) * 100)) / 10
+        coder_rating = round(coder_rating, 1)
+
+        coder_data.rating = float(coder_rating)
+        coder_data.save()
+
+    answer_data = Data.objects.filter(id__in=completed_variables)
+
+    if answer_data:
+        mention_data = Row.objects.get(id=answer_data[0].row_id)
+
+        for answer in answer_data:
+            column_data = Column.objects.get(id=answer.column_id)
+            variable_data = Variable.objects.get(column=column_data)
+
+            if variable_data.is_multiple_choice:
+                variable_data.multiple_or_freeform = 'Multiple Choice'
+            else:
+                variable_data.multiple_or_freeform = 'Freeform'
+
+            answer.variable_data = variable_data
+
+    return render(
+        request,
+        'coder_app/select_variable.html',
+        {
+            'coder_data': coder_data,
+            'mention_data': mention_data,
+            'answer_data': answer_data,
+            'project_id': project_id,
+            'completed_variable_ids': completed_variable_ids
+        }
+    )
+
+def get_variable_names(request):
+    if request.method == 'POST' and json.loads(request.POST.get('variable_id_to_add')):
+        variable_id = json.loads(request.POST.get('variable_id_to_add'))
+        variable_data = Variable.objects.filter(id=variable_id)
+        variable_data = serializers.serialize('json', variable_data)
+
+        return HttpResponse(
+            json.dumps({
+                'variable_data': variable_data,
+                'result': 'successful!'
+            }),
+            content_type="application/json"
+        )
+
+    elif request.is_ajax():
+        query = request.GET.get('term', '')
+        variables = Variable.objects.filter(name__icontains=query)
+        results = []
+        for variable in variables:
+            variable_names_json = {
+                'id': variable.id,
+                'label': variable.name,
+                'value': variable.description
+            }
+            results.append(variable_names_json)
+        variable_data = json.dumps(results)
+    else:
+        variable_data = 'fail'
+
+    mimetype = 'application/json'
+    return HttpResponse(variable_data, mimetype)
+
+def get_tag_names(request):
+    if request.method == 'POST' and json.loads(request.POST.get('tag_id_to_add')):
+        tag_id = json.loads(request.POST.get('tag_id_to_add'))
+        tag = Tag.objects.get(id=tag_id)
+        variable_data = tag.variable.all()
+        tag_data = {
+            'id': tag.id,
+            'name': tag.name
+        }
+        variable_data = serializers.serialize('json', variable_data)
+
+        return HttpResponse(
+            json.dumps({
+                'tag_data': tag_data,
+                'variable_data': variable_data,
+                'result': 'successful!'
+            }),
+            content_type="application/json"
+        )
+
+    elif request.is_ajax():
+        query = request.GET.get('term', '')
+        tags = Tag.objects.filter(name__icontains=query)
+        results = []
+        for tag in tags:
+            tag_names_json = {
+                'value': tag.id,
+                'label': tag.name,
+                'id': tag.id
+            }
+            results.append(tag_names_json)
+        variable_data = json.dumps(results)
+    else:
+        variable_data = 'fail'
+
+    mimetype = 'application/json'
+    return HttpResponse(variable_data, mimetype)

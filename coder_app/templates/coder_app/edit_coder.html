@@ -1,20 +1,41 @@
 {% extends 'coder_app/base.html' %}
 
 {% block content %}
-    <h2>Edit Coder</h2>
-    <form action="{% url 'coder_app:edit_coder' coder_id=coder.id %}" class="input-group" method="post">
-        {% csrf_token %}
-        <input class='btn btn-primary' type="submit" name="edit_coder" value="Submit Coder"/><br />
-        <label for="coder-first-name">First Name</label>
-        <input class="input-group" type="input" name="coder-first-name" value="{{ coder.first_name }}"/> <br />
-        <label for="coder-middle-name">Middle Name</label>
-        <input class="input-group" type="input" name="coder-middle-name" value="{{ coder.middle_name }}"/> <br />
-        <label for="coder-last-name">Last Name</label>
-        <input class="input-group" type="input" name="coder-last-name" value="{{ coder.last_name }}"/> <br />
-        <label for="coder-username">Username</label>
-        <input class="input-group" type="input" name="coder-username" value="{{ coder.username }}"/> <br />
-        <label for="coder-email">Email</label>
-        <input class="input-group" type="input" name="coder-email" value="{{ coder.email }}"/> <br />
-        <input class="text" style="display:none;" name="project_id" value="{{ project_id }}" />
-    </form>
+    {% include 'coder_app/home_tab.html' %}
+    <h2>Edit Coder Details</h2>
+    <div class="row">
+        <div class="col-md-3">
+        <form action="{% url 'coder_app:edit_coder' coder_id=coder.id %}" class="input-group" method="post">
+            {% csrf_token %}
+            <input class='btn btn-primary' type="submit" name="edit_coder" value="Submit Changes"/><br />
+            <label for="coder-first-name">First Name</label>
+            <input class="input-group" type="input" name="coder-first-name" value="{{ coder.first_name }}"/> <br />
+            <label for="coder-middle-name">Middle Name</label>
+            <input class="input-group" type="input" name="coder-middle-name" value="{{ coder.middle_name }}"/> <br />
+            <label for="coder-last-name">Last Name</label>
+            <input class="input-group" type="input" name="coder-last-name" value="{{ coder.last_name }}"/> <br />
+            <label for="coder-username">Username</label>
+            <input class="input-group" type="input" name="coder-username" value="{{ coder.username }}"/> <br />
+            <label for="coder-email">Email</label>
+            <input class="input-group" type="input" name="coder-email" value="{{ coder.email }}"/> <br />
+            <input class="text" style="display:none;" name="project_id" value="{{ project_id }}" />
+        </form>
+        </div>
+        <div class="col-md-4">
+            <h3>Attached to these Projects:</h3>
+            <ul style="list-style: none;">
+                {% if projects %}
+                    {% for project in projects %}
+                        <li>{{ project.name }} |
+                            <a href="{% url 'coder_app:select_mention' coder.id project.id %}"><span>review responses</span></a>
+                        </li>
+                    {% endfor %}
+                    {% else %}
+                    <span>No Current Projects</span>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+    <hr/>
+
 {% endblock %}

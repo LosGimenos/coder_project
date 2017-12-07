@@ -1,7 +1,8 @@
 {% extends "coder_app/base.html" %}
 
 {% block content %}
-    <h2>Edit Variable "{{ variable_data.name }}"</h2>
+    {% include 'coder_app/home_tab.html' %}
+    <h3>Edit Variable "{{ variable_data.name }}"</h3>
 
     <form action={% url 'coder_app:edit_variable' variable_id=variable_data.id project_id=project_id %} class="input-group" method="post">
         {% csrf_token %}

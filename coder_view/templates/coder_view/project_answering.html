@@ -20,7 +20,7 @@
         <h3>Media Text</h3>
         <div>
             <span>{{ media_text }}</span>
-        </div>>
+        </div>
     {% endif %}
 
     <h3>Description</h3>
@@ -36,43 +36,43 @@
             {% elif variable_data.is_multiple_choice %}
                 {% if variable_data.multiple_choice_option_one %}
                     <label>Choice 1</label><br/>
-                    <input name="variable-multiple" type="radio" value={{ variable_data.multiple_choice_option_one }}>
+                    <input name="variable-multiple" type="radio" value="{{ variable_data.multiple_choice_option_one }}">
                     {{ variable_data.multiple_choice_option_one }}</input>
                     <br/>
                 {% endif %}
                 {% if variable_data.multiple_choice_option_two %}
                     <label>Choice 2</label><br/>
-                    <input name="variable-multiple" type="radio" value={{ variable_data.multiple_choice_option_two }}>
+                    <input name="variable-multiple" type="radio" value="{{ variable_data.multiple_choice_option_two }}">
                     {{ variable_data.multiple_choice_option_two }}</input>
                     <br/>
                 {% endif %}
                 {% if variable_data.multiple_choice_option_three %}
                     <label>Choice 3</label><br/>
-                    <input name="variable-multiple" type="radio" value={{ variable_data.multiple_choice_option_three }}>
+                    <input name="variable-multiple" type="radio" value="{{ variable_data.multiple_choice_option_three }}">
                     {{ variable_data.multiple_choice_option_three }}</input>
                     <br/>
                 {% endif %}
                 {% if variable_data.multiple_choice_option_four %}
                     <label>Choice 4</label><br/>
-                    <input name="variable-multiple" type="radio" value={{ variable_data.multiple_choice_option_four }}>
+                    <input name="variable-multiple" type="radio" value="{{ variable_data.multiple_choice_option_four }}">
                     {{ variable_data.multiple_choice_option_four }}</input>
                     <br/>
                 {% endif %}
                 {% if variable_data.multiple_choice_option_five %}
                     <label>Choice 5</label><br/>
-                    <input name="variable-multiple" type="radio" value={{ variable_data.multiple_choice_option_five }}>
+                    <input name="variable-multiple" type="radio" value="{{ variable_data.multiple_choice_option_five }}">
                     {{ variable_data.multiple_choice_option_five }}</input>
                     <br/>
                 {% endif %}
                 {% if variable_data.multiple_choice_option_six %}
                     <label>Choice 6</label><br/>
-                    <input name="variable-multiple" type="radio" value={{ variable_data.multiple_choice_option_six }}>
+                    <input name="variable-multiple" type="radio" value="{{ variable_data.multiple_choice_option_six }}">
                     {{ variable_data.multiple_choice_option_six }}</input>
                     <br/>
                 {% endif %}
                 {% if variable_data.multiple_choice_option_seven %}
                     <label>Choice 7</label><br/>
-                    <input name="variable-multiple" type="radio" value={{ variable_data.multiple_choice_option_seven }}>
+                    <input name="variable-multiple" type="radio" value="{{ variable_data.multiple_choice_option_seven }}">
                     {{ variable_data.multiple_choice_option_seven }}</input>
                     <br/>
                 {% endif %}

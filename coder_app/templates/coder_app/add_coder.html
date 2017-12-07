@@ -1,7 +1,5 @@
-{% extends "coder_app/base.html" %}
-
 {% block content %}
-    <h2>Add Coder</h2>
+    <h3>Add Coder</h3>
     <form action="{% url 'coder_app:add_coder' %}" class="input-group" method="post">
         {% csrf_token %}
         <input class='btn btn-primary' type="submit" name="add_coder" value="Submit Coder"/><br />

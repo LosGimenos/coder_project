@@ -42,11 +42,6 @@
           {% url 'coder_app:add_coder' as add_coder %}
         <div id="navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
-            <li {% if request.path == index_url %} class="active" {% endif %}><a href='{{ index_url }}'>Projects</a></li>
-              <li {% if request.path == project_url %} class="active" {% endif %}><a href='{{ project_url }}'>Add Project</a></li>
-            <li {% if request.path == variable_url %} class="active" {% endif %}><a href="{{ variable_url }}">Variables</a></li>
-              <li {% if request.path == add_coder %} class="active" {% endif %}><a href="{{ add_coder }}">Add Coder</a></li>
-            <li><a href="#">Admin Panel</a></li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>

@@ -4,7 +4,7 @@
 
     {% url 'coder_app:submit_new_variable' as variable_url %}
     {% url 'coder_app:add_coder' as coder_url %}
-
+{% include 'coder_app/home_tab.html' %}
 <h3>Edit Project</h3>
     <form action={% url 'coder_app:edit_project' project_id=id %} class="input-group" method="post">
         {% csrf_token %}
@@ -23,6 +23,13 @@
                     {% csrf_token %}
                     <input type="submit" name="select-variable-view-button" value="Variables" />
                     <input style="display: none;" name="variable_view" value="{{ variable.id }}" />
+                </form>
+            </li>
+            <li>
+                <form action={% url 'coder_app:edit_project' project_id=id %} method="post">
+                    {% csrf_token %}
+                    <input type="submit" name="select-mention-view-button" value="Mentions" />
+                    <input style="display: none;" name="mentions_view" value="{{ variable.id }}" />
                 </form>
             </li>
             <li>
@@ -53,5 +60,7 @@
                     <input class="btn btn-primary" type="submit" name="add-coders-button" value="Add Coders" />
                 {% endif %}
             </form>
+        {% elif project_edit_view == 'mention'%}
+            {% include 'coder_app/mention_table.html' %}
     {% endif %}
 {% endblock %}
