@@ -17,6 +17,7 @@ class Project(models.Model):
     metadata = models.TextField(blank=True, null=True)
     contains_adverse_events = models.BooleanField(default=False)
     coder = models.ManyToManyField(Coder)
+    is_completed = models.BooleanField(default=False)
 
 class Variable(models.Model):
     name = models.CharField(blank=True, null=True, max_length=200)
@@ -32,7 +33,6 @@ class Variable(models.Model):
     multiple_choice_option_five = models.CharField(blank=True, null=True, max_length=2000)
     multiple_choice_option_six = models.CharField(blank=True, null=True, max_length=2000)
     multiple_choice_option_seven = models.CharField(blank=True, null=True, max_length=2000)
-    # column = models.ForeignKey(Column, on_delete=models.CASCADE, null=True)
 
 class Column(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True)

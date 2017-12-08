@@ -1,6 +1,6 @@
 <h3>Variables Attached to Project "{{ project_data.name }}"</h3>
 
-<form action={% url 'coder_app:submit_new_variable' %} method='post'>
+<form action={% url 'coder_app:submit_new_variable' %} method='post' style="float: left; margin-right: 1%;">
     {% csrf_token %}
     <input style="display: none;" name="project_for_variable" value={{ id }} />
     <input class="btn btn-primary" type='submit' name='add_variable' value="Create New Variable"/>

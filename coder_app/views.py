@@ -33,14 +33,44 @@ def index(request):
 
 def submit_new_variable(request):
     if request.method == 'POST' and 'submit_variable' in request.POST:
-        variable_name = request.POST.get('variable-name')
         project_id = request.POST.get('project_id')
+        variable_name = request.POST.get('variable-name')
         variable_description = request.POST.get('variable-description')
         variable_instructions = request.POST.get('variable-instructions')
         multiple_or_freeform = request.POST.get('variable_answer_option')
 
-        variable_id = request.POST.get('variable_id')
-        variable = Variable.objects.get(id=variable_id)
+        # variable_id = request.POST.get('variable_id')
+        # variable = Variable.objects.get(id=variable_id)
+
+        project = Project.objects.get(id=project_id)
+
+        greatest_col_index = Column.objects.filter(project=project).aggregate(Max('column_number'))
+
+        if not greatest_col_index['column_number__max']:
+            greatest_col_index = 1
+        else:
+            greatest_col_index = greatest_col_index['column_number__max'] + 1
+
+        variable = Variable()
+        variable.save()
+
+        column = Column(
+            project=project,
+            is_variable=True,
+            column_number=greatest_col_index,
+            variable=variable
+        )
+        column.save()
+
+        rows = Row.objects.filter(project=project)
+
+        for row in rows:
+            data = Data(
+                column=column,
+                row=row,
+                project=project
+            )
+            data.save()
 
         if multiple_or_freeform == 'multiple_choice':
             variable.is_freeform = False
@@ -76,6 +106,9 @@ def submit_new_variable(request):
 
     elif request.method == 'POST' and 'add_variable' in request.POST:
         project_id = request.POST.get('project_for_variable')
+
+        return render(request, 'coder_app/variables.html', {'project_id': project_id})
+
         project = Project.objects.get(id=project_id)
 
         greatest_col_index = Column.objects.filter(project=project).aggregate(Max('column_number'))
@@ -85,17 +118,16 @@ def submit_new_variable(request):
         else:
             greatest_col_index = greatest_col_index['column_number__max'] + 1
 
+        variable = Variable()
+        variable.save()
+
         column = Column(
             project=project,
             is_variable=True,
-            column_number=greatest_col_index
+            column_number=greatest_col_index,
+            variable=variable
         )
         column.save()
-
-        variable = Variable(
-            column=column
-        )
-        variable.save()
 
         rows = Row.objects.filter(project=project)
 
@@ -113,7 +145,7 @@ def submit_new_variable(request):
         variable = Variable.objects.get(id=variable_id)
         project_id = request.POST.get('project_id')
 
-        tag = Tag.objects.get(name=tag_name)
+        tag = Tag.objects.filter(name=tag_name).first()
 
         if not tag:
             tag = Tag(
@@ -198,19 +230,22 @@ def edit_project(request, project_id):
         'contains_adverse_effects': p.contains_adverse_events
     }
 
-    columns = Column.objects.filter(project=p)
+    columns = Column.objects.filter(project=p, is_variable=True)
+    variable_ids = columns.values_list('variable_id', flat=True)
+
     variables = []
-    for column in columns:
-        v = Variable.objects.get(column=column)
-        variable = {
-         'id': v.id,
-         'name': v.name,
-         'description': v.description,
-         'instructions': v.instructions,
-         'is_freeform': v.is_freeform,
-         'is_multiple_choice': v.is_multiple_choice
-        }
-        variables.append(variable)
+    for variable_id in variable_ids:
+        if variable_id:
+            v = Variable.objects.get(id=variable_id)
+            variable = {
+             'id': v.id,
+             'name': v.name,
+             'description': v.description,
+             'instructions': v.instructions,
+             'is_freeform': v.is_freeform,
+             'is_multiple_choice': v.is_multiple_choice
+            }
+            variables.append(variable)
 
     for variable in variables:
         if variable['is_freeform'] == True:
@@ -471,9 +506,6 @@ def edit_coder(request, coder_id):
     return render(request, 'coder_app/edit_coder.html', {'coder': coder, 'project_id': project_id, 'projects': projects })
 
 def edit_variable_library(request):
-    variable_data = Variable.objects.all()
-    variable_library_data = VariableLibrary.objects.all()
-
     if request.method == "POST" and 'import_variable' in request.POST:
         project_id = request.POST.get('project_for_variable')
         project_data = Project.objects.get(id=project_id)
@@ -486,13 +518,37 @@ def edit_variable_library(request):
             }
         )
 
-    return render(
-        request,
-        'coder_app/variable_library.html',
-        {
-            'variable_data': variable_data,
-            'variable_library_data': variable_library_data
-        })
+    if request.method == "POST" and json.loads(request.POST.get('add_variables')):
+        variables = json.loads(request.POST.get('variables_to_add'))
+        project_id = request.POST.get('project_id')
+
+        project_data = Project.objects.get(id=project_id)
+        column_data = Column.objects.filter(project=project_data, is_variable=True)
+        variable_ids_attached_to_project = column_data.values('variable_id')
+
+        for variable in variables:
+            attached_variable = \
+                next((item for item in variable_ids_attached_to_project if item['variable_id'] == variable['id']), None)
+
+            if attached_variable:
+                continue
+            else:
+                variable = Variable.objects.get(id=variable['id'])
+                column = Column(
+                    variable=variable,
+                    is_variable=True,
+                    project=project_data
+                )
+                column.save()
+
+        redirect_url = '/coder_project/' + project_id + '/edit_project/'
+        return HttpResponse(
+            json.dumps({
+                'redirect_url': redirect_url,
+                'result': 'successful!'
+            }),
+            content_type="application/json"
+        )
 
 def select_mention(request, coder_id, project_id):
     coder_data = Coder.objects.get(id=coder_id)
@@ -702,7 +758,7 @@ def get_tag_names(request):
         results = []
         for tag in tags:
             tag_names_json = {
-                'value': tag.id,
+                'value': tag.name,
                 'label': tag.name,
                 'id': tag.id
             }

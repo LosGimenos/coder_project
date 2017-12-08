@@ -8,14 +8,14 @@
             <li>
                 <form action={% url 'coder_view:coder_splash' coder_data.id %} method="post">
                     {% csrf_token %}
-                    <input type="submit" name="select-variable-view-button" value="Pending" />
+                    <input type="submit" name="select-variable-view-button" value="Available" />
                     <input style="display: none;" name="pending_projects_view" value="{{ coder_data.id }}" />
                 </form>
             </li>
             <li>
                 <form action={% url 'coder_view:coder_splash' coder_data.id %} method="post">
                     {% csrf_token %}
-                    <input type="submit" name="assigned-coder-view-button" value="Completed" />
+                    <input type="submit" name="assigned-coder-view-button" value="Previous" />
                     <input style="display: none;" name="completed_projects_view" value="{{ coder_data.id }}" />
                 </form>
             </li>

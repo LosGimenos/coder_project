@@ -20,34 +20,61 @@ def select_project(request, coder_id):
     project_data = []
 
     if request.method == 'POST' and 'all_projects_view' in request.POST:
+        project_ids_to_render = {}
+
         for project in projects:
             all_rows = Row.objects.filter(project=project)
             all_rows_count = all_rows.count()
-            rows = Row.objects.filter(
+
+            uncompleted_rows = all_rows.filter(is_completed=False)
+            completed_rows = all_rows.filter(
                 project=project,
                 is_completed=True
             )
-            completed_rows_count = rows.count()
+            completed_rows_count = completed_rows.count()
 
-            try:
-                row = all_rows[0]
-                row_id = row.id
-            except:
-                row_id = None
+            project_is_available = False
 
-            single_project = {
-                'id': project.id,
-                'name': project.name,
-                'rate': project.rate,
-                'all_rows_count': all_rows_count,
-                'completed_rows_count': completed_rows_count,
-                'row_id': row_id
-            }
+            for row in uncompleted_rows:
+                if not row.coder_id or int(coder_id) == int(row.coder_id):
+                    project_is_available = True
 
-            if all_rows_count <= completed_rows_count:
-                single_project['is_completed'] = True
+            if project_is_available:
+                try:
+                    row = all_rows[0]
+                    row_id = row.id
+                except:
+                    row_id = None
 
-            project_data.append(single_project)
+                single_project = {
+                    'id': project.id,
+                    'name': project.name,
+                    'rate': project.rate,
+                    'all_rows_count': all_rows_count,
+                    'completed_rows_count': completed_rows_count,
+                    'row_id': row_id
+                }
+
+                project_ids_to_render['project_id'] = project.id
+
+                if all_rows_count <= completed_rows_count:
+                    single_project['is_completed'] = True
+
+                project_data.append(single_project)
+
+                for completed_row in completed_rows:
+                    if completed_row.id not in project_ids_to_render:
+                        single_project = {
+                            'id': project.id,
+                            'name': project.name,
+                            'rate': project.rate,
+                            'all_rows_count': all_rows_count,
+                            'completed_rows_count': completed_rows_count,
+                            'row_id': row_id,
+                            'is_completed': True
+                        }
+
+                        project_data.append(single_project)
 
     elif request.method == 'POST' and 'completed_projects_view' in request.POST:
         for project in projects:
@@ -83,19 +110,29 @@ def select_project(request, coder_id):
         for project in projects:
             all_rows = Row.objects.filter(project=project)
             all_rows_count = all_rows.count()
-            rows = Row.objects.filter(
-                project=project,
-                is_completed=True
-            )
-            completed_rows_count = rows.count()
 
-            try:
-                row = all_rows[0]
-                row_id = row.id
-            except:
-                row_id = None
+            uncompleted_rows = all_rows.filter(is_completed=False)
 
-            if completed_rows_count < all_rows_count:
+            project_is_available = False
+
+            for row in uncompleted_rows:
+                print('checking rows', coder_id, row.coder_id)
+                if not row.coder_id or int(coder_id) == int(row.coder_id):
+                    project_is_available = True
+
+            if project_is_available:
+                completed_rows = Row.objects.filter(
+                    project=project,
+                    is_completed=True
+                )
+                completed_rows_count = completed_rows.count()
+
+                try:
+                    row = all_rows[0]
+                    row_id = row.id
+                except:
+                    row_id = None
+
                 single_project = {
                     'id': project.id,
                     'name': project.name,
@@ -104,6 +141,9 @@ def select_project(request, coder_id):
                     'completed_rows_count': completed_rows_count,
                     'row_id': row_id
                 }
+
+                if all_rows_count <= completed_rows_count:
+                    single_project['is_completed'] = True
 
                 project_data.append(single_project)
 
@@ -119,9 +159,11 @@ def project_overview(request, coder_id, project_id, row_id):
     project_data = Project.objects.get(id=project_id)
     coder = Coder.objects.get(id=coder_id)
 
+    print('this is project id', project_data.id)
     #check if coder is currently working on a row query
 
     previous_coder_row = Row.objects.filter(
+        project=project_data,
         coder=coder,
         is_completed=False
     )
@@ -133,11 +175,10 @@ def project_overview(request, coder_id, project_id, row_id):
             is_completed=False
         )
 
-
         if rows:
             row = random.choice(rows)
         else:
-            return redirect('/')
+            return redirect('/coder_view/' + str(coder_id) + '/project_select')
 
         row.is_locked = True
         row.coder = coder
@@ -157,11 +198,17 @@ def project_overview(request, coder_id, project_id, row_id):
     no_next_column_found = False
 
     greatest_col_index = Column.objects.filter(project=project_data).aggregate(Max('column_number'))
+    print('greatest col from filter', greatest_col_index)
     greatest_col_index = greatest_col_index['column_number__max']
 
     column_acquired = False
 
+    num_attempts = 0
     while not column_acquired:
+        print(current_column_index, 'current index', row_id, 'this is row id')
+        attempted_column = Column.objects.filter(project=project_data, is_variable=True, column_number=current_column_index)
+        print(attempted_column, 'attempted col')
+
         try:
             column = Column.objects.filter(
                 project=project_data,
@@ -172,7 +219,10 @@ def project_overview(request, coder_id, project_id, row_id):
             print('made it out')
         except:
             current_column_index = current_column_index + 1
+            num_attempts += 1
             print('current', current_column_index)
+            if num_attempts > 20:
+                return
 
     #load up next column information URL with error handling
 
@@ -200,7 +250,7 @@ def project_overview(request, coder_id, project_id, row_id):
 
     # get variable for render
 
-    variable_data = Variable.objects.get(column=column)
+    variable_data = Variable.objects.get(id=column.variable_id)
 
     if no_next_column_found:
         next_variable_id = None
@@ -215,23 +265,23 @@ def project_overview(request, coder_id, project_id, row_id):
             'project_data': project_data,
             'variable_data': variable_data,
             'next_variable_id': next_variable_id,
-            'row_id': row_id
+            'row_id': row_id,
+            'column_data': column
         })
 
-def project_answering(request, coder_id, project_id, row_id, variable_id):
+def project_answering(request, coder_id, project_id, row_id, column_id):
     next_variable_id = request.POST.get('next_variable_id')
 
+    column = Column.objects.get(id=column_id)
+    variable_id = column.variable_id
     project_data = Project.objects.get(id=project_id)
     row_data = Row.objects.get(id=row_id)
     variable_data = Variable.objects.get(id=variable_id)
     coder = Coder.objects.get(id=coder_id)
 
-    all_columns_in_project = Column.objects.filter(project=project_data)
+    all_columns_in_project = Column.objects.filter(project=project_data, is_variable=True)
     total_variable_count = all_columns_in_project.count()
     completed_variable_count = row_data.curr_col_index
-
-    column_id = variable_data.column_id
-    column = all_columns_in_project.get(id=column_id)
 
     # check media source as Twitter or Instagram
     if row_data.is_twitter:
@@ -319,7 +369,7 @@ def project_answering(request, coder_id, project_id, row_id, variable_id):
 
             current_column_index = row_data.curr_col_index
             column = Column.objects.get(column_number=current_column_index)
-            variable_data = Variable.objects.get(column=column)
+            variable_data = Variable.objects.get(column=column.variable_id)
 
         # add next column information
 

@@ -3,7 +3,7 @@
 {% block content %}
     <h2>{{ project_data.name }}</h2>
 
-    <form action="{% url 'coder_view:coder_project_answering' coder_id=coder_id project_id=project_data.id row_id=row_id variable_id=variable_data.id %}" method="post" class="input-group">
+    <form action="{% url 'coder_view:coder_project_answering' coder_id=coder_id project_id=project_data.id row_id=row_id column_id=column_data.id %}" method="post" class="input-group">
         {% csrf_token %}
         <input class="btn btn-primary" type="submit" name='start-answer' value="Start">
     </form>
