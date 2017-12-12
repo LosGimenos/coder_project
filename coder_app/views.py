@@ -34,6 +34,7 @@ def index(request):
 def submit_new_variable(request):
     if request.method == 'POST' and 'submit_variable' in request.POST:
         project_id = request.POST.get('project_id')
+        tag_ids = request.POST.getlist('tag-ids')
         variable_name = request.POST.get('variable-name')
         variable_description = request.POST.get('variable-description')
         variable_instructions = request.POST.get('variable-instructions')
@@ -101,6 +102,10 @@ def submit_new_variable(request):
 
         variable.save()
 
+        for tag_id in tag_ids:
+            tag_data = Tag.objects.get(id=tag_id)
+            tag_data.variable.add(variable)
+
         redirect_url = '/coder_project/' + str(project_id) + '/edit_project/'
         return redirect(redirect_url)
 
@@ -139,12 +144,8 @@ def submit_new_variable(request):
             )
             data.save()
 
-    elif request.method == 'POST' and request.POST.get('add-tag') == 'add-tag':
-        tag_name = request.POST.get('variable-tag')
-        variable_id = request.POST.get('variable_id')
-        variable = Variable.objects.get(id=variable_id)
-        project_id = request.POST.get('project_id')
-
+    elif request.method == 'POST' and json.loads(request.POST.get('add_tag')):
+        tag_name = request.POST.get('tag_name')
         tag = Tag.objects.filter(name=tag_name).first()
 
         if not tag:
@@ -153,18 +154,14 @@ def submit_new_variable(request):
             )
             tag.save()
 
-        tag.variable.add(variable)
-        tag_data = variable.tag_set.all()
-        tag_data_list = []
-
-        for tag in tag_data:
-            tag_data_list.append({'name': tag.name, 'id': tag.id})
+        tag = {
+            'id': tag.id,
+            'name': tag.name
+        }
 
         return HttpResponse(
             json.dumps({
-                'variable_id': variable_id,
-                'project_id': project_id,
-                'tag_data': tag_data_list,
+                'tag_data': tag,
                 'result': 'successful!'
             }),
             content_type="application/json"
@@ -509,12 +506,14 @@ def edit_variable_library(request):
     if request.method == "POST" and 'import_variable' in request.POST:
         project_id = request.POST.get('project_for_variable')
         project_data = Project.objects.get(id=project_id)
+        variable_data = Variable.objects.all()
 
         return render(
             request,
             'coder_app/variable_library.html',
             {
-                'project_data': project_data
+                'project_data': project_data,
+                'variable_data': variable_data
             }
         )
 
@@ -701,6 +700,40 @@ def select_variable(request, coder_id, project_id):
     )
 
 def get_variable_names(request):
+    if request.method == 'POST' and json.loads(request.POST.get('get_variables')):
+        keywords = json.loads(request.POST.get('keywords'))
+        global_tag_ids = json.loads(request.POST.get('global_tag_ids'))
+
+        if global_tag_ids:
+            variables = Variable.objects.filter(tag=global_tag_ids[0])
+        else:
+            variables = Variable.objects.all()
+
+        if len(global_tag_ids) > 1:
+            sliced_global_tag_ids = global_tag_ids[1:]
+            for global_tag_id in sliced_global_tag_ids:
+                variables = variables.filter(tag=global_tag_id)
+
+        if keywords:
+            for keyword in keywords:
+                variables = variables.filter(name__icontains=keyword)
+
+        print(variables, 'these are the variables')
+
+        variable_data = variables
+
+        print(global_tag_ids, variable_data, keywords)
+
+        variable_data = serializers.serialize('json', variable_data)
+
+        return HttpResponse(
+            json.dumps({
+                'variable_data': variable_data,
+                'result': 'successful!'
+            }),
+            content_type="application/json"
+        )
+
     if request.method == 'POST' and json.loads(request.POST.get('variable_id_to_add')):
         variable_id = json.loads(request.POST.get('variable_id_to_add'))
         variable_data = Variable.objects.filter(id=variable_id)
@@ -733,15 +766,90 @@ def get_variable_names(request):
     return HttpResponse(variable_data, mimetype)
 
 def get_tag_names(request):
-    if request.method == 'POST' and json.loads(request.POST.get('tag_id_to_add')):
-        tag_id = json.loads(request.POST.get('tag_id_to_add'))
+    if request.method == "POST" and request.POST.get('tag_id_to_add_to_variable'):
+        tag_id = json.loads(request.POST.get('tag_id_to_add_to_variable'))
         tag = Tag.objects.get(id=tag_id)
-        variable_data = tag.variable.all()
+        print(tag_id)
+
         tag_data = {
             'id': tag.id,
             'name': tag.name
         }
+
+        return HttpResponse(
+            json.dumps({
+                'tag_data': tag_data,
+                'result': 'successful!'
+            }),
+            content_type="application/json"
+        )
+
+    if request.method == 'POST' and request.POST.get('add_to_filter') == 'add_keyword':
+        keywords = json.loads(request.POST.get('keywords'))
+        global_tag_ids = json.loads(request.POST.get('global_tag_ids'))
+
+        if global_tag_ids:
+            variables = Variable.objects.filter(tag=global_tag_ids[0])
+        else:
+            variables = Variable.objects.all()
+
+        if len(global_tag_ids) > 1:
+            sliced_global_tag_ids = global_tag_ids[1:]
+            for global_tag_id in sliced_global_tag_ids:
+                variables = variables.filter(tag=global_tag_id)
+
+        if keywords:
+            for keyword in keywords:
+                variables = variables.filter(name__icontains=keyword)
+
+        print(variables, 'these are the variables')
+
+        variable_data = variables
+
+        print(global_tag_ids, variable_data, keywords)
+
         variable_data = serializers.serialize('json', variable_data)
+
+        return HttpResponse(
+            json.dumps({
+                'variable_data': variable_data,
+                'result': 'successful!'
+            }),
+            content_type="application/json"
+        )
+
+    if request.method == 'POST' and request.POST.get('add_to_filter') == 'add_tag':
+        print('made it to add_tag')
+        tag_id = json.loads(request.POST.get('tag_id_to_add'))
+        tag = Tag.objects.get(id=tag_id)
+
+        keywords = json.loads(request.POST.get('keywords'))
+        global_tag_ids = json.loads(request.POST.get('global_tag_ids'))
+        variables = Variable.objects.filter(tag=global_tag_ids[0])
+
+        if len(global_tag_ids) > 1:
+            sliced_global_tag_ids = global_tag_ids[1:]
+            for global_tag_id in sliced_global_tag_ids:
+                variables = variables.filter(tag=global_tag_id)
+
+        if keywords:
+            for keyword in keywords:
+                variables = variables.filter(name__icontains=keyword)
+
+        variable_data = []
+
+        for variable in variables:
+            variable_name_and_id = {
+                'id': variable.id,
+                'name': variable.name
+            }
+            variable_data.append(variable_name_and_id)
+
+        print(tag, 'this is the tag')
+        tag_data = {
+            'id': tag.id,
+            'name': tag.name
+        }
 
         return HttpResponse(
             json.dumps({

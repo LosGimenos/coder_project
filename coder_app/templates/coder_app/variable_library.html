@@ -8,21 +8,32 @@
 
     <div class="row ">
         <div class="col-md-5">
-            <div class="ui-widget">
-                <label for="variable_name_filter">Add Variable by Name</label>
-                <input id='by_name' class='form-control' type="text" name="variable_name_filter" placeholder="by Name" /><br/>
+            <label for="variable_name_filter">Add Keyword</label>
+            <div class="input-group">
+                <input id='by_name' class='form-control' type="text" name="variable_name_filter"  /><br/>
+                <span class="input-group-btn">
+                    <button id='button--add__keyword' class="btn btn-default" type="button">Add</button>
+                </span>
             </div>
             <div class="ui-widget">
-                <label for="tag_filter">Add Variables by Tag</label>
-                <input id='by_tag' class="form-control" type="text" name="tag_filter" placeholder="by Tag" />
+                <label for="tag_filter">Add Tags</label>
+                <input id='by_tag' class="form-control" type="text" name="tag_filter" placeholder="...tagname" />
             </div>
         </div>
         <div class="col-md-1">
         </div>
         <div class="col-md-5">
-            <h4 style="text-align: center;">Selected Tags</h4>
-            <div class="col-md-12 variable--container tag--container">
+            <h4 style="text-align: center;">Keywords</h4>
+            <div id="keyword-container" class="col-md-12 filter--container">
             </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-5"></div>
+        <div class="col-md-1"></div>
+        <div class="col-md-5">
+            <h4 style="text-align: center;">Selected Tags</h4>
+            <div class="col-md-12 filter--container tag--container"></div>
         </div>
     </div>
 
@@ -33,6 +44,11 @@
     </div>
     <div class="row">
         <div class="col-md-5 variable--container variable--container__filtered">
+            {% if variable_data %}
+                {% for variable in variable_data %}
+                    <span name="{{ variable.id }}">{{ variable.name }}<br/></span>
+                {% endfor %}
+            {% endif %}
         </div>
         <div class="col-md-1 control--container">
             <div class="action--button action--button-library">
@@ -67,6 +83,13 @@
     </div>
 
     <style>
+
+    .filter--container {
+        border: 1px solid black;
+        height: 15vh;
+        overflow: scroll;
+    }
+
     .variable--container {
         border: 1px solid black;
         height: 30vh;
@@ -120,22 +143,45 @@
         const variablesToProjectContainer = $('.variable--container__to-project');
         const filteredVariablesContainer = $('.variable--container__filtered');
         const tagContainer = $('.tag--container');
+        const keywordContainer = $('#keyword-container');
 
-        const filteredVariablesArray = [];
         const tagsArray = [];
+        let keywordArray = [];
+        let filteredVariablesArray = [];
         const variablesToProjectArray = [];
 
         const globalVariableIds = [];
         const globalTagIds = [];
+        const globalKeywords = [];
 
         const projectId = $('.project-id').val();
 
         function renderContainer(array, container) {
             $(container).empty();
             array.forEach(itemData => {
-                let variableNode = $(`<span name='${itemData.id}'>${itemData.name}</br></span>`);
+                let variableNode = $(`<span name='${itemData.id}'>${itemData.name}<br/></span>`);
                 $(container).append(variableNode);
             });
+        }
+
+        function renderFilterContainer(array, container, type) {
+            $(container).empty();
+
+            if (type == 'keyword') {
+                array.forEach(itemData => {
+                let variableNode =
+                    $(`<span name='${itemData.name}'>${itemData.name}<span class='badge keyword-remove'>X</span><br/></span>`);
+                    $(container).append(variableNode);
+                });
+                addKeywordHandler();
+            } else if (type == 'tag') {
+                array.forEach(itemData => {
+                let variableNode =
+                    $(`<span name='${itemData.name}'>${itemData.name}<span class='badge tag-remove'>X</span><br/></span>`);
+                    $(container).append(variableNode);
+                });
+                addTagHandler();
+            }
         }
 
         function addVariableHandlers() {
@@ -163,6 +209,108 @@
                 }
             });
         }
+
+        function addKeywordHandler() {
+            $('.keyword-remove').click(e => {
+                e.preventDefault();
+                let nodeValue = $(e.target.parentNode).attr('name');
+                $(keywordArray).each((index, keyword) => {
+                    if (keyword.name == nodeValue) {
+                        keywordArray.splice(index, 1)
+                    }
+                });
+
+                let indexOfValue = $.inArray(nodeValue, globalKeywords);
+                if (indexOfValue >= 0) {
+                    globalKeywords.splice(indexOfValue, 1);
+                }
+
+                $.ajax({
+                    url: '/coder_project/get_variable_names',
+                    type: 'POST',
+                    data: {
+                        'get_variables': true,
+                        'global_tag_ids': JSON.stringify(globalTagIds),
+                        'keywords': JSON.stringify(globalKeywords)
+                    },
+                    success: function(json) {
+                        let variableData = JSON.parse(json.variable_data);
+
+                        filteredVariablesArray = [];
+                        console.log(variableData);
+
+                        $(variableData).each((index, variable) => {
+                            let variableInfo = {
+                                'name': variable.fields.name,
+                                'id': variable.pk
+                            };
+                            filteredVariablesArray.unshift(variableInfo);
+                        });
+
+                        renderContainer(filteredVariablesArray, filteredVariablesContainer);
+
+                        addVariableHandlers();
+                        $('#by_name').val('');
+                    },
+                    error: function(xhr,errmsg,err) {
+                        console.log(err);
+                    }
+                })
+                renderFilterContainer(keywordArray, keywordContainer, 'keyword');
+            });
+        }
+
+        function addTagHandler() {
+            $('.tag-remove').click(e => {
+                e.preventDefault();
+                let nodeValue = $(e.target.parentNode).attr('name');
+                $(keywordArray).each((index, keyword) => {
+                    if (keyword.name == nodeValue) {
+                        keywordArray.splice(index, 1)
+                    }
+                });
+
+                let indexOfValue = $.inArray(nodeValue, globalKeywords);
+                if (indexOfValue >= 0) {
+                    globalKeywords.splice(indexOfValue, 1);
+                }
+
+                $.ajax({
+                    url: '/coder_project/get_variable_names',
+                    type: 'POST',
+                    data: {
+                        'get_variables': true,
+                        'global_tag_ids': JSON.stringify(globalTagIds),
+                        'keywords': JSON.stringify(globalKeywords)
+                    },
+                    success: function(json) {
+                        let variableData = JSON.parse(json.variable_data);
+
+                        filteredVariablesArray = [];
+                        console.log(variableData);
+
+                        $(variableData).each((index, variable) => {
+                            let variableInfo = {
+                                'name': variable.fields.name,
+                                'id': variable.pk
+                            };
+                            filteredVariablesArray.unshift(variableInfo);
+                        });
+
+                        renderContainer(filteredVariablesArray, filteredVariablesContainer);
+
+                        addVariableHandlers();
+                        $('#by_name').val('');
+                    },
+                    error: function(xhr,errmsg,err) {
+                        console.log(err);
+                    }
+                })
+                renderFilterContainer(tagsArray, tagContainer, 'tag');
+            });
+        }
+
+        addVariableHandlers();
 
         $('.action--button-library').click(e => {
            e.preventDefault();
@@ -199,76 +347,46 @@
             });
         });
 
-        $('#by_name').autocomplete({
-            source: "/coder_project/get_variable_names",
-            select: function (event, ui) {
-                $('#by_name').val('');
-                $.ajax({
-                    url: '/coder_project/get_variable_names',
-                    type: 'POST',
-                    data: {
-                        'variable_id_to_add': ui.item.id
-                    },
-                    success: function(json) {
-                        let variableData = JSON.parse(json.variable_data)[0];
-                        let variable = {
-                            'name': variableData.fields.name,
-                            'id': variableData.pk
-                        }
-
-                        if ($.inArray(variable.id, globalVariableIds) < 0) {
-                            filteredVariablesArray.unshift(variable);
-                            globalVariableIds.push(variable.id);
-                        }
-
-                        renderContainer(filteredVariablesArray, filteredVariablesContainer);
-                        addVariableHandlers();
-                    },
-                    error: function(xhr,errmsg,err) {
-                        console.log(err);
-                    }
-                });
-
-                return false;
-            },
-            minLength: 2,
-        })
-
-
         $('#by_tag').autocomplete({
            source: "/coder_project/get_tag_names",
             select: function (event, ui) {
+               console.log('hit select on by tag')
+               let tagId;
+               if ($.inArray(ui.item.id, globalTagIds) < 0) {
+                   tagId = ui.item.id;
+                   globalTagIds.push(tagId);
+               }
+
                 $.ajax({
                     url: '/coder_project/get_tag_names',
                     type: 'POST',
                     data: {
-                        'tag_id_to_add': ui.item.id
+                        'add_to_filter': 'add_tag',
+                        'tag_id_to_add': tagId,
+                        'global_tag_ids': JSON.stringify(globalTagIds),
+                        'keywords': JSON.stringify(globalKeywords)
                     },
                     success: function(json) {
                         let tagData = json.tag_data;
-                        let variableData = JSON.parse(json.variable_data);
+                        let variableData = json.variable_data;
 
                         let tag = {
                             'name': tagData.name,
                             'id': tagData.id
                         };
 
-                        if ($.inArray(tagData.id, globalTagIds) < 0) {
-                            tagsArray.unshift(tag);
-                            globalTagIds.push(tagData.id);
-                        }
+                        tagsArray.push(tag);
 
-                        renderContainer(tagsArray, tagContainer);
+                        renderFilterContainer(tagsArray, tagContainer, 'tag');
+                        filteredVariablesArray = [];
+                        console.log(variableData);
 
                         $(variableData).each((index, variable) => {
-                            if ($.inArray(variable.pk, globalVariableIds) < 0) {
-                                let variableInfo = {
-                                    'name': variable.fields.name,
-                                    'id': variable.pk
-                                };
-                                filteredVariablesArray.unshift(variableInfo);
-                                globalVariableIds.push(variableInfo.id);
-                            }
+                            let variableInfo = {
+                                'name': variable.name,
+                                'id': variable.id
+                            };
+                            filteredVariablesArray.unshift(variableInfo);
                         });
 
                         renderContainer(filteredVariablesArray, filteredVariablesContainer);
@@ -282,6 +400,59 @@
                 })
             },
            minLength: 2
+        });
+
+        $('#button--add__keyword').click(e => {
+            e.preventDefault();
+
+            let keywordValue = $('#by_name').val();
+
+            if ($.inArray(keywordValue, globalKeywords) < 0) {
+                let keyword = {
+                    'id': keywordArray.length + 1,
+                    'name': keywordValue
+                };
+
+                globalKeywords.push(keywordValue);
+                keywordArray.unshift(keyword);
+            };
+
+            $('#by_name').val('');
+            renderFilterContainer(keywordArray, keywordContainer, 'keyword');
+
+            $.ajax({
+                url: '/coder_project/get_tag_names',
+                type: 'POST',
+                data: {
+                    'add_to_filter': 'add_keyword',
+                    'global_tag_ids': JSON.stringify(globalTagIds),
+                    'keywords': JSON.stringify(globalKeywords)
+                },
+                success: function(json) {
+                    let variableData = JSON.parse(json.variable_data);
+
+                    filteredVariablesArray = [];
+                    console.log(variableData);
+
+                    $(variableData).each((index, variable) => {
+                        let variableInfo = {
+                            'name': variable.fields.name,
+                            'id': variable.pk
+                        };
+                        filteredVariablesArray.unshift(variableInfo);
+                    });
+
+                    renderContainer(filteredVariablesArray, filteredVariablesContainer);
+
+                    addVariableHandlers();
+                    addKeywordHandler();
+                    $('#by_name').val('');
+                },
+                error: function(xhr,errmsg,err) {
+                    console.log(err);
+                }
+            })
+
         });
 
     </script>
