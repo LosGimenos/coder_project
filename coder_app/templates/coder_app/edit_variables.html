@@ -1,0 +1,93 @@
+{% block content %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
+
+    <h3>Edit Variables</h3>
+
+    <form>
+        <input class="btn btn-primary" type="submit" value="Create Variable" />
+    </form>
+
+    <div class="row" style="margin-top: 2%; margin-bottom: 2%;">
+        <div class="col-md-4">
+            <div class="ui-widget" style="margin-bottom: 1%;">
+                <label for="tag_filter">Filter by Variable Name</label>
+                <input id='by_name' class="form-control" type="text" name="name_filter" placeholder="...variable name" />
+            </div>
+            <div class="ui-widget" style="margin-bottom: 1%;">
+                <label for="tag_filter">Filter by Tag</label>
+                <input id='by_tag' class="form-control" type="text" name="tag_filter" placeholder="...tagname" />
+            </div>
+            <div class="ui-widget" style="margin-bottom: 1%;">
+                <label for="tag_filter">Filter by Project</label>
+                <input id='by_project' class="form-control" type="text" name="tag_filter" placeholder="...project name" />
+            </div>
+        </div>
+        <div class="col-md-2"></div>
+        <div class="col-md-4">
+            <label for="filter--container">Selected Filters</label>
+            <div class="filter--container variable--container" name="filter--container">
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3">
+            <button class="btn btn-default">Select All</button>
+            <button class="btn btn-default"><span class="glyphicon glyphicon-trash"></span></button>
+        </div>
+        <div class="col-md-1"></div>
+        <div class="col-md-4 input-group">
+            <input type="text" name="tag-name-to-add" style="margin-right: 2%;"/>
+            <span class="tag-control--bulk tag-control--bulk__add glyphicon glyphicon-plus"></span>
+            <span class="tag-control--bulk tag-control--bulk__add glyphicon glyphicon-minus"></span>
+        </div>
+    </div>
+
+    <div class="table-responsive" style="margin-top: 1%;">
+        <form>
+    <table class="table table-bordered table-hovered table-striped tablesorter">
+        <thead>
+        <tr>
+            <th class="header">Variable Name</th>
+            <th class="header"></th>
+        </tr>
+        </thead>
+        {% if tag_data %}
+                <tbody>
+                    {% for variable in variable_data %}
+                    <tr>
+                        <td>
+                            <input style="margin-right: 1%;" type="checkbox" name="variable-names[]" value="{{ variable.id }}" />
+                            <span class="variable-name">{{ variable.name }}</span>
+                        </td>
+                        <td style="width: 25%; text-align: center;">
+                            <span class="variable-controls" style="display: flex; justify-content: space-around;">
+                                <span>Replicate</span>
+                                <span>Edit</span>
+                                <span>Edit Tags</span>
+                                <span class="glyphicon glyphicon-th-list"></span>
+                                <span class="glyphicon glyphicon-trash"></span>
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+        {% else  %}
+            <tbody>
+                <tr>
+                    <td>There are no current Variables</td>
+                </tr>
+            </tbody>
+        {% endif %}
+    </table>
+        </form>
+</div>
+
+    <style>
+        .tag-control--bulk {
+            cursor: pointer;
+            margin-right: 3%;
+        }
+    </style>
+
+{% endblock %}

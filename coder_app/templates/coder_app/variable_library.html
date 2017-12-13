@@ -131,6 +131,10 @@
         background-color: aquamarine;
     }
 
+    .project-selected {
+        background-color: cadetblue;
+    }
+
     </style>
 
     {% load static %}
@@ -140,6 +144,7 @@
 
     <script>
         let variablesToMove = [];
+        let variablesToReset = [];
         const variablesToProjectContainer = $('.variable--container__to-project');
         const filteredVariablesContainer = $('.variable--container__filtered');
         const tagContainer = $('.tag--container');
@@ -148,7 +153,7 @@
         const tagsArray = [];
         let keywordArray = [];
         let filteredVariablesArray = [];
-        const variablesToProjectArray = [];
+        let variablesToProjectArray = [];
 
         const globalVariableIds = [];
         const globalTagIds = [];
@@ -156,35 +161,61 @@
 
         const projectId = $('.project-id').val();
 
-        function renderContainer(array, container) {
-            $(container).empty();
-            array.forEach(itemData => {
-                let variableNode = $(`<span name='${itemData.id}'>${itemData.name}<br/></span>`);
-                $(container).append(variableNode);
+        function loadFilteredVariables() {
+            const allVariables = $('.variable--container__filtered span');
+            $(allVariables).each((index, variable) => {
+                let id = $(variable).attr('name');
+                let name = $(variable).text();
+                filteredVariablesArray.push({
+                    id,
+                    name
+                })
             });
         }
+
+        loadFilteredVariables();
 
         function renderFilterContainer(array, container, type) {
             $(container).empty();
 
-            if (type == 'keyword') {
-                array.forEach(itemData => {
-                let variableNode =
-                    $(`<span name='${itemData.name}'>${itemData.name}<span class='badge keyword-remove'>X</span><br/></span>`);
-                    $(container).append(variableNode);
-                });
-                addKeywordHandler();
-            } else if (type == 'tag') {
-                array.forEach(itemData => {
-                let variableNode =
-                    $(`<span name='${itemData.name}'>${itemData.name}<span class='badge tag-remove'>X</span><br/></span>`);
-                    $(container).append(variableNode);
-                });
-                addTagHandler();
+            switch (type) {
+                case 'keyword':
+                    array.forEach(itemData => {
+                    let variableNode =
+                        $(`<span name='${itemData.name}'>${itemData.name}<span class='badge keyword-remove'>X</span><br/></span>`);
+                        $(container).append(variableNode);
+                    });
+                    addKeywordHandler();
+                    break;
+
+                case 'tag':
+                    array.forEach(itemData => {
+                        let variableNode =
+                        $(`<span name='${itemData.id}'>${itemData.name}<span class='badge tag-remove'>X</span><br/></span>`);
+                        $(container).append(variableNode);
+                    });
+                    addTagHandler();
+                    break;
+
+                case 'variable':
+                    array.forEach(itemData => {
+                        let variableNode = $(`<span name='${itemData.id}'>${itemData.name}<br/></span>`);
+                        $(container).append(variableNode);
+                    });
+                    addVariableHandler();
+                    break;
+
+                case 'project':
+                    array.forEach(itemData => {
+                        let variableNode = $(`<span name='${itemData.id}'>${itemData.name}<br/></span>`);
+                        $(container).append(variableNode);
+                    });
+                    addProjectVariablesHandler();
+                    break;
             }
         }
 
-        function addVariableHandlers() {
+        function addVariableHandler() {
             $('.variable--container__filtered span').click(e => {
                 e.preventDefault();
                 const variableNode = $(e.currentTarget);
@@ -208,6 +239,32 @@
                     variablesToMove.push(variableNodeId);
                 }
             });
+        }
+
+        function addProjectVariablesHandler() {
+            $('.variable--container__to-project span').click(e => {
+                e.preventDefault();
+                const variableNode = $(e.currentTarget);
+                const variableNodeId = variableNode.attr('name');
+
+                $(variableNode).toggleClass('selected');
+
+                let isInVariablesToReset = false;
+                let indexToRemove;
+
+                variablesToReset.forEach((variable, index) => {
+                    if (variableNodeId == variable) {
+                        isInVariablesToReset = true;
+                        indexToRemove = index;
+                    }
+                });
+
+                if (isInVariablesToReset) {
+                    variablesToReset.splice(indexToRemove, 1);
+                } else if (!isInVariablesToReset || variablesToReset.length == 0) {
+                    variablesToReset.push(variableNodeId);
+                }
+            })
         }
 
         function addKeywordHandler() {
@@ -237,7 +294,6 @@
                         let variableData = JSON.parse(json.variable_data);
 
                         filteredVariablesArray = [];
-                        console.log(variableData);
 
                         $(variableData).each((index, variable) => {
                             let variableInfo = {
@@ -247,9 +303,7 @@
                             filteredVariablesArray.unshift(variableInfo);
                         });
 
-                        renderContainer(filteredVariablesArray, filteredVariablesContainer);
-
-                        addVariableHandlers();
+                        renderFilterContainer(filteredVariablesArray, filteredVariablesContainer, 'variable');
                         $('#by_name').val('');
                     },
                     error: function(xhr,errmsg,err) {
@@ -264,15 +318,15 @@
             $('.tag-remove').click(e => {
                 e.preventDefault();
                 let nodeValue = $(e.target.parentNode).attr('name');
-                $(keywordArray).each((index, keyword) => {
-                    if (keyword.name == nodeValue) {
-                        keywordArray.splice(index, 1)
+                $(tagsArray).each((index, tag) => {
+                    if (tag.id == nodeValue) {
+                        tagsArray.splice(index, 1)
                     }
                 });
 
-                let indexOfValue = $.inArray(nodeValue, globalKeywords);
+                let indexOfValue = $.inArray(parseInt(nodeValue), globalTagIds);
                 if (indexOfValue >= 0) {
-                    globalKeywords.splice(indexOfValue, 1);
+                    globalTagIds.splice(indexOfValue, 1);
                 }
 
                 $.ajax({
@@ -287,7 +341,6 @@
                         let variableData = JSON.parse(json.variable_data);
 
                         filteredVariablesArray = [];
-                        console.log(variableData);
 
                         $(variableData).each((index, variable) => {
                             let variableInfo = {
@@ -297,9 +350,7 @@
                             filteredVariablesArray.unshift(variableInfo);
                         });
 
-                        renderContainer(filteredVariablesArray, filteredVariablesContainer);
-
-                        addVariableHandlers();
+                        renderFilterContainer(filteredVariablesArray, filteredVariablesContainer, 'variable');
                         $('#by_name').val('');
                     },
                     error: function(xhr,errmsg,err) {
@@ -309,8 +360,7 @@
                 renderFilterContainer(tagsArray, tagContainer, 'tag');
             });
         }
-
-        addVariableHandlers();
+        addVariableHandler();
 
         $('.action--button-library').click(e => {
            e.preventDefault();
@@ -321,14 +371,43 @@
                variablesToProjectArray.push(variable);
            });
             variablesToMove = [];
-            renderContainer(filteredVariablesArray, filteredVariablesContainer);
-            renderContainer(variablesToProjectArray, variablesToProjectContainer);
-            addVariableHandlers();
+            renderFilterContainer(filteredVariablesArray, filteredVariablesContainer, 'variable');
+            renderFilterContainer(variablesToProjectArray, variablesToProjectContainer, 'project');
+        });
+
+        $('.action--button-back').click(e => {
+            e.preventDefault();
+            variablesToReset.forEach(variableId => {
+                let variable = variablesToProjectArray.find(item => item.id == variableId);
+                let variableIndex = $.inArray(variable, variablesToProjectArray);
+                variablesToProjectArray.splice(variableIndex, 1);
+                filteredVariablesArray.push(variable);
+            });
+            variablesToReset = [];
+            renderFilterContainer(filteredVariablesArray, filteredVariablesContainer, 'variable');
+            renderFilterContainer(variablesToProjectArray, variablesToProjectContainer, 'project');
+        });
+
+        $('.action--button-library__all').click(e => {
+            e.preventDefault();
+            let concatArray = $.unique(variablesToProjectArray.concat(filteredVariablesArray));
+            variablesToProjectArray = concatArray;
+            filteredVariablesArray = [];
+            renderFilterContainer(filteredVariablesArray, filteredVariablesContainer, 'variable');
+            renderFilterContainer(variablesToProjectArray, variablesToProjectContainer, 'project');
+        });
+
+        $('.action--button-back__all').click(e => {
+            e.preventDefault();
+            let concatArray = $.unique(filteredVariablesArray.concat(variablesToProjectArray));
+            filteredVariablesArray = concatArray;
+            variablesToProjectArray = [];
+            renderFilterContainer(filteredVariablesArray, filteredVariablesContainer, 'variable');
+            renderFilterContainer(variablesToProjectArray, variablesToProjectContainer, 'project');
         });
 
         $('.variable--container__submit').click(e => {
             e.preventDefault();
-            console.log(variablesToProjectArray, 'this is project array', projectId);
             $.ajax({
                 url: '/coder_project/variable_library',
                 type: 'POST',
@@ -350,7 +429,6 @@
         $('#by_tag').autocomplete({
            source: "/coder_project/get_tag_names",
             select: function (event, ui) {
-               console.log('hit select on by tag')
                let tagId;
                if ($.inArray(ui.item.id, globalTagIds) < 0) {
                    tagId = ui.item.id;
@@ -379,7 +457,6 @@
 
                         renderFilterContainer(tagsArray, tagContainer, 'tag');
                         filteredVariablesArray = [];
-                        console.log(variableData);
 
                         $(variableData).each((index, variable) => {
                             let variableInfo = {
@@ -389,9 +466,7 @@
                             filteredVariablesArray.unshift(variableInfo);
                         });
 
-                        renderContainer(filteredVariablesArray, filteredVariablesContainer);
-
-                        addVariableHandlers();
+                        renderFilterContainer(filteredVariablesArray, filteredVariablesContainer, 'variable');
                         $('#by_tag').val('');
                     },
                     error: function(xhr,errmsg,err) {
@@ -432,7 +507,6 @@
                     let variableData = JSON.parse(json.variable_data);
 
                     filteredVariablesArray = [];
-                    console.log(variableData);
 
                     $(variableData).each((index, variable) => {
                         let variableInfo = {
@@ -442,11 +516,7 @@
                         filteredVariablesArray.unshift(variableInfo);
                     });
 
-                    renderContainer(filteredVariablesArray, filteredVariablesContainer);
-
-                    addVariableHandlers();
-                    addKeywordHandler();
-                    $('#by_name').val('');
+                    renderFilterContainer(filteredVariablesArray, filteredVariablesContainer, 'variable');
                 },
                 error: function(xhr,errmsg,err) {
                     console.log(err);

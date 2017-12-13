@@ -1,0 +1,159 @@
+{% block content %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
+
+    <h3>Edit Tags</h3>
+
+    <form>
+        <input class="btn btn-primary" type="submit" value="Create Tag" />
+    </form>
+
+    <div class="row" style="margin-top: 2%;">
+        <div class="col-md-4">
+            <div class="ui-widget">
+                <label for="tag_filter">Filter by Tag</label>
+                <input id='by_tag' class="form-control" type="text" name="tag_filter" placeholder="...tagname" />
+            </div>
+        </div>
+        <div class="col-md-2"></div>
+        <div class="col-md-4">
+            <label for="filter--container">Selected Filters</label>
+            <div class="filter--container tag--container" name="filter--container">
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row">
+        <div class="col-md-3">
+            <button class="btn btn-default">Select All</button>
+            <button class="btn btn-default"><span class="glyphicon glyphicon-trash"></span></button>
+        </div>
+    </div>
+
+    <div class="table-responsive" style="margin-top: 1%;">
+        <form>
+    <table class="table table-bordered table-hovered table-striped tablesorter">
+        <thead>
+        <tr>
+            <th class="header">Tag Name</th>
+            <th class="header"></th>
+        </tr>
+        </thead>
+        {% if tag_data %}
+                <tbody>
+                    {% for tag in tag_data %}
+                    <tr>
+                        <td>
+                            <input style="margin-right: 1%;" type="checkbox" name="variable-names[]" value="{{ tag.id }}" />
+                            <span class="tag-name">{{ tag.name }}</span>
+                        </td>
+                        <td style="width: 15%; text-align: center;">
+                            <span class="tag-controls" style="display: flex; justify-content: space-around;">
+                                <span>Rename</span>
+                                <span class="glyphicon glyphicon-th-list"></span>
+                                <span class="glyphicon glyphicon-trash"></span>
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+        {% else  %}
+            <tbody>
+                <tr>
+                    <td>There are no current Tags</td>
+                </tr>
+            </tbody>
+        {% endif %}
+    </table>
+        </form>
+</div>
+
+    <style>
+        .filter--container {
+            border: 1px solid black;
+            height: 15vh;
+            overflow: scroll;
+        }
+
+        .tag-controls span {
+            cursor: pointer;
+        }
+
+    </style>
+
+     {% load static %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script src="{% static 'token_injector.js' %}"></script>
+
+    <script>
+    let variablesToMove = [];
+        let variablesToReset = [];
+        const filteredVariablesContainer = $('.variable--container__filtered');
+        const tagContainer = $('.tag--container');
+        const keywordContainer = $('#keyword-container');
+
+        const tagsArray = [];
+        let keywordArray = [];
+        let filteredVariablesArray = [];
+        let variablesToProjectArray = [];
+
+        const globalVariableIds = [];
+        const globalTagIds = [];
+        const globalKeywords = [];
+
+        const projectId = $('.project-id').val();
+
+        $('#by_tag').autocomplete({
+           source: "/coder_project/get_tag_names",
+            select: function (event, ui) {
+               let tagId;
+               if ($.inArray(ui.item.id, globalTagIds) < 0) {
+                   tagId = ui.item.id;
+                   globalTagIds.push(tagId);
+               }
+
+                $.ajax({
+                    url: '/coder_project/get_tag_names',
+                    type: 'POST',
+                    data: {
+                        'add_to_filter': 'add_tag',
+                        'tag_id_to_add': tagId,
+                        'global_tag_ids': JSON.stringify(globalTagIds),
+                        'keywords': JSON.stringify(globalKeywords)
+                    },
+                    success: function(json) {
+                        let tagData = json.tag_data;
+                        let variableData = json.variable_data;
+
+                        let tag = {
+                            'name': tagData.name,
+                            'id': tagData.id
+                        };
+
+                        tagsArray.push(tag);
+
+                        renderFilterContainer(tagsArray, tagContainer, 'tag');
+                        filteredVariablesArray = [];
+
+                        $(variableData).each((index, variable) => {
+                            let variableInfo = {
+                                'name': variable.name,
+                                'id': variable.id
+                            };
+                            filteredVariablesArray.unshift(variableInfo);
+                        });
+
+                        renderFilterContainer(filteredVariablesArray, filteredVariablesContainer, 'variable');
+                        $('#by_tag').val('');
+                    },
+                    error: function(xhr,errmsg,err) {
+                        console.log(err);
+                    }
+                })
+            },
+           minLength: 2
+        });
+    </script>
+
+{%  endblock %}

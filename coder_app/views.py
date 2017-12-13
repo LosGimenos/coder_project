@@ -19,6 +19,8 @@ def index(request):
     project_data_list = []
     projects = Project.objects.all()
     coder_data = Coder.objects.all()
+    tag_data = Tag.objects.all()
+    variable_data = Variable.objects.all()
 
     for project in projects:
         project_data = {
@@ -29,7 +31,15 @@ def index(request):
         }
         project_data_list.append(project_data)
 
-    return render(request, 'coder_app/index.html', {'project_data': project_data_list, 'coder_data': coder_data})
+    return render(
+        request,
+        'coder_app/index.html',
+        {
+            'project_data': project_data_list,
+            'coder_data': coder_data,
+            'tag_data': tag_data,
+            'variable_data': variable_data
+        })
 
 def submit_new_variable(request):
     if request.method == 'POST' and 'submit_variable' in request.POST:
@@ -533,6 +543,13 @@ def edit_variable_library(request):
                 continue
             else:
                 variable = Variable.objects.get(id=variable['id'])
+                tags_attached_to_variable = variable.tag_set.all()
+                print('this is variable pk before save', variable.pk)
+                variable.pk = None
+                variable.save()
+
+                print('this is variable pk after save', variable.pk)
+
                 column = Column(
                     variable=variable,
                     is_variable=True,
@@ -718,11 +735,7 @@ def get_variable_names(request):
             for keyword in keywords:
                 variables = variables.filter(name__icontains=keyword)
 
-        print(variables, 'these are the variables')
-
         variable_data = variables
-
-        print(global_tag_ids, variable_data, keywords)
 
         variable_data = serializers.serialize('json', variable_data)
 
@@ -877,3 +890,7 @@ def get_tag_names(request):
 
     mimetype = 'application/json'
     return HttpResponse(variable_data, mimetype)
+
+def edit_tags(request):
+    tag_data = Tag.objects.all()
+    return render(request, 'coder_app/edit_tags.html', {'tag_data': tag_data})

@@ -19,5 +19,6 @@ urlpatterns = [
     url(r'^(?P<coder_id>[0-9]+)/coder/(?P<project_id>[0-9]+)/review_variables/$',
         views.review_variables, name='review_variables'),
     url(r'^get_variable_names', views.get_variable_names, name='get_variable_names'),
-    url(r'^get_tag_names', views.get_tag_names, name='get_tag_names')
+    url(r'^get_tag_names', views.get_tag_names, name='get_tag_names'),
+    url(r'^edit_tags', views.edit_tags, name='edit_tags')
 ]
