@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from django.db.models import Max
 from django.shortcuts import render, redirect, HttpResponse
-from coder_app.models import Project, Tag, Variable, Coder, Row, Column, Data
+from coder_app.models import Project, Variable, Coder, Row, Column, Data, RowMeta, ColumnMeta, DataMeta
 import random
 import datetime
 import pytz

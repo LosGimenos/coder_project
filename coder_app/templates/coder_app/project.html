@@ -2,16 +2,29 @@
 
 {% block content %}
 
-    <h1>Add New Project</h1>
+    <h3>Add New Project</h3>
 
-    <form action={% url 'coder_app:submit_new_project' %} class="input-group" method="post">
+    <form action={% url 'coder_app:submit_new_project' %} method="post">
         {% csrf_token %}
-        <label for="project-name">Project Name</label>
-        <input class="input-group" type="input" name="project-name" /> <br />
-        <label for="project-rate">Rate</label>
-        <input class="input-group" type="input" name="project-rate" /> <br />
-        <input class='btn btn-primary' type="submit" value="Submit"/>
-        <br />
+        <div class="row">
+            <div class="col-md-12">
+                <div class="col-md-4 input-group">
+                    <label for="project-name">Project Name</label>
+                    <input class="form-control" type="input" name="project-name" /> <br />
+                    <label for="project-rate">Rate</label>
+                    <input class="form-control" type="input" name="project-rate" /> <br />
+                    <input class='btn btn-primary' type="submit" value="Submit"/>
+                    <br />
+                </div>
+                <div class="col-md-3">
+                    <select name="dataset-name">
+                        {% for dataset in dataset_data %}
+                            <option value="{{ dataset.id }}"><span>{{ dataset.name }}</span>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
     </form>
 
 {% endblock %}

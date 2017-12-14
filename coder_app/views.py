@@ -4,7 +4,7 @@ from __future__ import unicode_literals
 from django.shortcuts import render, redirect, HttpResponse
 from django.db.models import Max
 from django.core import serializers
-from .models import Project, Tag, Variable, Coder, Column, Row, Data, VariableLibrary
+from .models import Project, Tag, Variable, Coder, Column, Row, Data, ColumnMeta, RowMeta, DataMeta, Dataset
 import json
 import requests
 import datetime
@@ -229,7 +229,9 @@ def submit_new_project(request):
 
         return redirect('/coder_project')
 
-    return render(request, 'coder_app/project.html', context={})
+    dataset_data = Dataset.objects.all()
+
+    return render(request, 'coder_app/project.html', {'dataset_data': dataset_data})
 
 def edit_project(request, project_id):
     p = Project.objects.get(id=project_id)
