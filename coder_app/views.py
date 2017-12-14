@@ -336,7 +336,10 @@ def edit_project(request, project_id):
         )
 
     if request.method == 'POST' and 'mentions_view' in request.POST:
-        mention_data = Row.objects.filter(project=p)
+        dataset = Dataset.objects.get(project=project_data)
+        rows_in_dataset = Row.objects.filter(dataset=dataset)
+        row_ids = [row.id for row in rows_in_dataset]
+        mention_data = RowMeta.objects.filter(id__in=row_ids)
         project_edit_view = 'mention'
 
         return render(
