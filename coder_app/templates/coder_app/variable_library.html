@@ -6,35 +6,40 @@
     {% include 'coder_app/home_tab.html' %}
     <h3>Attach Variables to Project "{{ project_data.name }}"</h3>
 
-    <div class="row ">
-        <div class="col-md-5">
-            <label for="variable_name_filter">Add Keyword</label>
-            <div class="input-group">
-                <input id='by_name' class='form-control' type="text" name="variable_name_filter"  /><br/>
-                <span class="input-group-btn">
-                    <button id='button--add__keyword' class="btn btn-default" type="button">Add</button>
-                </span>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="col-md-5">
+                <label for="variable_name_filter">Add Keyword</label>
+                <div class="input-group">
+                    <input id='by_name' class='form-control' type="text" name="variable_name_filter"  /><br/>
+                    <span class="input-group-btn">
+                        <button id='button--add__keyword' class="btn btn-default" type="button">Add</button>
+                    </span>
+                </div>
+                <div class="ui-widget">
+                    <label for="tag_filter">Add Tags</label>
+                    <input id='by_tag' class="form-control" type="text" name="tag_filter" placeholder="...tagname" />
+                </div>
             </div>
-            <div class="ui-widget">
-                <label for="tag_filter">Add Tags</label>
-                <input id='by_tag' class="form-control" type="text" name="tag_filter" placeholder="...tagname" />
+            <div class="col-md-1">
             </div>
-        </div>
-        <div class="col-md-1">
-        </div>
-        <div class="col-md-5">
-            <h4 style="text-align: center;">Keywords</h4>
-            <div id="keyword-container" class="col-md-12 filter--container">
+            <div class="col-md-5">
+                <h4 style="text-align: center;">Keywords</h4>
+                <div id="keyword-container" class="col-md-12 filter--container">
+                </div>
             </div>
         </div>
     </div>
+
     <div class="row">
+    <div class="col-md-12">
         <div class="col-md-5"></div>
         <div class="col-md-1"></div>
         <div class="col-md-5">
             <h4 style="text-align: center;">Selected Tags</h4>
             <div class="col-md-12 filter--container tag--container"></div>
         </div>
+    </div>
     </div>
 
     <div class="row">
@@ -43,6 +48,7 @@
         <div class="col-md-5 variable--container__title"><h3 class="variable--container__title-choice">{{ project_data.name }}</h3></div>
     </div>
     <div class="row">
+    <div class="col-md-12">
         <div class="col-md-5 variable--container variable--container__filtered">
             {% if variable_data %}
                 {% for variable in variable_data %}
@@ -71,15 +77,16 @@
         <div class="col-md-5 variable--container variable--container__to-project">
         </div>
     </div>
+    </div>
     <div class="row" style="margin-top: 1%;">
-    <div class="col-md-5">
-    </div>
-    <div class="col-md-1" style="text-align: center;">
-        <button class="btn btn-success variable--container__submit">Confirm</button>
-        <input class="project-id" type="hidden" name="project_id" value="{{ project_data.id }}"/>
-    </div>
-    <div class="col-md-5">
-    </div>
+        <div class="col-md-5">
+        </div>
+        <div class="col-md-1" style="text-align: center;">
+            <button class="btn btn-success variable--container__submit">Confirm</button>
+            <input class="project-id" type="hidden" name="project_id" value="{{ project_data.id }}"/>
+        </div>
+        <div class="col-md-5">
+        </div>
     </div>
 
     <style>

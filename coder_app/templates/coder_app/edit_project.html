@@ -11,6 +11,7 @@
     <div class="row">
         <div class="col-md-12">
         <form action={% url 'coder_app:edit_project' project_id=id %} method="post">
+            <input class="input--project-id" style="display: none;" name="project_id" value="{{ id }}" />
                 {% csrf_token %}
         <div class="col-md-4">
                 <label for="project-name">Project Name</label>
@@ -27,10 +28,15 @@
             </div>
         </div>
         <div class="col-md-4">
-            <label>Current Project Tags</label>
-            <select multiple class="" style="width: 100%; border: 1px solid grey; height: 20vh; overflow: scroll;">
-            </select>
-            <input class="btn btn-danger" name="delete-project-tags" type="submit" value="Delete Selected"/>
+            <form class="input-group" action="{% url 'coder_app:edit_project' project_id=id %}" method="post">
+                <label for="tags-to-remove[]">Current Project Tags</label>
+                <select class='form-control' multiple name="tags-to-remove[]" style="width: 100%; border: 1px solid grey; height: 20vh; overflow: scroll;">
+                    {% for tag in tag_data %}
+                        <option value="{{ tag.id }}"><span>{{ tag.name }}</span>
+                    {% endfor %}
+                </select>
+                <input class="btn btn-danger" name="remove-project-tags" type="submit" value="Remove Selected"/>
+            </form>
         </div>
         </form>
         </div>
@@ -94,6 +100,23 @@
             source: "/coder_project/get_tag_names",
             select: function(event, ui) {
                 console.log(ui.item.id);
+                let projectId = $('.input--project-id').val()
+                let url = '/coder_project/' + projectId.toString() + '/edit_project/';
+
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: {
+                        'tag_id': ui.item.id,
+                        'add_tag_to_project': true
+                    },
+                    success: function(json) {
+                        window.location.href = url;
+                    },
+                    error: function(xhr,errmsg,err) {
+                        console.log(err);
+                    }
+                });
             },
             minLength: 2
         });

@@ -9,8 +9,11 @@
         <input class='btn btn-primary' type="submit" name="submit_variable" value="Submit Variable"/><br />
         <input style="display:none;" name="variable_id" value="{{ variable_data.id }}" />
         <input style="display:none;" name="project_id" value="{{ project_id }}" />
+
+        <div class="row">
+        <div class="col-md-12">
         <label for="project-name">Variable Name</label>
-        <input class="input-group" type="input" name="variable-name" value='{{ variable_data.name }}' /> <br />
+        <input class="form-control" type="input" name="variable-name" value='{{ variable_data.name }}' /> <br />
         <label for="variable-description">Description</label>
         <textarea class="form-control" name="variable-description">{{ variable_data.description }}</textarea> <br />
         <label for="variable-instructions">Instructions</label>
@@ -39,6 +42,8 @@
             </div>
         {% endif %}
         <label for="variable-tags">Tags</label>
+        </div>
+        </div>
     </form>
 
     <form id='add-tag'

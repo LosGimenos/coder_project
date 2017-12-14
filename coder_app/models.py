@@ -33,6 +33,7 @@ class Variable(models.Model):
     multiple_choice_option_five = models.CharField(blank=True, null=True, max_length=2000)
     multiple_choice_option_six = models.CharField(blank=True, null=True, max_length=2000)
     multiple_choice_option_seven = models.CharField(blank=True, null=True, max_length=2000)
+    project = models.ForeignKey(Project, null=True)
 
 class Column(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True)

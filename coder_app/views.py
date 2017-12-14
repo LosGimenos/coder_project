@@ -44,7 +44,7 @@ def index(request):
 def submit_new_variable(request):
     if request.method == 'POST' and 'submit_variable' in request.POST:
         project_id = request.POST.get('project_id')
-        tag_ids = request.POST.getlist('tag-ids')
+        # tag_ids = request.POST.getlist('tag-ids')
         variable_name = request.POST.get('variable-name')
         variable_description = request.POST.get('variable-description')
         variable_instructions = request.POST.get('variable-instructions')
@@ -54,6 +54,7 @@ def submit_new_variable(request):
         # variable = Variable.objects.get(id=variable_id)
 
         project = Project.objects.get(id=project_id)
+        project_tags = project.tag_set.all()
 
         greatest_col_index = Column.objects.filter(project=project).aggregate(Max('column_number'))
 
@@ -62,8 +63,13 @@ def submit_new_variable(request):
         else:
             greatest_col_index = greatest_col_index['column_number__max'] + 1
 
-        variable = Variable()
+        variable = Variable(
+            project=project
+        )
         variable.save()
+
+        for project_tag in project_tags:
+            variable.tag_set.add(project_tag)
 
         column = Column(
             project=project,
@@ -73,15 +79,15 @@ def submit_new_variable(request):
         )
         column.save()
 
-        rows = Row.objects.filter(project=project)
-
-        for row in rows:
-            data = Data(
-                column=column,
-                row=row,
-                project=project
-            )
-            data.save()
+        # rows = Row.objects.filter(project=project)
+        #
+        # for row in rows:
+        #     data = Data(
+        #         column=column,
+        #         row=row,
+        #         project=project
+        #     )
+        #     data.save()
 
         if multiple_or_freeform == 'multiple_choice':
             variable.is_freeform = False
@@ -112,9 +118,9 @@ def submit_new_variable(request):
 
         variable.save()
 
-        for tag_id in tag_ids:
-            tag_data = Tag.objects.get(id=tag_id)
-            tag_data.variable.add(variable)
+        # for tag_id in tag_ids:
+        #     tag_data = Tag.objects.get(id=tag_id)
+        #     tag_data.variable.add(variable)
 
         redirect_url = '/coder_project/' + str(project_id) + '/edit_project/'
         return redirect(redirect_url)
@@ -154,7 +160,7 @@ def submit_new_variable(request):
             )
             data.save()
 
-    elif request.method == 'POST' and json.loads(request.POST.get('add_tag')):
+    elif request.is_ajax() and json.loads(request.POST.get('add_tag')):
         tag_name = request.POST.get('tag_name')
         tag = Tag.objects.filter(name=tag_name).first()
 
@@ -226,10 +232,12 @@ def submit_new_project(request):
     return render(request, 'coder_app/project.html', context={})
 
 def edit_project(request, project_id):
+    p = Project.objects.get(id=project_id)
+    tag_data = p.tag_set.all()
+
     variable_data_list = []
     project_edit_view = 'variable'
 
-    p = Project.objects.get(id=project_id)
     project_data = {
         'id': p.id,
         'name': p.name,
@@ -358,6 +366,38 @@ def edit_project(request, project_id):
 
         return redirect('/coder_project')
 
+    if request.is_ajax() and json.loads(request.POST.get('add_tag_to_project')):
+        tag_id = request.POST.get('tag_id')
+        tag_to_add = Tag.objects.get(id=tag_id)
+        p.tag_set.add(tag_to_add)
+        p.save()
+
+        return HttpResponse(
+            json.dumps({
+                'result': 'successful!'
+            }),
+            content_type="application/json"
+        )
+    
+    if request.method == 'POST' and 'remove-project-tags' in request.POST:
+        tag_ids = request.POST.getlist('tags-to-remove[]')
+
+        for tag_id in tag_ids:
+            tag_to_remove = Tag.objects.get(id=tag_id)
+            p.tag_set.remove(tag_to_remove)
+
+        tag_data = p.tag_set.all()
+
+        return render(
+            request,
+            'coder_app/edit_project.html',
+            {
+                'variable_data': variable_data_list,
+                'id': project_id,
+                'project_data': project_data,
+                'project_edit_view': project_edit_view,
+                'tag_data': tag_data
+            })
 
     if request.method == 'POST':
         project_name = request.POST.get('project-name')
@@ -386,7 +426,8 @@ def edit_project(request, project_id):
             'variable_data': variable_data_list,
             'id': project_id,
             'project_data': project_data,
-            'project_edit_view': project_edit_view
+            'project_edit_view': project_edit_view,
+            'tag_data': tag_data
         }
     )
 
@@ -527,11 +568,12 @@ def edit_variable_library(request):
             }
         )
 
-    if request.method == "POST" and json.loads(request.POST.get('add_variables')):
+    if request.is_ajax() and json.loads(request.POST.get('add_variables')):
         variables = json.loads(request.POST.get('variables_to_add'))
         project_id = request.POST.get('project_id')
 
         project_data = Project.objects.get(id=project_id)
+        project_tags = project_data.tag_set.all()
         column_data = Column.objects.filter(project=project_data, is_variable=True)
         variable_ids_attached_to_project = column_data.values('variable_id')
 
@@ -543,12 +585,18 @@ def edit_variable_library(request):
                 continue
             else:
                 variable = Variable.objects.get(id=variable['id'])
-                tags_attached_to_variable = variable.tag_set.all()
-                print('this is variable pk before save', variable.pk)
+                variable_project_origin = variable.project
+                project_origin_tag_ids = [tag.id for tag in variable_project_origin.tag_set.all()]
+                tags_attached_to_original_variable = variable.tag_set.exclude(id__in=project_origin_tag_ids)
+
                 variable.pk = None
                 variable.save()
 
-                print('this is variable pk after save', variable.pk)
+                for tag in project_tags:
+                    variable.tag_set.add(tag)
+
+                for tag in tags_attached_to_original_variable:
+                    variable.tag_set.add(tag)
 
                 column = Column(
                     variable=variable,
