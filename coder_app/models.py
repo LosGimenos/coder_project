@@ -87,6 +87,7 @@ class Row(models.Model):
         return "Row = %s" % (self.row_name.__str__())
 
 class RowMeta(models.Model):
+    row = models.ForeignKey(Row, on_delete=models.CASCADE, null=True)
     is_completed = models.BooleanField(default=False)
     is_locked = models.BooleanField(default=False)
     coder = models.ForeignKey(Coder, on_delete=models.CASCADE, null=True)

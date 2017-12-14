@@ -23,11 +23,13 @@ def index(request):
     variable_data = Variable.objects.all()
 
     for project in projects:
+        dataset_data = Dataset.objects.get(id=project.dataset_id)
         project_data = {
             'id': project.id,
             'name': project.name,
             'rate': project.rate,
-            'contains_adverse_events': project.contains_adverse_events
+            'contains_adverse_events': project.contains_adverse_events,
+            'dataset_name': dataset_data.dataset_ID
         }
         project_data_list.append(project_data)
 
@@ -44,19 +46,25 @@ def index(request):
 def submit_new_variable(request):
     if request.method == 'POST' and 'submit_variable' in request.POST:
         project_id = request.POST.get('project_id')
-        # tag_ids = request.POST.getlist('tag-ids')
         variable_name = request.POST.get('variable-name')
         variable_description = request.POST.get('variable-description')
         variable_instructions = request.POST.get('variable-instructions')
         multiple_or_freeform = request.POST.get('variable_answer_option')
 
-        # variable_id = request.POST.get('variable_id')
-        # variable = Variable.objects.get(id=variable_id)
-
         project = Project.objects.get(id=project_id)
         project_tags = project.tag_set.all()
+        project_dataset = project.dataset
 
-        greatest_col_index = Column.objects.filter(project=project).aggregate(Max('column_number'))
+        variables_in_project = Variable.objects.filter(project=project).values()
+
+        if variables_in_project:
+            variable_ids = [variable['id'] for variable in variables_in_project]
+
+            greatest_col_index = \
+                ColumnMeta.objects.filter(variable_id__in=variable_ids).aggregate(Max('column_number'))
+        else:
+            greatest_col_index = {}
+            greatest_col_index['column_number__max'] = None
 
         if not greatest_col_index['column_number__max']:
             greatest_col_index = 1
@@ -72,22 +80,18 @@ def submit_new_variable(request):
             variable.tag_set.add(project_tag)
 
         column = Column(
-            project=project,
-            is_variable=True,
-            column_number=greatest_col_index,
-            variable=variable
+            dataset=project_dataset
         )
         column.save()
 
-        # rows = Row.objects.filter(project=project)
-        #
-        # for row in rows:
-        #     data = Data(
-        #         column=column,
-        #         row=row,
-        #         project=project
-        #     )
-        #     data.save()
+        column_meta = ColumnMeta(
+            column=column,
+            is_variable=True,
+            variable=variable,
+            column_number=greatest_col_index,
+            column_name=column.column_name
+        )
+        column_meta.save()
 
         if multiple_or_freeform == 'multiple_choice':
             variable.is_freeform = False
@@ -118,10 +122,6 @@ def submit_new_variable(request):
 
         variable.save()
 
-        # for tag_id in tag_ids:
-        #     tag_data = Tag.objects.get(id=tag_id)
-        #     tag_data.variable.add(variable)
-
         redirect_url = '/coder_project/' + str(project_id) + '/edit_project/'
         return redirect(redirect_url)
 
@@ -132,7 +132,7 @@ def submit_new_variable(request):
 
         project = Project.objects.get(id=project_id)
 
-        greatest_col_index = Column.objects.filter(project=project).aggregate(Max('column_number'))
+        greatest_col_index = ColumnMeta.objects.filter(project=project).aggregate(Max('column_number'))
 
         if not greatest_col_index['column_number__max']:
             greatest_col_index = 1
@@ -218,14 +218,31 @@ def submit_new_project(request):
     if request.method == 'POST':
         project_name = request.POST.get('project-name')
         project_rate = request.POST.get('project-rate')
+        dataset_id = request.POST.get('dataset-name')
+        project_tags = request.POST.getlist('tags_to_add[]')
+        project_dataset = Dataset.objects.get(id=dataset_id)
+        project_rows = Row.objects.filter(dataset=project_dataset)
 
         project = Project(
             name=project_name,
             rate=project_rate,
-            contains_adverse_events=False
+            contains_adverse_events=False,
+            is_completed=False,
+            dataset=project_dataset
         )
 
         project.save()
+
+        for tag in project_tags:
+            project_tag = Tag.objects.get(id=tag)
+            project.tag_set.add(project_tag)
+
+        for row in project_rows:
+            row_meta = RowMeta(
+                row=row
+            )
+
+            row_meta.save()
 
         return redirect('/coder_project')
 
@@ -235,48 +252,27 @@ def submit_new_project(request):
 
 def edit_project(request, project_id):
     p = Project.objects.get(id=project_id)
+    project_data = p
     tag_data = p.tag_set.all()
 
-    variable_data_list = []
     project_edit_view = 'variable'
+    variables = Variable.objects.filter(project=p)
 
-    project_data = {
-        'id': p.id,
-        'name': p.name,
-        'rate': p.rate,
-        'contains_adverse_effects': p.contains_adverse_events
-    }
-
-    columns = Column.objects.filter(project=p, is_variable=True)
-    variable_ids = columns.values_list('variable_id', flat=True)
-
-    variables = []
-    for variable_id in variable_ids:
-        if variable_id:
-            v = Variable.objects.get(id=variable_id)
-            variable = {
-             'id': v.id,
-             'name': v.name,
-             'description': v.description,
-             'instructions': v.instructions,
-             'is_freeform': v.is_freeform,
-             'is_multiple_choice': v.is_multiple_choice
-            }
-            variables.append(variable)
+    variable_data_list = [];
 
     for variable in variables:
-        if variable['is_freeform'] == True:
+        if variable.is_freeform:
             multiple_or_freeform = 'freeform'
-        elif variable['is_multiple_choice'] == True:
+        elif variable.is_multiple_choice:
             multiple_or_freeform = 'multiple'
         else:
             multiple_or_freeform = 'not assigned'
 
         variable_data = {
-            'id': variable['id'],
-            'name': variable['name'],
+            'id': variable.id,
+            'name': variable.name,
             'multiple_or_freeform': multiple_or_freeform,
-            'description': variable['description']
+            'description': variable.description
         }
         variable_data_list.append(variable_data)
 

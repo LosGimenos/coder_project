@@ -9,6 +9,7 @@
         <tr>
             <th class="header">Project Name</th>
             <th class="header">Project Rate</th>
+            <th class="header">Dataset</th>
             <th class="header">Contains Adverse Events</th>
             <th class="header"></th>
             <th class="header"></th>
@@ -20,6 +21,7 @@
                     <tr>
                         <td>{{ project.name }}</td>
                         <td>{{ project.rate }}</td>
+                        <td>{{ project.dataset_name }}</td>
                         <td>{{ project.contains_adverse_events }}</td>
                         <td>
                             <a href={% url 'coder_app:edit_project' project_id=project.id %}><span>Edit</span></a>

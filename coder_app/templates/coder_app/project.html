@@ -1,6 +1,7 @@
 {% extends "coder_app/base.html" %}
 
 {% block content %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
 
     <h3>Add New Project</h3>
 
@@ -8,23 +9,156 @@
         {% csrf_token %}
         <div class="row">
             <div class="col-md-12">
-                <div class="col-md-4 input-group">
+                <div class="col-md-4">
                     <label for="project-name">Project Name</label>
                     <input class="form-control" type="input" name="project-name" /> <br />
                     <label for="project-rate">Rate</label>
                     <input class="form-control" type="input" name="project-rate" /> <br />
-                    <input class='btn btn-primary' type="submit" value="Submit"/>
-                    <br />
+                </div>
+                <div class="col-md-1"></div>
+                <div class="col-md-3">
+                    <div class="ui-widget">
+                        <label for="tag_filter">Add Project Tags (minimum of 1)</label>
+                        <input id='by_tag' class="form-control" type="text" name="tag_filter" placeholder="...tagname" />
+                    </div>
                 </div>
                 <div class="col-md-3">
-                    <select name="dataset-name">
+                    <label for="filter--container">Tags to Add</label>
+                    <div class="filter--container tag--container col-md-12"></div>
+                    <select style="display: none;" class="tag--container__hidden" multiple name="tags_to_add[]">
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="col-md-4">
+                    <label for="dataset-name">Link a Dataset</label>
+                    <select name="dataset-name" class="form-control">
                         {% for dataset in dataset_data %}
-                            <option value="{{ dataset.id }}"><span>{{ dataset.name }}</span>
+                            <option value="{{ dataset.id }}"><span>{{ dataset.dataset_ID }}</span></option>
                         {% endfor %}
                     </select>
                 </div>
             </div>
         </div>
+        <div class="row">
+            <div class="col-md-2">
+                <input class='btn btn-primary' type="submit" value="Submit"/>
+            </div>
+        </div>
+
     </form>
+
+    <style>
+        .filter--container {
+            border: 1px solid black;
+            height: 15vh;
+            overflow: scroll;
+        }
+    </style>
+
+    {% load static %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script src="{% static 'token_injector.js' %}"></script>
+
+    <script>
+    const tagsArray = [];
+    const globalTagIds = [];
+    const hiddenTagContainer = $('.tag--container__hidden');
+    const tagContainer = $('.tag--container');
+
+    function renderFilterContainer(array, container, type) {
+            $(container).empty();
+
+            switch (type) {
+                case 'keyword':
+                    array.forEach(itemData => {
+                    let variableNode =
+                        $(`<span name='${itemData.name}'>${itemData.name}<span class='badge keyword-remove'>X</span><br/></span>`);
+                        $(container).append(variableNode);
+                    });
+                    addKeywordHandler();
+                    break;
+
+                case 'tag':
+                    array.forEach(itemData => {
+                        let variableNode =
+                        $(`<span name='${itemData.id}'>${itemData.name}<span class='badge tag-remove'>X</span><br/></span>`);
+                        $(container).append(variableNode);
+                    });
+                    addTagHandler();
+                    break;
+
+                case 'variable':
+                    array.forEach(itemData => {
+                        let variableNode = $(`<span name='${itemData.id}'>${itemData.name}<br/></span>`);
+                        $(container).append(variableNode);
+                    });
+                    addVariableHandler();
+                    break;
+
+                case 'project':
+                    array.forEach(itemData => {
+                        let variableNode = $(`<span name='${itemData.id}'>${itemData.name}<br/></span>`);
+                        $(container).append(variableNode);
+                    });
+                    addProjectVariablesHandler();
+                    break;
+
+                case 'hidden':
+                    array.forEach(itemData => {
+                        let variableNode =
+                            $(`<option selected='selected' value='${itemData.id}'><span>${itemData.name}</span></option>`);
+                        $(container).append(variableNode);
+                    });
+            }
+        }
+
+        function addTagHandler() {
+            $('.tag-remove').click(e => {
+                e.preventDefault();
+                let nodeValue = $(e.target.parentNode).attr('name');
+                $(tagsArray).each((index, tag) => {
+                    if (tag.id == nodeValue) {
+                        tagsArray.splice(index, 1)
+                    }
+                });
+
+                let indexOfValue = $.inArray(parseInt(nodeValue), globalTagIds);
+                if (indexOfValue >= 0) {
+                    globalTagIds.splice(indexOfValue, 1);
+                }
+
+                renderFilterContainer(tagsArray, tagContainer, 'tag');
+                renderFilterContainer(tagsArray, hiddenTagContainer, 'hidden');
+            });
+        }
+
+    $('#by_tag').autocomplete({
+           source: "/coder_project/get_tag_names",
+            select: function (event, ui) {
+               let tagId;
+               if ($.inArray(ui.item.id, globalTagIds) < 0) {
+                   tagId = ui.item.id;
+                   const tagData = {
+                       'id': tagId,
+                       'name': ui.item.label
+                   }
+                   globalTagIds.push(tagId);
+                   tagsArray.unshift(tagData);
+                   renderFilterContainer(tagsArray, tagContainer, 'tag')
+                   renderFilterContainer(tagsArray, hiddenTagContainer, 'hidden');
+               };
+
+               $('#by_tag').val('');
+               return false;
+            },
+           minLength: 2
+        })
+
+    </script>
 
 {% endblock %}
