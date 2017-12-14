@@ -239,7 +239,8 @@ def submit_new_project(request):
 
         for row in project_rows:
             row_meta = RowMeta(
-                row=row
+                row=row,
+                row_name=row.row_name
             )
 
             row_meta.save()
@@ -300,7 +301,8 @@ def edit_project(request, project_id):
                 'id': project_id,
                 'project_data': project_data,
                 'project_edit_view': project_edit_view,
-                'coder_data': coder_data
+                'coder_data': coder_data,
+                'tag_data': tag_data
             }
         )
 
@@ -317,7 +319,8 @@ def edit_project(request, project_id):
                 'project_data': project_data,
                 'project_edit_view': project_edit_view,
                 'coder_data': coder_data,
-                'assigned_or_available': 'assigned'
+                'assigned_or_available': 'assigned',
+                'tag_data': tag_data
             }
         )
 
@@ -331,7 +334,8 @@ def edit_project(request, project_id):
                 'variable_data': variable_data_list,
                 'id': project_id,
                 'project_data': project_data,
-                'project_edit_view': project_edit_view
+                'project_edit_view': project_edit_view,
+                'tag_data': tag_data
             }
         )
 
@@ -350,7 +354,8 @@ def edit_project(request, project_id):
                 'mention_data': mention_data,
                 'id': project_id,
                 'project_data': project_data,
-                'project_edit_view': project_edit_view
+                'project_edit_view': project_edit_view,
+                'tag_data': tag_data
             }
         )
         pass
@@ -574,9 +579,11 @@ def edit_variable_library(request):
         project_id = request.POST.get('project_id')
 
         project_data = Project.objects.get(id=project_id)
+        dataset = Dataset.objects.get(project=project_data)
         project_tags = project_data.tag_set.all()
-        column_data = Column.objects.filter(project=project_data, is_variable=True)
-        variable_ids_attached_to_project = column_data.values('variable_id')
+        variable_data = Variable.objects.filter(project=project_data)
+        # column_data = Column.objects.filter(dataset=dataset)
+        variable_ids_attached_to_project = variable_data.values('variable')
 
         for variable in variables:
             attached_variable = \
@@ -600,11 +607,16 @@ def edit_variable_library(request):
                     variable.tag_set.add(tag)
 
                 column = Column(
-                    variable=variable,
-                    is_variable=True,
-                    project=project_data
+                    dataset=dataset
                 )
                 column.save()
+                
+                column_meta = ColumnMeta(
+                    variable=variable,
+                    is_variable=True,
+                    column_name=column.column_name
+                )
+                column_meta.save()
 
         redirect_url = '/coder_project/' + project_id + '/edit_project/'
         return HttpResponse(
