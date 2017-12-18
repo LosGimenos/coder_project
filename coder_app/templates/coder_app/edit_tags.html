@@ -25,13 +25,18 @@
 
     <div class="row">
         <div class="col-md-3">
-            <button class="btn btn-default">Select All</button>
-            <button class="btn btn-default"><span class="glyphicon glyphicon-trash"></span></button>
+            <button style="float: left;" class="btn btn-default select-all">Select All</button>
+            <form action="{% url 'coder_app:index' %}" method="post">
+                {% csrf_token %}
+                <button class="btn btn-default bulk-delete" name="bulk-tag-delete">
+                    <span class="glyphicon glyphicon-trash"></span>
+                </button>
+
         </div>
     </div>
 
     <div class="table-responsive" style="margin-top: 1%;">
-        <form>
+
     <table class="table table-bordered table-hovered table-striped tablesorter">
         <thead>
         <tr>
@@ -44,14 +49,19 @@
                     {% for tag in tag_data %}
                     <tr>
                         <td>
-                            <input style="margin-right: 1%;" type="checkbox" name="variable-names[]" value="{{ tag.id }}" />
-                            <span class="tag-name">{{ tag.name }}</span>
+                            <input
+                                    style="margin-right: 1%; float: left;"
+                                    class="checkbox"
+                                    type="checkbox"
+                                    name="tag-names[]"
+                                    value="{{ tag.id }}" />
+                            <span name="{{ tag.id }}" class="tag-name">{{ tag.name }}</span>
                         </td>
                         <td style="width: 15%; text-align: center;">
                             <span class="tag-controls" style="display: flex; justify-content: space-around;">
-                                <span>Rename</span>
-                                <span class="glyphicon glyphicon-th-list"></span>
-                                <span class="glyphicon glyphicon-trash"></span>
+                                <span name="{{ tag.id }}" class="rename-tag">Rename</span>
+                                <span name="{{ tag.id }}" class="glyphicon glyphicon-th-list tag-list--redirect"></span>
+                                <span name="{{ tag.id }}" class="glyphicon glyphicon-trash tag-delete"></span>
                             </span>
                         </td>
                     </tr>
@@ -87,20 +97,14 @@
     <script src="{% static 'token_injector.js' %}"></script>
 
     <script>
-    let variablesToMove = [];
-        let variablesToReset = [];
+        let variablesToMove = [];
         const filteredVariablesContainer = $('.variable--container__filtered');
         const tagContainer = $('.tag--container');
-        const keywordContainer = $('#keyword-container');
 
         const tagsArray = [];
-        let keywordArray = [];
         let filteredVariablesArray = [];
-        let variablesToProjectArray = [];
 
-        const globalVariableIds = [];
         const globalTagIds = [];
-        const globalKeywords = [];
 
         const projectId = $('.project-id').val();
 
@@ -119,8 +123,7 @@
                     data: {
                         'add_to_filter': 'add_tag',
                         'tag_id_to_add': tagId,
-                        'global_tag_ids': JSON.stringify(globalTagIds),
-                        'keywords': JSON.stringify(globalKeywords)
+                        'global_tag_ids': JSON.stringify(globalTagIds)
                     },
                     success: function(json) {
                         let tagData = json.tag_data;
@@ -154,6 +157,78 @@
             },
            minLength: 2
         });
+
+        $('.select-all').click(e => {
+            e.preventDefault();
+            $('.checkbox').prop('checked', true);
+        });
+
+        $('.rename-tag').click(e => {
+            e.preventDefault();
+            let tagId = $(e.currentTarget).attr('name');
+            let tagNode = $(`.tag-name[name=${tagId}]`);
+            let tagNodeParent = $(tagNode).parent();
+            let tagName = $(tagNode).text();
+            let renameInput = $(`<input class='input-rename' name='${tagId}' value='${tagName}'/>`)
+            $(tagNode).remove();
+            $(tagNodeParent).append(renameInput);
+            addInputHandler();
+        });
+
+        function addInputHandler() {
+            $('.input-rename').keypress(e => {
+                if ( e.which == 13 ) {
+                    let tagName = $(e.currentTarget).val();
+                    let tagId = $(e.currentTarget).attr('name');
+                    let parentNode = $(e.currentTarget).parent();
+                    let tagNameNode = $(`<span name='${tagId}' class="tag-name">${tagName}</span>`);
+
+                    $.ajax({
+                        url: '/coder_project/edit_tags',
+                        type: 'POST',
+                        data: {
+                          'rename_tag': true,
+                          'delete_single_tag': false,
+                          'new_tag_name': tagName,
+                          'tag_id': tagId
+                        },
+                        success: function(json) {
+                            console.log(json);
+                            $(e.currentTarget).remove();
+                            $(parentNode).append(tagNameNode);
+                        },
+                        error: function() {
+
+                        }
+                    });
+                }
+            });
+        }
+
+        function addDeleteHandler() {
+            $('.tag-delete').click(e => {
+                e.preventDefault();
+                let tagId = $(e.currentTarget).attr('name');
+                console.log(tagId);
+
+                $.ajax({
+                    url: '/coder_project/edit_tags',
+                    type: 'POST',
+                    data: {
+                        'rename_tag': false,
+                        'delete_single_tag': true,
+                        'tag_id': tagId
+                    },
+                    success: function(json) {
+
+                    },
+                    error: function() {},
+
+                });
+            });
+        }
+        addDeleteHandler();
+
     </script>
 
 {%  endblock %}

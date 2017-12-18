@@ -16,6 +16,12 @@ def index(request):
         project_to_delete = Project.objects.get(id=value)
         project_to_delete.delete()
 
+    if request.method == "POST" and 'bulk-tag-delete' in request.POST:
+        tags_to_delete = request.POST.getlist('tag-names[]')
+        for tag_to_delete in tags_to_delete:
+            tag = Tag.objects.get(id=tag_to_delete)
+            tag.delete()
+
     project_data_list = []
     projects = Project.objects.all()
     coder_data = Coder.objects.all()
@@ -358,7 +364,6 @@ def edit_project(request, project_id):
                 'tag_data': tag_data
             }
         )
-        pass
 
     if request.method == 'POST' and 'add_to_project' in request.POST:
         project_id = request.POST.get('project_id')
@@ -582,12 +587,12 @@ def edit_variable_library(request):
         dataset = Dataset.objects.get(project=project_data)
         project_tags = project_data.tag_set.all()
         variable_data = Variable.objects.filter(project=project_data)
-        # column_data = Column.objects.filter(dataset=dataset)
-        variable_ids_attached_to_project = variable_data.values('variable')
+        variable_ids_attached_to_project = variable_data.values('id')
+        print(variable_ids_attached_to_project, 'ids list')
 
         for variable in variables:
             attached_variable = \
-                next((item for item in variable_ids_attached_to_project if item['variable_id'] == variable['id']), None)
+                next((item for item in variable_ids_attached_to_project if item['id'] == variable['id']), None)
 
             if attached_variable:
                 continue
@@ -596,8 +601,20 @@ def edit_variable_library(request):
                 variable_project_origin = variable.project
                 project_origin_tag_ids = [tag.id for tag in variable_project_origin.tag_set.all()]
                 tags_attached_to_original_variable = variable.tag_set.exclude(id__in=project_origin_tag_ids)
+                greatest_col_index = \
+                    ColumnMeta.objects\
+                        .filter(variable_id__in=variable_ids_attached_to_project)\
+                        .aggregate(Max('column_number'))
+
+                if not greatest_col_index['column_number__max']:
+                    greatest_col_index = 1
+                else:
+                    greatest_col_index = greatest_col_index['column_number__max'] + 1
 
                 variable.pk = None
+                variable.save()
+
+                variable.project = project_data
                 variable.save()
 
                 for tag in project_tags:
@@ -614,7 +631,9 @@ def edit_variable_library(request):
                 column_meta = ColumnMeta(
                     variable=variable,
                     is_variable=True,
-                    column_name=column.column_name
+                    column_name=column.column_name,
+                    column=column,
+                    column_number=greatest_col_index
                 )
                 column_meta.save()
 
@@ -953,5 +972,38 @@ def get_tag_names(request):
     return HttpResponse(variable_data, mimetype)
 
 def edit_tags(request):
+    if request.is_ajax() and json.loads(request.POST.get('rename_tag')):
+        tag_id = request.POST.get('tag_id')
+        tag = Tag.objects.get(id=tag_id)
+        new_name = request.POST.get('new_tag_name')
+        tag.name = new_name
+        tag.save()
+
+        tag_data = serializers.serialize('json', Tag.objects.all())
+
+        return HttpResponse(
+            json.dumps({
+                'tag_data': tag_data,
+                'result': 'successful!'
+            }),
+            content_type="application/json"
+        )
+
+    if request.is_ajax() and json.loads(request.POST.get('delete_single_tag')):
+        tag_id = request.POST.get('tag_id')
+        tag = Tag.objects.get(id=tag_id)
+        tag.delete()
+
+        tag_data = serializers.serialize('json', Tag.objects.all())
+
+        return HttpResponse(
+            json.dumps({
+                'tag_data': tag_data,
+                'result': 'successful!'
+            }),
+            content_type="application/json"
+        )
+
     tag_data = Tag.objects.all()
+
     return render(request, 'coder_app/edit_tags.html', {'tag_data': tag_data})
