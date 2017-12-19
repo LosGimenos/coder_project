@@ -29,7 +29,7 @@
                         <td>{{ variable.multiple_or_freeform }}</td>
                         <td>{{ variable.description }}</td>
                         <td>
-                            <a href={% url 'coder_app:edit_variable' variable_id=variable.id project_id=id %}><span>Edit</span>
+                            <a href={% url 'coder_app:edit_variable' variable_id=variable.id %}><span>Edit</span>
                         </td>
                         <td>
                             <form action={% url 'coder_app:edit_project' project_id=id %} method='post'>

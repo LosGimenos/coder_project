@@ -99,6 +99,7 @@ class RowMeta(models.Model):
     media_text = models.TextField(null=True, blank=True)
     is_twitter = models.BooleanField(default=False)
     is_instagram = models.BooleanField(default=False)
+    project = models.ForeignKey(Project, null=True)
 
 class Data(models.Model):
     dataset = models.ForeignKey(Dataset, on_delete=models.CASCADE, null=True)

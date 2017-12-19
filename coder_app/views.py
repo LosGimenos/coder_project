@@ -22,6 +22,12 @@ def index(request):
             tag = Tag.objects.get(id=tag_to_delete)
             tag.delete()
 
+    if request.method == "POST" and 'bulk-variable-delete' in request.POST:
+        variables_to_delete = request.POST.getlist('variable-names[]')
+        for variable_to_delete in variables_to_delete:
+            variable = Variable.objects.get(id=variable_to_delete)
+            variable.delete()
+
     project_data_list = []
     projects = Project.objects.all()
     coder_data = Coder.objects.all()
@@ -50,54 +56,65 @@ def index(request):
         })
 
 def submit_new_variable(request):
+    if request.method == 'POST' and 'add_tag' in request.POST:
+
+        pass
+
     if request.method == 'POST' and 'submit_variable' in request.POST:
-        project_id = request.POST.get('project_id')
         variable_name = request.POST.get('variable-name')
         variable_description = request.POST.get('variable-description')
         variable_instructions = request.POST.get('variable-instructions')
         multiple_or_freeform = request.POST.get('variable_answer_option')
 
-        project = Project.objects.get(id=project_id)
-        project_tags = project.tag_set.all()
-        project_dataset = project.dataset
+        project_id = request.POST.get('project_id')
 
-        variables_in_project = Variable.objects.filter(project=project).values()
-
-        if variables_in_project:
-            variable_ids = [variable['id'] for variable in variables_in_project]
-
-            greatest_col_index = \
-                ColumnMeta.objects.filter(variable_id__in=variable_ids).aggregate(Max('column_number'))
+        if project_id == 'None':
+            variable = Variable()
+            variable.save()
+            redirect_url = '/coder_project/'
         else:
-            greatest_col_index = {}
-            greatest_col_index['column_number__max'] = None
+            project = Project.objects.get(id=project_id)
+            project_tags = project.tag_set.all()
+            project_dataset = project.dataset
 
-        if not greatest_col_index['column_number__max']:
-            greatest_col_index = 1
-        else:
-            greatest_col_index = greatest_col_index['column_number__max'] + 1
+            variables_in_project = Variable.objects.filter(project=project).values()
 
-        variable = Variable(
-            project=project
-        )
-        variable.save()
+            if variables_in_project:
+                variable_ids = [variable['id'] for variable in variables_in_project]
 
-        for project_tag in project_tags:
-            variable.tag_set.add(project_tag)
+                greatest_col_index = \
+                    ColumnMeta.objects.filter(variable_id__in=variable_ids).aggregate(Max('column_number'))
+            else:
+                greatest_col_index = {}
+                greatest_col_index['column_number__max'] = None
 
-        column = Column(
-            dataset=project_dataset
-        )
-        column.save()
+            if not greatest_col_index['column_number__max']:
+                greatest_col_index = 1
+            else:
+                greatest_col_index = greatest_col_index['column_number__max'] + 1
 
-        column_meta = ColumnMeta(
-            column=column,
-            is_variable=True,
-            variable=variable,
-            column_number=greatest_col_index,
-            column_name=column.column_name
-        )
-        column_meta.save()
+            variable = Variable(
+                project=project
+            )
+            variable.save()
+
+            for project_tag in project_tags:
+                variable.tag_set.add(project_tag)
+
+            column = Column(
+                dataset=project_dataset
+            )
+            column.save()
+
+            column_meta = ColumnMeta(
+                column=column,
+                is_variable=True,
+                variable=variable,
+                column_number=greatest_col_index,
+                column_name=column.column_name
+            )
+            column_meta.save()
+            redirect_url = '/coder_project/' + str(project_id) + '/edit_project/'
 
         if multiple_or_freeform == 'multiple_choice':
             variable.is_freeform = False
@@ -128,43 +145,12 @@ def submit_new_variable(request):
 
         variable.save()
 
-        redirect_url = '/coder_project/' + str(project_id) + '/edit_project/'
         return redirect(redirect_url)
 
     elif request.method == 'POST' and 'add_variable' in request.POST:
         project_id = request.POST.get('project_for_variable')
 
         return render(request, 'coder_app/variables.html', {'project_id': project_id})
-
-        project = Project.objects.get(id=project_id)
-
-        greatest_col_index = ColumnMeta.objects.filter(project=project).aggregate(Max('column_number'))
-
-        if not greatest_col_index['column_number__max']:
-            greatest_col_index = 1
-        else:
-            greatest_col_index = greatest_col_index['column_number__max'] + 1
-
-        variable = Variable()
-        variable.save()
-
-        column = Column(
-            project=project,
-            is_variable=True,
-            column_number=greatest_col_index,
-            variable=variable
-        )
-        column.save()
-
-        rows = Row.objects.filter(project=project)
-
-        for row in rows:
-            data = Data(
-                column=column,
-                row=row,
-                project=project
-            )
-            data.save()
 
     elif request.is_ajax() and json.loads(request.POST.get('add_tag')):
         tag_name = request.POST.get('tag_name')
@@ -383,9 +369,16 @@ def edit_project(request, project_id):
         p.tag_set.add(tag_to_add)
         p.save()
 
+        variable_data = Variable.objects.filter(project=p)
+        for variable in variable_data:
+            variable.tag_set.add(tag_to_add)
+
+        redirect_url = '/coder_project/' + str(p.id) + '/edit_project/'
+
         return HttpResponse(
             json.dumps({
-                'result': 'successful!'
+                'result': 'successful!',
+                'redirect_url': redirect_url
             }),
             content_type="application/json"
         )
@@ -424,8 +417,8 @@ def edit_project(request, project_id):
         p.rate = project_rate
         p.save()
 
-        project_data['name'] = project_name
-        project_data['rate'] = project_rate
+        # project_data['name'] = project_name
+        # project_data['rate'] = project_rate
 
         return redirect('/coder_project')
 
@@ -442,9 +435,8 @@ def edit_project(request, project_id):
         }
     )
 
-def edit_variable(request, variable_id, project_id):
-    if project_id == None:
-        project_id = request.POST.get('project_id')
+def edit_variable(request, variable_id):
+    project_id = request.POST.get('project_id')
 
     v = Variable.objects.get(id=variable_id)
     variable_data = {
@@ -498,9 +490,9 @@ def edit_variable(request, variable_id, project_id):
         v.description = variable_description
         v.instructions = variable_instructions
         v.save()
-        redirect_url = '/coder_project/' + str(project_id) + '/edit_project/'
+        # redirect_url = '/coder_project/' + str(project_id) + '/edit_project/'
 
-        return redirect(redirect_url)
+        # return redirect('/coder_project/')
 
     return render(
         request,
@@ -508,7 +500,7 @@ def edit_variable(request, variable_id, project_id):
         {
             'variable_data': variable_data,
             'tag_data': tag_data,
-            'project_id': project_id,
+            # 'project_id': project_id,
             'choice_data': choice_data
         })
 
@@ -649,12 +641,13 @@ def edit_variable_library(request):
 def select_mention(request, coder_id, project_id):
     coder_data = Coder.objects.get(id=coder_id)
     project_data = Project.objects.get(id=project_id)
-    mention_data = Row.objects.filter(project=project_data)
-    column_data = Column.objects.filter(project=project_data, is_variable=True)
-    total_variable_count = column_data.count()
+    dataset = Dataset.objects.get(project=project_data)
+    mention_data = Row.objects.filter(dataset=dataset)
+    total_variable_count = Variable.objects.filter(project=project_data).count()
 
     for row in mention_data:
-        answer_data = Data.objects.filter(coder=coder_data, row=row)
+        answer_data = Data.objects.filter(row=row)
+        answer_data = DataMeta.objects.filter(data_id__in=[data.id for data in answer_data])
         answer_ids = ''
 
         for index, answer in enumerate(answer_data):
@@ -662,6 +655,7 @@ def select_mention(request, coder_id, project_id):
             if index + 1 != answer_data.count():
                 answer_ids += ','
 
+        row = RowMeta.objects.get(row=row)
 
         row.completed_variables = answer_ids
         row.completed_variables_count = answer_data.count()
@@ -912,7 +906,6 @@ def get_tag_names(request):
         )
 
     if request.method == 'POST' and request.POST.get('add_to_filter') == 'add_tag':
-        print('made it to add_tag')
         tag_id = json.loads(request.POST.get('tag_id_to_add'))
         tag = Tag.objects.get(id=tag_id)
 
@@ -938,7 +931,6 @@ def get_tag_names(request):
             }
             variable_data.append(variable_name_and_id)
 
-        print(tag, 'this is the tag')
         tag_data = {
             'id': tag.id,
             'name': tag.name
@@ -1004,6 +996,199 @@ def edit_tags(request):
             content_type="application/json"
         )
 
+    if request.is_ajax() and json.loads(request.POST.get('tag_list_redirect')):
+        tag_id = request.POST.get('tag_id')
+        base_url = '/coder_project/review_tag/'
+        url_redirect = base_url + str(tag_id)
+
+        return HttpResponse(
+            json.dumps({
+                'result': 'successful!',
+                'url_redirect': url_redirect
+            }),
+            content_type="application/json"
+        )
+
     tag_data = Tag.objects.all()
 
     return render(request, 'coder_app/edit_tags.html', {'tag_data': tag_data})
+
+def review_tag(request, tag_id):
+    tag_data = Tag.objects.get(id=tag_id)
+    variable_data = tag_data.variable.all()
+    for variable in variable_data:
+        variable.tag_names = [tag.name for tag in variable.tag_set.all()]
+
+    return render(
+        request,
+        'coder_app/review_tag.html',
+        {
+            'tag_data': tag_data,
+            'variable_data': variable_data
+        }
+    )
+
+def create_tag(request):
+    if request.method == 'POST' and 'create-tag' in request.POST:
+        tag_name = request.POST.get('create-tag')
+        new_tag = Tag()
+        new_tag.name = tag_name
+        new_tag.save()
+
+        url_redirect = '/coder_project'
+
+        return redirect(url_redirect)
+
+    return render(
+        request,
+        'coder_app/create_tag.html',
+        {}
+    )
+
+def edit_variables(request):
+    if request.is_ajax() and request.POST.get('variable_action') == 'bulk_add':
+        tag_id = request.POST.get('tag_id')
+        variable_ids = json.loads(request.POST.get('variable_ids'))
+
+        tag_to_add = Tag.objects.get(id=tag_id)
+
+        for variable_id in variable_ids:
+            variable = Variable.objects.get(id=variable_id)
+            variable.tag_set.add(tag_to_add)
+
+        redirect_url = '/coder_project/'
+
+        return HttpResponse(
+            json.dumps({
+                'redirect_url': redirect_url,
+                'result': 'successful!'
+            }),
+            content_type="application/json"
+        )
+    elif request.is_ajax() and request.POST.get('variable_action') == 'bulk_remove':
+        tag_id = request.POST.get('tag_id')
+        variable_ids = json.loads(request.POST.get('variable_ids'))
+
+        tag_to_remove = Tag.objects.get(id=tag_id)
+
+        for variable_id in variable_ids:
+            variable = Variable.objects.get(id=variable_id)
+            variable.tag_set.remove(tag_to_remove)
+
+        redirect_url = '/coder_project/'
+
+        return HttpResponse(
+            json.dumps({
+                'redirect_url': redirect_url,
+                'result': 'successful!'
+            }),
+            content_type="application/json"
+        )
+    else:
+        variable_id = request.POST.get('variable_id')
+        variable = Variable.objects.get(id=variable_id)
+
+    if request.is_ajax() and request.POST.get('variable_action') == 'delete_single_variable':
+        variable.delete()
+        variable_data = serializers.serialize('json', Variable.objects.all())
+        redirect_url = '/coder_project/'
+
+        return HttpResponse(
+            json.dumps({
+                'variable_data': variable_data,
+                'redirect_url': redirect_url,
+                'result': 'successful!'
+            }),
+            content_type="application/json"
+        )
+
+    if request.is_ajax() and request.POST.get('variable_action') == 'edit_variable':
+
+        redirect_url = '/coder_project/edit_variable/' + str(variable_id)
+
+        return HttpResponse(
+            json.dumps({
+                'redirect_url': redirect_url,
+                'result': 'successful!'
+            }),
+            content_type="application/json"
+        )
+
+    if request.is_ajax() and request.POST.get('variable_action') == 'copy_variable':
+        project_data = variable.project
+        project_tags = project_data.tag_set.all()
+        project_tag_ids = [tag.id for tag in project_tags]
+
+        tag_data = variable.tag_set.exclude(id__in=project_tag_ids)
+
+        variable.pk = None
+        variable.save()
+
+        variable.project = None
+
+        for tag in tag_data:
+            variable.tag_set.add(tag)
+
+        variable_data = serializers.serialize('json', Variable.objects.all())
+
+        redirect_url = '/coder_project/'
+
+        return HttpResponse(
+            json.dumps({
+                'variable_data': variable_data,
+                'redirect_url': redirect_url,
+                'result': 'successful!'
+            }),
+            content_type="application/json"
+        )
+
+def review_variable(request, variable_id):
+    variable_data = Variable.objects.get(id=variable_id)
+    tag_data = variable_data.tag_set.all()
+
+    return render(
+        request,
+        'coder_app/review_variable.html',
+        {
+            'tag_data': tag_data,
+            'variable_data': variable_data
+        }
+    )
+
+def tag_to_variable(request, variable_id):
+    variable_data = Variable.objects.get(id=variable_id)
+
+    if request.is_ajax() and request.POST.get('tag_action') == 'add_to_variable':
+        tag_id = request.POST.get('tag_id')
+        variable_data.tag_set.add(tag_id)
+
+    if request.is_ajax() and request.POST.get('tag_action') == 'remove_tag':
+        tag_id = request.POST.get('tag_id')
+        tag_to_remove = Tag.objects.get(id=tag_id)
+        variable_data.tag_set.remove(tag_to_remove)
+
+    if request.is_ajax() and request.POST.get('tag_action') == 'create_tag':
+        tag_name = request.POST.get('tag_name')
+        new_tag = Tag()
+        new_tag.name = tag_name
+        new_tag.save()
+
+        variable_data.tag_set.add(new_tag)
+
+    tags = variable_data.tag_set.all()
+    tag_data = []
+
+    for tag in tags:
+        tag_info = {
+            'id': tag.id,
+            'name': tag.name
+        }
+        tag_data.append(tag_info)
+
+    return HttpResponse(
+        json.dumps({
+            'tag_data': tag_data,
+            'result': 'successful!'
+        }),
+        content_type="application/json"
+    )

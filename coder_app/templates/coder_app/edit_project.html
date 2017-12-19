@@ -20,6 +20,7 @@
                 <input class="form-control" type="input" name="project-rate" value={{ project_data.rate }} /> <br />
                 <input class='btn btn-primary' type="submit" value="Submit"/>
         </div>
+        </form>
         <div class="col-md-1"></div>
         <div class="col-md-3">
             <div class="ui-widget">
@@ -28,17 +29,14 @@
             </div>
         </div>
         <div class="col-md-4">
-            <form class="input-group" action="{% url 'coder_app:edit_project' project_id=id %}" method="post">
                 <label for="tags-to-remove[]">Current Project Tags</label>
                 <select class='form-control' multiple name="tags-to-remove[]" style="width: 100%; border: 1px solid grey; height: 20vh; overflow: scroll;">
                     {% for tag in tag_data %}
                         <option value="{{ tag.id }}"><span>{{ tag.name }}</span>
                     {% endfor %}
                 </select>
-                <input class="btn btn-danger" name="remove-project-tags" type="submit" value="Remove Selected"/>
-            </form>
+                <input class="btn btn-danger" name="remove-variable-tags" type="submit" value="Remove Selected"/>
         </div>
-        </form>
         </div>
     </div>
 
@@ -99,7 +97,6 @@
         $('#by_tag').autocomplete({
             source: "/coder_project/get_tag_names",
             select: function(event, ui) {
-                console.log(ui.item.id);
                 let projectId = $('.input--project-id').val()
                 let url = '/coder_project/' + projectId.toString() + '/edit_project/';
 
@@ -111,7 +108,7 @@
                         'add_tag_to_project': true
                     },
                     success: function(json) {
-                        window.location.href = url;
+                        window.location.href = json.redirect_url;
                     },
                     error: function(xhr,errmsg,err) {
                         console.log(err);

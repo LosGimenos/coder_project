@@ -1,0 +1,32 @@
+{% extends 'coder_app/base.html' %}
+
+{% block content %}
+    {% include 'coder_app/home_tab.html' %}
+
+    <h3>Review Tag</h3>
+    <h3>"{{ tag_data.name }}"</h3>
+
+    <div class="table-responsive">
+    <table class="table table-bordered table-hovered table-striped tablesorter">
+        <thead>
+        <tr>
+            <th class="header">Variable Name</th>
+            <th class="header">Tags in Variable</th>
+        </tr>
+        </thead>
+                <tbody>
+                            {% for variable in variable_data %}
+                    <tr>
+                        <td>{{ variable.name }}</td>
+                        <td>
+                            {%  for tag in variable.tag_names %}
+                                <span>{{ tag }},</span>
+                            {% endfor %}
+                        </td>
+                    </tr>
+                            {% endfor %}
+                </tbody>
+    </table>
+</div>
+
+{% endblock %}

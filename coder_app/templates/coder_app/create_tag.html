@@ -1,0 +1,16 @@
+{% extends 'coder_app/base.html' %}
+
+{% block content %}
+    {% include 'coder_app/home_tab.html' %}
+
+    <h3>Create Tag</h3>
+
+    <form action="{% url 'coder_app:create_tag' %}" method="POST">
+        {% csrf_token %}
+        <div class="col-md-4">
+            <input name="create-tag" class="form-control" type="text" />
+            <input type="submit" name="create-tag-submit" class="btn btn-primary" />
+        </div>
+    </form>
+
+{% endblock %}

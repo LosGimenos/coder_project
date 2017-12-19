@@ -3,8 +3,9 @@
 
     <h3>Edit Variables</h3>
 
-    <form>
-        <input class="btn btn-primary" type="submit" value="Create Variable" />
+    <form action="{%  url 'coder_app:submit_new_variable' %}" method="post">
+        {% csrf_token %}
+        <input class="btn btn-primary" name="add_variable" type="submit" value="Create Variable" />
     </form>
 
     <div class="row" style="margin-top: 2%; margin-bottom: 2%;">
@@ -32,19 +33,24 @@
 
     <div class="row">
         <div class="col-md-3">
-            <button class="btn btn-default">Select All</button>
-            <button class="btn btn-default"><span class="glyphicon glyphicon-trash"></span></button>
+            <button style="float: left;" class="btn btn-default select-all">Select All</button>
+
+            <form action="{% url 'coder_app:index' %}" method="post">
+                {% csrf_token %}
+            <button class="btn btn-default bulk-delete" name="bulk-variable-delete">
+                <span class="glyphicon glyphicon-trash"></span>
+            </button>
         </div>
         <div class="col-md-1"></div>
         <div class="col-md-4 input-group">
-            <input type="text" name="tag-name-to-add" style="margin-right: 2%;"/>
+            <label style="margin-right: 2%;" for="tag-name-to-add">Add/Remove Tags</label>
+            <input type="text" name="tag-to-add" style="margin-right: 2%;"/>
             <span class="tag-control--bulk tag-control--bulk__add glyphicon glyphicon-plus"></span>
-            <span class="tag-control--bulk tag-control--bulk__add glyphicon glyphicon-minus"></span>
+            <span class="tag-control--bulk tag-control--bulk__remove glyphicon glyphicon-minus"></span>
         </div>
     </div>
 
     <div class="table-responsive" style="margin-top: 1%;">
-        <form>
     <table class="table table-bordered table-hovered table-striped tablesorter">
         <thead>
         <tr>
@@ -57,16 +63,17 @@
                     {% for variable in variable_data %}
                     <tr>
                         <td>
-                            <input style="margin-right: 1%;" type="checkbox" name="variable-names[]" value="{{ variable.id }}" />
+                            <input style="margin-right: 1%; float: left;" class='variable-checkbox' type="checkbox" name="variable-names[]" value="{{ variable.id }}" />
                             <span class="variable-name">{{ variable.name }}</span>
                         </td>
-                        <td style="width: 25%; text-align: center;">
+                        <td style="width: 20%; text-align: center;">
                             <span class="variable-controls" style="display: flex; justify-content: space-around;">
-                                <span>Replicate</span>
-                                <span>Edit</span>
-                                <span>Edit Tags</span>
-                                <span class="glyphicon glyphicon-th-list"></span>
-                                <span class="glyphicon glyphicon-trash"></span>
+                                <span class="copy-variable" name="{{ variable.id }}">Replicate</span>
+                                <span name="{{ variable.id }}" class="edit-variable">Edit</span>
+                                <a style="color: inherit;" href="{% url 'coder_app:review_variable' variable.id %}">
+                                    <span class="glyphicon glyphicon-th-list variable-list"></span>
+                                </a>
+                                <span name="{{ variable.id }}" class="glyphicon glyphicon-trash variable-delete"></span>
                             </span>
                         </td>
                     </tr>
@@ -88,6 +95,175 @@
             cursor: pointer;
             margin-right: 3%;
         }
+
+        .variable-controls span {
+            cursor: pointer;
+        }
+
     </style>
+
+    {% load static %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script src="{% static 'token_injector.js' %}"></script>
+
+    <script>
+        $('.select-all').click(e => {
+            e.preventDefault();
+            $('.variable-checkbox').prop('checked', true);
+        });
+
+        function addDeleteHandler() {
+            $('.variable-delete').click(e => {
+                e.preventDefault();
+                let variableId = $(e.currentTarget).attr('name');
+
+                $.ajax({
+                    url: '/coder_project/edit_variables',
+                    type: 'POST',
+                    data: {
+                        'variable_action': 'delete_single_variable',
+                        'variable_id': variableId
+                    },
+                    success: function(json) {
+                        window.location.href = json.redirect_url;
+                    },
+                    error: function() {},
+
+                });
+            });
+        }
+
+        addDeleteHandler();
+
+        function addEditHandler() {
+            $('.edit-variable').click(e => {
+                e.preventDefault();
+                let variableId = $(e.currentTarget).attr('name');
+                console.log('edit', variableId);
+
+                $.ajax({
+                    url: '/coder_project/edit_variables',
+                    type: 'POST',
+                    data: {
+                        'variable_action': 'edit_variable',
+                        'variable_id': variableId
+                    },
+                    success: function(json) {
+                        window.location.href = json.redirect_url;
+                    },
+                    error: function() {}
+                });
+            });
+        }
+
+        function addCopyHandler() {
+            $('.copy-variable').click(e => {
+                e.preventDefault();
+
+                let variableId = $(e.currentTarget).attr('name');
+
+                $.ajax({
+                    url: '/coder_project/edit_variables',
+                    type: 'POST',
+                    data: {
+                        'variable_action': 'copy_variable',
+                        'variable_id': variableId
+                    },
+                    success: function(json) {
+                        window.location.href = json.redirect_url
+                    },
+                    error: function() {}
+                });
+            });
+        }
+
+        function addBulkAddHandler() {
+            $('.tag-control--bulk__add').click(e => {
+                e.preventDefault();
+
+                let variablesToAdd = getSelectedVariables();
+                let tagId = $('input[name="tag-to-add"]').val();
+
+                $.ajax({
+                    url: '/coder_project/edit_variables/',
+                    type: 'POST',
+                    data: {
+                        'variable_ids': JSON.stringify(variablesToAdd),
+                        'tag_id': tagId,
+                        'variable_action': 'bulk_add'
+                    },
+                    success: function(json) {
+                        window.location.href = json.redirect_url
+                    },
+                    error: function() {}
+                });
+            });
+
+        }
+
+        function addBulkRemoveHandler() {
+            $('.tag-control--bulk__remove').click(e => {
+                e.preventDefault();
+
+                let tagId = $('input[name="tag-to-add"]').val();
+                let variablesToRemove = getSelectedVariables();
+
+                $.ajax({
+                    url: '/coder_project/edit_variables/',
+                    type: 'POST',
+                    data: {
+                        'variable_ids': JSON.stringify(variablesToRemove),
+                        'tag_id': tagId,
+                        'variable_action': 'bulk_remove'
+                    },
+                    success: function(json) {
+                        window.location.href = json.redirect_url;
+                    },
+                    error: function() {}
+                });
+            });
+        }
+
+        function getSelectedVariables() {
+            let variablesToAdd = [];
+            $('.variable-checkbox').each((index, box) => {
+                if ($(box).prop('checked')) {
+                    let variableId = $(box).val();
+                    variablesToAdd.push(variableId);
+                }
+            });
+            return variablesToAdd;
+        }
+
+        addEditHandler();
+        addCopyHandler();
+        addBulkAddHandler();
+        addBulkRemoveHandler();
+
+        {#        $('#by_tag').autocomplete({#}
+{#            source: "/coder_project/get_tag_names",#}
+{#            select: function(event, ui) {#}
+{#                let projectId = $('.input--project-id').val()#}
+{#                let url = '/coder_project/' + projectId.toString() + '/edit_project/';#}
+{##}
+{#                $.ajax({#}
+{#                    url: url,#}
+{#                    type: 'POST',#}
+{#                    data: {#}
+{#                        'tag_id': ui.item.id,#}
+{#                        'add_tag_to_project': true#}
+{#                    },#}
+{#                    success: function(json) {#}
+{#                        window.location.href = json.redirect_url;#}
+{#                    },#}
+{#                    error: function(xhr,errmsg,err) {#}
+{#                        console.log(err);#}
+{#                    }#}
+{#                });#}
+{#            },#}
+{#            minLength: 2#}
+{#        });#}
+    </script>
 
 {% endblock %}

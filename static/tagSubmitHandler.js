@@ -18,8 +18,6 @@ tagSubmit.addEventListener('submit', e => {
         },
 
         success: function(json) {
-            console.log(json, 'this is the json')
-
             $(tagSubmit).trigger('reset');
             tag_wrapper.innerHTML = '';
             json.tag_data.forEach(tag => {
@@ -70,3 +68,41 @@ tagSubmit.addEventListener('submit', e => {
         }
     });
 });
+
+function addTagDeleteHandler() {
+    $('.tag-node').hover((e) => {
+      $( e.target ).css({
+        "border": "1px solid red"
+      });
+    $('.tag-node').click((e) => {
+      e.preventDefault();
+      const tagId = e.currentTarget.getAttribute('name');
+      $.ajax({
+        url: '/coder_project/variables',
+        type: 'POST',
+        data: {
+          'delete_tag': 'delete_tag',
+          'tag_id': tagId,
+          'variable_id': $(variable_id_input).val(),
+          'project_id': $(project_id_input).val()
+        },
+
+        success: function(json) {
+          const tagToRemove = $(`[name="${json.tag_id}"]`);
+          tagToRemove.remove();
+        },
+          error: function(xhr,errmsg,err) {
+            console.log(xhr,errmsg,err);
+          }
+      })
+
+    });
+    }, (e) => {
+        $( e.target ).css({
+          "border": "none"
+         });
+      }
+    );
+};
+
+addTagDeleteHandler();

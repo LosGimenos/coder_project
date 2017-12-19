@@ -3,7 +3,7 @@
 
     <h3>Edit Tags</h3>
 
-    <form>
+    <form action="{% url 'coder_app:create_tag' %}">
         <input class="btn btn-primary" type="submit" value="Create Tag" />
     </form>
 
@@ -26,6 +26,7 @@
     <div class="row">
         <div class="col-md-3">
             <button style="float: left;" class="btn btn-default select-all">Select All</button>
+
             <form action="{% url 'coder_app:index' %}" method="post">
                 {% csrf_token %}
                 <button class="btn btn-default bulk-delete" name="bulk-tag-delete">
@@ -228,6 +229,30 @@
             });
         }
         addDeleteHandler();
+        addTagListHandler();
+
+        function addTagListHandler() {
+            $('.tag-list--redirect').click(e => {
+                const tagId = $(e.currentTarget).attr('name');
+
+                e.preventDefault();
+                $.ajax({
+                    url: '/coder_project/edit_tags',
+                    type: 'POST',
+                    data: {
+                        'rename_tag': false,
+                        'delete_single_tag': false,
+                        'tag_list_redirect': true,
+                        'tag_id': tagId
+                    },
+                    success: function(json) {
+                        console.log(json)
+                        window.location.href = json.url_redirect;
+                    },
+                    error: function() {}
+                });
+            });
+        }
 
     </script>
 

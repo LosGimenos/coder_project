@@ -23,14 +23,14 @@ def select_project(request, coder_id):
         project_ids_to_render = {}
 
         for project in projects:
-            all_rows = Row.objects.filter(project=project)
+            dataset = project.dataset
+            row_data = Row.objects.filter(dataset=dataset)
+            row_ids = [row.id for row in row_data]
+            all_rows = RowMeta.objects.filter(row_id__in=row_ids)
             all_rows_count = all_rows.count()
 
             uncompleted_rows = all_rows.filter(is_completed=False)
-            completed_rows = all_rows.filter(
-                project=project,
-                is_completed=True
-            )
+            completed_rows = all_rows.filter(is_completed=True)
             completed_rows_count = completed_rows.count()
 
             project_is_available = False
@@ -78,13 +78,15 @@ def select_project(request, coder_id):
 
     elif request.method == 'POST' and 'completed_projects_view' in request.POST:
         for project in projects:
-            all_rows = Row.objects.filter(project=project)
+            dataset = project.dataset
+            row_data = Row.objects.filter(dataset=dataset)
+            row_ids = [row.id for row in row_data]
+            all_rows = RowMeta.objects.filter(row_id__in=row_ids)
             all_rows_count = all_rows.count()
-            rows = Row.objects.filter(
-                project=project,
+            completed_rows = all_rows.filter(
                 is_completed=True
             )
-            completed_rows_count = rows.count()
+            completed_rows_count = completed_rows.count()
 
             try:
                 row = all_rows[0]
@@ -108,7 +110,10 @@ def select_project(request, coder_id):
     else:
         # pending projects default
         for project in projects:
-            all_rows = Row.objects.filter(project=project)
+            dataset = project.dataset
+            row_data = Row.objects.filter(dataset=dataset)
+            row_ids = [row.id for row in row_data]
+            all_rows = RowMeta.objects.filter(row_id__in=row_ids)
             all_rows_count = all_rows.count()
 
             uncompleted_rows = all_rows.filter(is_completed=False)
@@ -116,13 +121,11 @@ def select_project(request, coder_id):
             project_is_available = False
 
             for row in uncompleted_rows:
-                print('checking rows', coder_id, row.coder_id)
                 if not row.coder_id or int(coder_id) == int(row.coder_id):
                     project_is_available = True
 
             if project_is_available:
-                completed_rows = Row.objects.filter(
-                    project=project,
+                completed_rows = all_rows.filter(
                     is_completed=True
                 )
                 completed_rows_count = completed_rows.count()
@@ -157,6 +160,7 @@ def select_project(request, coder_id):
 
 def project_overview(request, coder_id, project_id, row_id):
     project_data = Project.objects.get(id=project_id)
+    dataset = project_data.dataset
     coder = Coder.objects.get(id=coder_id)
 
     print('this is project id', project_data.id)
