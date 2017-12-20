@@ -201,7 +201,7 @@ def project_overview(request, coder_id, project_id, row_id):
     no_column_found = False
     no_next_column_found = False
 
-    greatest_col_index = Column.objects.filter(project=project_data).aggregate(Max('column_number'))
+    greatest_col_index = ColumnMeta.objects.filter(project=project_data).aggregate(Max('column_number'))
     print('greatest col from filter', greatest_col_index)
     greatest_col_index = greatest_col_index['column_number__max']
 
@@ -210,11 +210,11 @@ def project_overview(request, coder_id, project_id, row_id):
     num_attempts = 0
     while not column_acquired:
         print(current_column_index, 'current index', row_id, 'this is row id')
-        attempted_column = Column.objects.filter(project=project_data, is_variable=True, column_number=current_column_index)
+        attempted_column = ColumnMeta.objects.filter(project=project_data, is_variable=True, column_number=current_column_index)
         print(attempted_column, 'attempted col')
 
         try:
-            column = Column.objects.filter(
+            column = ColumnMeta.objects.filter(
                 project=project_data,
                 is_variable=True,
                 column_number=current_column_index
@@ -234,7 +234,7 @@ def project_overview(request, coder_id, project_id, row_id):
 
     while not next_column_acquired:
         try:
-            next_column = Column.objects.filter(
+            next_column = ColumnMeta.objects.filter(
                 project=project_data,
                 is_variable=True,
                 column_number=next_column_index
@@ -276,14 +276,17 @@ def project_overview(request, coder_id, project_id, row_id):
 def project_answering(request, coder_id, project_id, row_id, column_id):
     next_variable_id = request.POST.get('next_variable_id')
 
-    column = Column.objects.get(id=column_id)
+    column = ColumnMeta.objects.get(id=column_id)
+    column_base = column.column
     variable_id = column.variable_id
     project_data = Project.objects.get(id=project_id)
-    row_data = Row.objects.get(id=row_id)
+    row_data = RowMeta.objects.get(id=row_id)
+    row = row_data.row
     variable_data = Variable.objects.get(id=variable_id)
     coder = Coder.objects.get(id=coder_id)
+    dataset = project_data.dataset
 
-    all_columns_in_project = Column.objects.filter(project=project_data, is_variable=True)
+    all_columns_in_project = ColumnMeta.objects.filter(project=project_data, is_variable=True)
     total_variable_count = all_columns_in_project.count()
     completed_variable_count = row_data.curr_col_index
 
@@ -305,28 +308,34 @@ def project_answering(request, coder_id, project_id, row_id, column_id):
         social_api_url = base_instagram_api_url + media_url
 
     if media_url:
-        social_api_json = requests.get(social_api_url).json()
-        social_data = social_api_json['html']
+        try:
+            social_api_json = requests.get(social_api_url).json()
+            social_data = social_api_json['html']
+        except:
+            social_data = 'Media Error'
     else:
         social_data = None
+
 
     if request.method == 'POST' and 'start-answer' not in request.POST:
         # save values to Data model
 
         date_submitted = datetime.datetime.now().replace(tzinfo=pytz.UTC)
 
-        data = Data.objects.filter(
-            project=project_data,
-            column=column,
-            row=row_data
-        ).first()
 
-        if not data:
-            data = Data(
-                project=project_data,
-                column=column,
-                row=row_data
-            )
+        # data = Data.objects.filter(
+        #     project=project_data,
+        #     column=column,
+        #     row=row_data
+        # ).first()
+
+        # if not data:
+        data = Data(
+            dataset=dataset,
+            column=column_base,
+            row=row,
+            date=date_submitted
+        )
 
         if 'variable-freeform' in request.POST:
             data.value = request.POST.get('variable-freeform')
@@ -334,9 +343,14 @@ def project_answering(request, coder_id, project_id, row_id, column_id):
             selected_choice = request.POST.get('variable-multiple')
             data.value = selected_choice
 
-        data.coder = coder
-        data.date = date_submitted
         data.save()
+
+        data_meta = DataMeta(
+            data=data,
+            coder=coder,
+            project=project_data
+        )
+        data_meta.save()
 
         # check for adverse events
         if 'variable-adverse-events' in request.POST:
@@ -351,7 +365,7 @@ def project_answering(request, coder_id, project_id, row_id, column_id):
         current_column_index = row_data.curr_col_index
 
         # check if row is complete
-        greatest_col_index = Column.objects.filter(project=project_data).aggregate(Max('column_number'))
+        greatest_col_index = ColumnMeta.objects.filter(project=project_data).aggregate(Max('column_number'))
         greatest_col_index = greatest_col_index['column_number__max']
 
         if row_data.curr_col_index > greatest_col_index:
@@ -359,7 +373,7 @@ def project_answering(request, coder_id, project_id, row_id, column_id):
             row_data.save()
 
         if row_data.is_completed == True:
-            rows = Row.objects.filter(
+            rows = RowMeta.objects.filter(
                 is_completed=False,
                 is_locked=False,
                 project=project_data
@@ -372,7 +386,7 @@ def project_answering(request, coder_id, project_id, row_id, column_id):
                 return redirect(redirect_url)
 
             current_column_index = row_data.curr_col_index
-            column = Column.objects.get(column_number=current_column_index)
+            column = ColumnMeta.objects.get(column_number=current_column_index)
             variable_data = Variable.objects.get(column=column.variable_id)
 
         # add next column information
@@ -382,7 +396,7 @@ def project_answering(request, coder_id, project_id, row_id, column_id):
 
         while not next_column_acquired:
             try:
-                next_column = Column.objects.filter(
+                next_column = ColumnMeta.objects.filter(
                     project=project_data,
                     is_variable=True,
                     column_number=current_column_index

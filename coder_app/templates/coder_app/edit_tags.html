@@ -221,7 +221,7 @@
                         'tag_id': tagId
                     },
                     success: function(json) {
-
+                        window.location.href = json.redirect_url;
                     },
                     error: function() {},
 

@@ -56,10 +56,6 @@ def index(request):
         })
 
 def submit_new_variable(request):
-    if request.method == 'POST' and 'add_tag' in request.POST:
-
-        pass
-
     if request.method == 'POST' and 'submit_variable' in request.POST:
         variable_name = request.POST.get('variable-name')
         variable_description = request.POST.get('variable-description')
@@ -111,7 +107,8 @@ def submit_new_variable(request):
                 is_variable=True,
                 variable=variable,
                 column_number=greatest_col_index,
-                column_name=column.column_name
+                column_name=column.column_name,
+                project=project
             )
             column_meta.save()
             redirect_url = '/coder_project/' + str(project_id) + '/edit_project/'
@@ -247,6 +244,11 @@ def edit_project(request, project_id):
     p = Project.objects.get(id=project_id)
     project_data = p
     tag_data = p.tag_set.all()
+    mention_data = RowMeta.objects.filter(project=p)
+    mentions_count = mention_data.count()
+    rate_per_mention = p.rate
+    projected_project_cost = mentions_count * rate_per_mention
+    projected_project_cost = '${:,.2f}'.format(projected_project_cost)
 
     project_edit_view = 'variable'
     variables = Variable.objects.filter(project=p)
@@ -294,7 +296,8 @@ def edit_project(request, project_id):
                 'project_data': project_data,
                 'project_edit_view': project_edit_view,
                 'coder_data': coder_data,
-                'tag_data': tag_data
+                'tag_data': tag_data,
+                'projected_project_cost': projected_project_cost
             }
         )
 
@@ -312,7 +315,8 @@ def edit_project(request, project_id):
                 'project_edit_view': project_edit_view,
                 'coder_data': coder_data,
                 'assigned_or_available': 'assigned',
-                'tag_data': tag_data
+                'tag_data': tag_data,
+                'projected_project_cost': projected_project_cost
             }
         )
 
@@ -332,10 +336,6 @@ def edit_project(request, project_id):
         )
 
     if request.method == 'POST' and 'mentions_view' in request.POST:
-        dataset = Dataset.objects.get(project=project_data)
-        rows_in_dataset = Row.objects.filter(dataset=dataset)
-        row_ids = [row.id for row in rows_in_dataset]
-        mention_data = RowMeta.objects.filter(id__in=row_ids)
         project_edit_view = 'mention'
 
         return render(
@@ -347,7 +347,8 @@ def edit_project(request, project_id):
                 'id': project_id,
                 'project_data': project_data,
                 'project_edit_view': project_edit_view,
-                'tag_data': tag_data
+                'tag_data': tag_data,
+                'projected_project_cost': projected_project_cost
             }
         )
 
@@ -400,7 +401,8 @@ def edit_project(request, project_id):
                 'id': project_id,
                 'project_data': project_data,
                 'project_edit_view': project_edit_view,
-                'tag_data': tag_data
+                'tag_data': tag_data,
+                'projected_project_cost': projected_project_cost
             })
 
     if request.method == 'POST':
@@ -431,7 +433,8 @@ def edit_project(request, project_id):
             'id': project_id,
             'project_data': project_data,
             'project_edit_view': project_edit_view,
-            'tag_data': tag_data
+            'tag_data': tag_data,
+            'projected_project_cost': projected_project_cost
         }
     )
 
@@ -591,8 +594,11 @@ def edit_variable_library(request):
             else:
                 variable = Variable.objects.get(id=variable['id'])
                 variable_project_origin = variable.project
-                project_origin_tag_ids = [tag.id for tag in variable_project_origin.tag_set.all()]
-                tags_attached_to_original_variable = variable.tag_set.exclude(id__in=project_origin_tag_ids)
+
+                if variable_project_origin:
+                    project_origin_tag_ids = [tag.id for tag in variable_project_origin.tag_set.all()]
+                    tags_attached_to_original_variable = variable.tag_set.exclude(id__in=project_origin_tag_ids)
+
                 greatest_col_index = \
                     ColumnMeta.objects\
                         .filter(variable_id__in=variable_ids_attached_to_project)\
@@ -641,11 +647,11 @@ def edit_variable_library(request):
 def select_mention(request, coder_id, project_id):
     coder_data = Coder.objects.get(id=coder_id)
     project_data = Project.objects.get(id=project_id)
-    dataset = Dataset.objects.get(project=project_data)
-    mention_data = Row.objects.filter(dataset=dataset)
+    mention_data = RowMeta.objects.filter(project=project_data)
     total_variable_count = Variable.objects.filter(project=project_data).count()
 
-    for row in mention_data:
+    for mention in mention_data:
+        row = mention.row
         answer_data = Data.objects.filter(row=row)
         answer_data = DataMeta.objects.filter(data_id__in=[data.id for data in answer_data])
         answer_ids = ''
@@ -655,10 +661,10 @@ def select_mention(request, coder_id, project_id):
             if index + 1 != answer_data.count():
                 answer_ids += ','
 
-        row = RowMeta.objects.get(row=row)
+        # row = RowMeta.objects.get(row=row)
 
-        row.completed_variables = answer_ids
-        row.completed_variables_count = answer_data.count()
+        mention.completed_variables = answer_ids
+        mention.completed_variables_count = answer_data.count()
 
     return render(
         request,
@@ -675,10 +681,13 @@ def review_variables(request, coder_id, project_id):
     completed_variable_id = request.POST.get('completed_variable_id')
 
     coder_data = Coder.objects.get(id=coder_id)
-    answer_data = Data.objects.get(id=int(completed_variable_id))
-    mention_data = Row.objects.get(id=answer_data.row_id)
+    answer_data_meta = DataMeta.objects.get(id=int(completed_variable_id))
+    answer_data = answer_data_meta.data
+    row_data = Row.objects.get(id=answer_data.row_id)
+    mention_data = RowMeta.objects.get(row=row_data)
     column_data = Column.objects.get(id=answer_data.column_id)
-    variable_data = Variable.objects.get(column=column_data)
+    column_meta_data = ColumnMeta.objects.get(column=column_data)
+    variable_data = column_meta_data.variable
 
     # check media source as Twitter or Instagram
     if mention_data.is_twitter:
@@ -698,8 +707,11 @@ def review_variables(request, coder_id, project_id):
         social_api_url = base_instagram_api_url + media_url
 
     if media_url:
-        social_api_json = requests.get(social_api_url).json()
-        social_data = social_api_json['html']
+        try:
+            social_api_json = requests.get(social_api_url).json()
+            social_data = social_api_json['html']
+        except:
+            social_data = 'Media Error'
     else:
         social_data = None
 
@@ -727,6 +739,7 @@ def select_variable(request, coder_id, project_id):
     if request.method == "POST" and 'confirm-variable' in request.POST:
         completed_variable_id = request.POST.get('completed_variable_id')
         answer = Data.objects.get(id=completed_variable_id)
+        answer_meta = DataMeta.objects.get(data=answer)
 
         if 'variable-freeform' in request.POST:
             variable_value = request.POST.get('variable-freeform')
@@ -738,7 +751,8 @@ def select_variable(request, coder_id, project_id):
         has_adverse_events = request.POST.get('variable-adverse-events')
 
         if has_adverse_events:
-            mention = Row.objects.get(id=answer.row_id)
+            row_data = Row.objects.get(id=answer.row_id)
+            mention = RowMeta.objects.get(row=row_data)
 
             if not mention.contains_adverse_events:
                 mention.contains_adverse_events = True
@@ -748,13 +762,14 @@ def select_variable(request, coder_id, project_id):
 
         if answer.value != variable_value:
             answer.value = variable_value
-            answer.corrected = True
+            answer_meta.corrected = True
+            answer.save()
 
-        answer.reviewed = True
-        answer.save()
+        answer_meta.reviewed = True
+        answer_meta.save()
 
-        total_coder_answer_count = Data.objects.filter(coder=coder_data).count()
-        corrected_coder_answer_count = Data.objects.filter(coder=coder_data, corrected=True).count()
+        total_coder_answer_count = DataMeta.objects.filter(coder=coder_data).count()
+        corrected_coder_answer_count = DataMeta.objects.filter(coder=coder_data, corrected=True).count()
 
         coder_rating = (100 - ((corrected_coder_answer_count / total_coder_answer_count) * 100)) / 10
         coder_rating = round(coder_rating, 1)
@@ -762,21 +777,25 @@ def select_variable(request, coder_id, project_id):
         coder_data.rating = float(coder_rating)
         coder_data.save()
 
-    answer_data = Data.objects.filter(id__in=completed_variables)
+    answer_meta_data = DataMeta.objects.filter(id__in=completed_variables)
+    answer_data = Data.objects.filter(id__in=[answer.data_id for answer in answer_meta_data])
 
     if answer_data:
-        mention_data = Row.objects.get(id=answer_data[0].row_id)
+        row_data = Row.objects.get(id=answer_data[0].row_id)
+        mention_data = RowMeta.objects.get(row=row_data)
 
-        for answer in answer_data:
+        for answer_meta in answer_meta_data:
+            answer = answer_meta.data
             column_data = Column.objects.get(id=answer.column_id)
-            variable_data = Variable.objects.get(column=column_data)
+            column_meta_data = ColumnMeta.objects.get(column=column_data)
+            variable_data = column_meta_data.variable
 
             if variable_data.is_multiple_choice:
                 variable_data.multiple_or_freeform = 'Multiple Choice'
             else:
                 variable_data.multiple_or_freeform = 'Freeform'
 
-            answer.variable_data = variable_data
+            answer_meta.variable_data = variable_data
 
     return render(
         request,
@@ -784,7 +803,7 @@ def select_variable(request, coder_id, project_id):
         {
             'coder_data': coder_data,
             'mention_data': mention_data,
-            'answer_data': answer_data,
+            'answer_data': answer_meta_data,
             'project_id': project_id,
             'completed_variable_ids': completed_variable_ids
         }
@@ -988,9 +1007,12 @@ def edit_tags(request):
 
         tag_data = serializers.serialize('json', Tag.objects.all())
 
+        redirect_url = '/coder_project/'
+
         return HttpResponse(
             json.dumps({
                 'tag_data': tag_data,
+                'redirect_url': redirect_url,
                 'result': 'successful!'
             }),
             content_type="application/json"

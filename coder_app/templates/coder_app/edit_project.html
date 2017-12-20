@@ -16,8 +16,10 @@
         <div class="col-md-4">
                 <label for="project-name">Project Name</label>
                 <input class="form-control" type="input" name="project-name" value='{{ project_data.name }}' /> <br />
-                <label for="project-rate">Rate</label>
+                <label for="project-rate">Rate per Mention</label>
                 <input class="form-control" type="input" name="project-rate" value={{ project_data.rate }} /> <br />
+                <label for="projected-cost">Estimated Project Cost</label><br/>
+                <span name="projected-cost"><p>{{ projected_project_cost }}</p></span>
                 <input class='btn btn-primary' type="submit" value="Submit"/>
         </div>
         </form>
