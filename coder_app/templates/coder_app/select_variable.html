@@ -12,6 +12,7 @@
             <th class="header">Multiple Choice or Freeform</th>
             <th class="header">Description</th>
             <th class="header">Reviewed</th>
+            <th class="header">Corrected</th>
             <th class="header"></th>
         </tr>
         </thead>
@@ -24,6 +25,9 @@
                         <td>{{ answer.variable_data.description }}</td>
                         <td style="text-align: center;">
                             {% if answer.reviewed %}<span class="glyphicon glyphicon-ok"></span> {% endif %}</td>
+                        <td style="text-align: center;">
+                            {% if answer.corrected %}<span class="glyphicon glyphicon-remove"></span> {% endif %}
+                        </td>
                         <td>
                             <form action="{% url 'coder_app:review_variables' coder_data.id project_id %}" method="POST">
                                 {% csrf_token %}

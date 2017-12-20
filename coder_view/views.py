@@ -23,14 +23,13 @@ def select_project(request, coder_id):
         project_ids_to_render = {}
 
         for project in projects:
-            dataset = project.dataset
-            row_data = Row.objects.filter(dataset=dataset)
-            row_ids = [row.id for row in row_data]
-            all_rows = RowMeta.objects.filter(row_id__in=row_ids)
+            all_rows = RowMeta.objects.filter(project=project)
+            num_variables_in_project = project.variable_set.all().count()
             all_rows_count = all_rows.count()
 
             uncompleted_rows = all_rows.filter(is_completed=False)
             completed_rows = all_rows.filter(is_completed=True)
+            completed_rows_by_coder = completed_rows.filter(coder=coder).count()
             completed_rows_count = completed_rows.count()
 
             project_is_available = False
@@ -52,7 +51,9 @@ def select_project(request, coder_id):
                     'rate': project.rate,
                     'all_rows_count': all_rows_count,
                     'completed_rows_count': completed_rows_count,
-                    'row_id': row_id
+                    'row_id': row_id,
+                    'num_variables_in_project': num_variables_in_project,
+                    'completed_rows_by_coder': completed_rows_by_coder
                 }
 
                 project_ids_to_render['project_id'] = project.id
@@ -63,7 +64,10 @@ def select_project(request, coder_id):
                 project_data.append(single_project)
 
                 for completed_row in completed_rows:
-                    if completed_row.id not in project_ids_to_render:
+                    if completed_row.project_id not in [row.project_id for row in uncompleted_rows] :
+                        total_answered_vars = DataMeta.objects.filter(coder=coder, project=project)
+                        corrected_var_count = total_answered_vars.filter(coder=coder, project=project, corrected=True).count()
+
                         single_project = {
                             'id': project.id,
                             'name': project.name,
@@ -71,17 +75,19 @@ def select_project(request, coder_id):
                             'all_rows_count': all_rows_count,
                             'completed_rows_count': completed_rows_count,
                             'row_id': row_id,
-                            'is_completed': True
+                            'is_completed': True,
+                            'num_variables_in_project': num_variables_in_project,
+                            'corrected_var_count': corrected_var_count,
+                            'total_answered_vars': total_answered_vars.count(),
+                            'completed_rows_by_coder': completed_rows_by_coder
                         }
 
                         project_data.append(single_project)
 
     elif request.method == 'POST' and 'completed_projects_view' in request.POST:
         for project in projects:
-            dataset = project.dataset
-            row_data = Row.objects.filter(dataset=dataset)
-            row_ids = [row.id for row in row_data]
-            all_rows = RowMeta.objects.filter(row_id__in=row_ids)
+            all_rows = RowMeta.objects.filter(project=project)
+            num_variables_in_project = project.variable_set.all().count()
             all_rows_count = all_rows.count()
             completed_rows = all_rows.filter(
                 is_completed=True
@@ -102,7 +108,8 @@ def select_project(request, coder_id):
                     'all_rows_count': all_rows_count,
                     'completed_rows_count': completed_rows_count,
                     'row_id': row_id,
-                    'is_completed': True
+                    'is_completed': True,
+                    'num_variables_in_project': num_variables_in_project
                 }
 
                 project_data.append(single_project)
@@ -110,13 +117,13 @@ def select_project(request, coder_id):
     else:
         # pending projects default
         for project in projects:
-            dataset = project.dataset
-            row_data = Row.objects.filter(dataset=dataset)
-            row_ids = [row.id for row in row_data]
-            all_rows = RowMeta.objects.filter(row_id__in=row_ids)
+            all_rows = RowMeta.objects.filter(project=project)
             all_rows_count = all_rows.count()
+            num_variables_in_project = project.variable_set.all().count()
 
             uncompleted_rows = all_rows.filter(is_completed=False)
+            completed_rows_by_coder = all_rows.filter(coder=coder, is_completed=True).count()
+
 
             project_is_available = False
 
@@ -142,7 +149,9 @@ def select_project(request, coder_id):
                     'rate': project.rate,
                     'all_rows_count': all_rows_count,
                     'completed_rows_count': completed_rows_count,
-                    'row_id': row_id
+                    'row_id': row_id,
+                    'num_variables_in_project': num_variables_in_project,
+                    'completed_rows_by_coder': completed_rows_by_coder
                 }
 
                 if all_rows_count <= completed_rows_count:

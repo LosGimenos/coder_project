@@ -21,6 +21,10 @@
             <input class="text" style="display:none;" name="project_id" value="{{ project_id }}" />
         </form>
         </div>
+        <div class="col-md-3" style="text-align: center;">
+            <h3>Rating for <br/>{{ coder.first_name }} {{ coder.last_name }}</h3>
+            <span><p style="font-size: 2em;">{{ coder.rating }}</p></span>
+        </div>
         <div class="col-md-4">
             <h3>Attached to these Projects:</h3>
             <ul style="list-style: none;">
