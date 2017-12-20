@@ -70,6 +70,7 @@ class ColumnMeta(models.Model):
     is_variable = models.BooleanField(default=False)
     variable = models.ForeignKey(Variable, on_delete=models.CASCADE, null=True)
     column = models.ForeignKey(Column, on_delete=models.CASCADE, null=True)
+    project = models.ForeignKey(Project, null=True)
     def __str__(self):
         return "ColumnMeta = %s" % (self.column_name.__str__())
     class Meta:
@@ -118,6 +119,7 @@ class DataMeta(models.Model):
     coder = models.ForeignKey(Coder, null=True)
     reviewed = models.BooleanField(default=False)
     corrected = models.BooleanField(default=False)
+    project = models.ForeignKey(Project, null=True)
 
 class Tag(models.Model):
     name = models.CharField(unique=True, max_length=200)

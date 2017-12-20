@@ -166,14 +166,14 @@ def project_overview(request, coder_id, project_id, row_id):
     print('this is project id', project_data.id)
     #check if coder is currently working on a row query
 
-    previous_coder_row = Row.objects.filter(
+    previous_coder_row = RowMeta.objects.filter(
         project=project_data,
         coder=coder,
         is_completed=False
     )
 
     if not previous_coder_row:
-        rows = Row.objects.filter(
+        rows = RowMeta.objects.filter(
             project=project_data,
             is_locked=False,
             is_completed=False
