@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from django.db.models import Max
 from django.shortcuts import render, redirect, HttpResponse
+from django.urls import reverse
 from coder_app.models import Project, Variable, Coder, Row, Column, Data, RowMeta, ColumnMeta, DataMeta
 import random
 import datetime
@@ -53,7 +54,8 @@ def select_project(request, coder_id):
                     'completed_rows_count': completed_rows_count,
                     'row_id': row_id,
                     'num_variables_in_project': num_variables_in_project,
-                    'completed_rows_by_coder': completed_rows_by_coder
+                    'completed_rows_by_coder': completed_rows_by_coder,
+                    'is_frozen': project.is_frozen
                 }
 
                 project_ids_to_render['project_id'] = project.id
@@ -79,7 +81,8 @@ def select_project(request, coder_id):
                             'num_variables_in_project': num_variables_in_project,
                             'corrected_var_count': corrected_var_count,
                             'total_answered_vars': total_answered_vars.count(),
-                            'completed_rows_by_coder': completed_rows_by_coder
+                            'completed_rows_by_coder': completed_rows_by_coder,
+                            'is_frozen': project.is_frozen
                         }
 
                         project_data.append(single_project)
@@ -109,7 +112,8 @@ def select_project(request, coder_id):
                     'completed_rows_count': completed_rows_count,
                     'row_id': row_id,
                     'is_completed': True,
-                    'num_variables_in_project': num_variables_in_project
+                    'num_variables_in_project': num_variables_in_project,
+                    'is_frozen': project.is_frozen
                 }
 
                 project_data.append(single_project)
@@ -151,7 +155,8 @@ def select_project(request, coder_id):
                     'completed_rows_count': completed_rows_count,
                     'row_id': row_id,
                     'num_variables_in_project': num_variables_in_project,
-                    'completed_rows_by_coder': completed_rows_by_coder
+                    'completed_rows_by_coder': completed_rows_by_coder,
+                    'is_frozen': project.is_frozen
                 }
 
                 if all_rows_count <= completed_rows_count:
@@ -169,10 +174,14 @@ def select_project(request, coder_id):
 
 def project_overview(request, coder_id, project_id, row_id):
     project_data = Project.objects.get(id=project_id)
+
+    if project_data.is_frozen:
+        redirect_url = reverse('coder_view:coder_splash', args=[coder_id])
+        return redirect(redirect_url)
+
     dataset = project_data.dataset
     coder = Coder.objects.get(id=coder_id)
 
-    print('this is project id', project_data.id)
     #check if coder is currently working on a row query
 
     previous_coder_row = RowMeta.objects.filter(
@@ -211,16 +220,13 @@ def project_overview(request, coder_id, project_id, row_id):
     no_next_column_found = False
 
     greatest_col_index = ColumnMeta.objects.filter(project=project_data).aggregate(Max('column_number'))
-    print('greatest col from filter', greatest_col_index)
     greatest_col_index = greatest_col_index['column_number__max']
 
     column_acquired = False
 
     num_attempts = 0
     while not column_acquired:
-        print(current_column_index, 'current index', row_id, 'this is row id')
         attempted_column = ColumnMeta.objects.filter(project=project_data, is_variable=True, column_number=current_column_index)
-        print(attempted_column, 'attempted col')
 
         try:
             column = ColumnMeta.objects.filter(
@@ -229,11 +235,9 @@ def project_overview(request, coder_id, project_id, row_id):
                 column_number=current_column_index
             )[0]
             column_acquired = True
-            print('made it out')
         except:
             current_column_index = current_column_index + 1
             num_attempts += 1
-            print('current', current_column_index)
             if num_attempts > 20:
                 return
 
@@ -249,7 +253,6 @@ def project_overview(request, coder_id, project_id, row_id):
                 column_number=next_column_index
             )[0]
             next_column_acquired = True
-            print('made it out of next')
         except:
             if next_column_index > greatest_col_index:
                 no_next_column_found = True
@@ -259,7 +262,6 @@ def project_overview(request, coder_id, project_id, row_id):
                 next_column_index = current_column_index + 1
             else:
                 next_column_index = next_column_index + 1
-            print('next', next_column_index)
 
     # get variable for render
 
@@ -284,11 +286,15 @@ def project_overview(request, coder_id, project_id, row_id):
 
 def project_answering(request, coder_id, project_id, row_id, column_id):
     next_variable_id = request.POST.get('next_variable_id')
+    project_data = Project.objects.get(id=project_id)
+
+    if project_data.is_frozen:
+        redirect_url = reverse('coder_view:coder_splash', args=[coder_id])
+        return redirect(redirect_url)
 
     column = ColumnMeta.objects.get(id=column_id)
     column_base = column.column
     variable_id = column.variable_id
-    project_data = Project.objects.get(id=project_id)
     row_data = RowMeta.objects.get(id=row_id)
     row = row_data.row
     variable_data = Variable.objects.get(id=variable_id)

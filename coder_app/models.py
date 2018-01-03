@@ -2,16 +2,14 @@
 from __future__ import unicode_literals
 
 from django.db import models
+from django.contrib.auth.models import User
+from common.models import UserInfo
 
 class Coder(models.Model):
-    first_name = models.CharField(max_length=300, blank=True, null=True)
-    middle_name = models.CharField(max_length=300, blank=True, null=True)
-    last_name = models.CharField(max_length=300, blank=True, null=True)
-    email = models.EmailField(blank=True, null=True, unique=True)
     rating = models.DecimalField(max_digits=3, decimal_places=1, default=10.0)
-    username = models.CharField(max_length=300, blank=True, null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
 
-class Dataset(models.Model):
+class Dataset(UserInfo):
     dataset_ID = models.TextField(null=True, blank=True, db_index=True)
     show = models.BooleanField(default=True)
     path = models.TextField(null=True, blank=True)
@@ -32,6 +30,11 @@ class Project(models.Model):
     contains_adverse_events = models.BooleanField(default=False)
     coder = models.ManyToManyField(Coder)
     is_completed = models.BooleanField(default=False)
+    is_frozen = models.BooleanField(default=False)
+    class Meta:
+        permissions = (
+            ('is_coding_app_admin', 'Is admin for Coding App'),
+        )
 
 class Variable(models.Model):
     name = models.CharField(blank=True, null=True, max_length=200)
@@ -92,7 +95,7 @@ class RowMeta(models.Model):
     row_name = models.TextField(null=True, blank=True, db_index=True)
     is_completed = models.BooleanField(default=False)
     is_locked = models.BooleanField(default=False)
-    coder = models.ForeignKey(Coder, on_delete=models.CASCADE, null=True)
+    coder = models.ForeignKey(Coder, null=True)
     curr_col_index = models.IntegerField(default=1)
     contains_adverse_events = models.BooleanField(default=False)
     adverse_event_datetime_submitted = models.DateTimeField(null=True, blank=True)

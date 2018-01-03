@@ -27,7 +27,7 @@
         <div class="col-md-3">
             <button style="float: left;" class="btn btn-default select-all">Select All</button>
 
-            <form action="{% url 'coder_app:index' %}" method="post">
+            <form action="{% url 'coder_app:homepage' %}" method="post">
                 {% csrf_token %}
                 <button class="btn btn-default bulk-delete" name="bulk-tag-delete">
                     <span class="glyphicon glyphicon-trash"></span>
@@ -46,7 +46,7 @@
         </tr>
         </thead>
         {% if tag_data %}
-                <tbody>
+                <tbody class="tag--table">
                     {% for tag in tag_data %}
                     <tr>
                         <td>
@@ -98,16 +98,10 @@
     <script src="{% static 'token_injector.js' %}"></script>
 
     <script>
-        let variablesToMove = [];
-        const filteredVariablesContainer = $('.variable--container__filtered');
         const tagContainer = $('.tag--container');
-
+        const tagTable = $('.tag--table');
         const tagsArray = [];
-        let filteredVariablesArray = [];
-
         const globalTagIds = [];
-
-        const projectId = $('.project-id').val();
 
         $('#by_tag').autocomplete({
            source: "/coder_project/get_tag_names",
@@ -119,36 +113,19 @@
                }
 
                 $.ajax({
-                    url: '/coder_project/get_tag_names',
+                    url: '/coder_project/filter_tags',
                     type: 'POST',
                     data: {
-                        'add_to_filter': 'add_tag',
-                        'tag_id_to_add': tagId,
-                        'global_tag_ids': JSON.stringify(globalTagIds)
+                        'tag_action': 'filter_tag',
+                        'tag_list': JSON.stringify(globalTagIds)
                     },
                     success: function(json) {
                         let tagData = json.tag_data;
-                        let variableData = json.variable_data;
+                        let filteredTagData = json.filtered_tag_data
 
-                        let tag = {
-                            'name': tagData.name,
-                            'id': tagData.id
-                        };
+                        renderFilterContainer(tagData, tagContainer, 'tag');
+                        renderFilterContainer(filteredTagData, tagTable, 'tagTable');
 
-                        tagsArray.push(tag);
-
-                        renderFilterContainer(tagsArray, tagContainer, 'tag');
-                        filteredVariablesArray = [];
-
-                        $(variableData).each((index, variable) => {
-                            let variableInfo = {
-                                'name': variable.name,
-                                'id': variable.id
-                            };
-                            filteredVariablesArray.unshift(variableInfo);
-                        });
-
-                        renderFilterContainer(filteredVariablesArray, filteredVariablesContainer, 'variable');
                         $('#by_tag').val('');
                     },
                     error: function(xhr,errmsg,err) {
@@ -206,6 +183,39 @@
             });
         }
 
+        function addTagRemoveHandler() {
+            $('.tag-remove').click(e => {
+                e.preventDefault();
+                let nodeValue = $(e.target.parentNode).attr('name');
+                $(globalTagIds).each((index, tag) => {
+                    if (tag == nodeValue) {
+                        globalTagIds.splice(index, 1)
+                    }
+                });
+
+                $.ajax({
+                    url: '/coder_project/filter_tags',
+                    type: 'POST',
+                    data: {
+                        'tag_action': 'filter_tag',
+                        'tag_list': JSON.stringify(globalTagIds)
+                    },
+                    success: function(json) {
+                        let tagData = json.tag_data;
+                        let filteredTagData = json.filtered_tag_data
+
+                        renderFilterContainer(tagData, tagContainer, 'tag');
+                        renderFilterContainer(filteredTagData, tagTable, 'tagTable');
+
+                        $('#by_tag').val('');
+                    },
+                    error: function(xhr,errmsg,err) {
+                        console.log(err);
+                    }
+                })
+            });
+        }
+
         function addDeleteHandler() {
             $('.tag-delete').click(e => {
                 e.preventDefault();
@@ -252,6 +262,80 @@
                     error: function() {}
                 });
             });
+        }
+
+        function renderFilterContainer(array, container, type) {
+            $(container).empty();
+
+            switch (type) {
+                case 'tagTable':
+                    array.forEach(itemData => {
+                        let variableNode =
+                            $(`
+                                <tr>
+                                    <td>
+                                        <input
+                                                style="margin-right: 1%; float: left;"
+                                                class="checkbox"
+                                                type="checkbox"
+                                                name="tag-names[]"
+                                                value="${ itemData.id }" />
+                                        <span name="${ itemData.id }" class="tag-name">${ itemData.name }</span>
+                                    </td>
+                                    <td style="width: 15%; text-align: center;">
+                                        <span
+                                            class="tag-controls" style="display: flex; justify-content: space-around;">
+                                            <span
+                                                name="${ itemData.id }" class="rename-tag">Rename</span>
+                                            <span
+                                                name="${ itemData.id }"
+                                                class="glyphicon glyphicon-th-list tag-list--redirect"></span>
+                                            <span name="${ itemData.id }" class="glyphicon glyphicon-trash tag-delete"></span>
+                                        </span>
+                                    </td>
+                                </tr>
+                            `)
+                        $(container).append(variableNode);
+                    });
+                    addDeleteHandler();
+                    addTagListHandler();
+                    addInputHandler();
+                    break;
+
+                case 'keyword':
+                    array.forEach(itemData => {
+                    let variableNode =
+                        $(`<span name='${itemData.name}'>${itemData.name}<span class='badge keyword-remove'>X</span><br/></span>`);
+                        $(container).append(variableNode);
+                    });
+                    addKeywordHandler();
+                    break;
+
+                case 'tag':
+                    array.forEach(itemData => {
+                        let variableNode =
+                        $(`<span name='${itemData.id}'>${itemData.name}<span class='badge tag-remove'>X</span><br/></span>`);
+                        $(container).append(variableNode);
+                    });
+                    addTagRemoveHandler();
+                    break;
+
+                case 'variable':
+                    array.forEach(itemData => {
+                        let variableNode = $(`<span name='${itemData.id}'>${itemData.name}<br/></span>`);
+                        $(container).append(variableNode);
+                    });
+                    addVariableHandler();
+                    break;
+
+                case 'project':
+                    array.forEach(itemData => {
+                        let variableNode = $(`<span name='${itemData.id}'>${itemData.name}<br/></span>`);
+                        $(container).append(variableNode);
+                    });
+                    addProjectVariablesHandler();
+                    break;
+            }
         }
 
     </script>

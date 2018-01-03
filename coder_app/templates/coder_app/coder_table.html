@@ -8,7 +8,6 @@
                 <thead>
                     <tr>
                         <th class="header">Coder First Name</th>
-                        <th class="header">Coder Middle Name</th>
                         <th class="header">Coder Last Name</th>
                         <th class="header">Coder Username</th>
                         <th class="header">Coder Email</th>
@@ -16,6 +15,7 @@
                         {% if project_edit_view == 'coder' and not assigned_or_available %}
                             <th class="header">Add To Project</th>
                             {% else %}
+                            <th class="header">Remove from Project</th>
                             <th class="header"></th>
                         {% endif %}
                     </tr>
@@ -25,7 +25,6 @@
                         {% for coder in coder_data %}
                         <tr>
                             <td>{{ coder.first_name }}</td>
-                            <td>{{ coder.middle_name }}</td>
                             <td>{{ coder.last_name }}</td>
                             <td>{{ coder.username }}</td>
                             <td>{{ coder.email }}</td>
@@ -36,8 +35,11 @@
                                 </td>
                                 {% else %}
                                 <td>
-                                    <a href="{% url 'coder_app:edit_coder' coder_id=coder.id %}?project_id={{ id }}">
-                                        <span>Edit</span>
+                                    <input class='input-group' type="checkbox" name="remove_from_project" value="{{ coder.id }}">
+                                </td>
+                                <td>
+                                    <a href="{% url 'coder_app:edit_coder' coder_id=coder.id %}">
+                                        <span>Edit Coder Details</span>
                                     </a>
                                 </td>
                             {% endif %}

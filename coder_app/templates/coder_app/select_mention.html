@@ -23,15 +23,29 @@
                             <span>{{ mention.media_text }}</span>
                         {% endif %}
                         <br/>
-                        <h4>Completed Variables by {{ coder_data.username }}</h4>
+                        <h4>Variables completed by {{ coder_data.username }}</h4>
                         {% if mention.completed_variables_count > 0 %}
                         {{ mention.completed_variables_count }} out of {{ total_variable_count }}
                     <br/>
-                    <input class="btn btn-primary" type="submit" name="submit_review" value="Review"/>
+                    <div clas="row">
+                        <input
+                                style="margin-right: 1%; float: left;"
+                                class="btn btn-primary" type="submit" name="submit_review" value="Review Single"/>
+                        </form>
+                        <form
+                            class="input-group"
+                            action="{% url 'coder_app:review_variables' coder_data.id project_data.id %}"
+                            method="POST">
+                            {% csrf_token %}
+                            <input type="hidden" name="completed_variables" value="{{ mention.completed_variables }}"/>
+                            <input
+                                    style="float: left;"
+                                    class="btn btn-primary" type="submit" name="submit_review_all" value="Review All"/>
+                    </div>
+                    </form>
                     {% else %}
                             <span><strong>No Completed Variables to Review</strong></span>
                     {% endif %}
-                </form>
                 </li>
                     {% endif %}
                 {% endfor %}

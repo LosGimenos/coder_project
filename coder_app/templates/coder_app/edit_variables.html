@@ -16,11 +16,11 @@
             </div>
             <div class="ui-widget" style="margin-bottom: 1%;">
                 <label for="tag_filter">Filter by Tag</label>
-                <input id='by_tag' class="form-control" type="text" name="tag_filter" placeholder="...tagname" />
+                <input id="by_tag_name" class="form-control" type="text" name="tag_filter" placeholder="...tagname" />
             </div>
             <div class="ui-widget" style="margin-bottom: 1%;">
-                <label for="tag_filter">Filter by Project</label>
-                <input id='by_project' class="form-control" type="text" name="tag_filter" placeholder="...project name" />
+                <label for="project_filter">Filter by Project</label>
+                <input id='by_project' class="form-control" type="text" name="project_filter" placeholder="...project name" />
             </div>
         </div>
         <div class="col-md-2"></div>
@@ -35,7 +35,7 @@
         <div class="col-md-3">
             <button style="float: left;" class="btn btn-default select-all">Select All</button>
 
-            <form action="{% url 'coder_app:index' %}" method="post">
+            <form action="{% url 'coder_app:homepage' %}" method="post">
                 {% csrf_token %}
             <button class="btn btn-default bulk-delete" name="bulk-variable-delete">
                 <span class="glyphicon glyphicon-trash"></span>
@@ -108,6 +108,12 @@
     <script src="{% static 'token_injector.js' %}"></script>
 
     <script>
+        let variableIds = [];
+        let tagIds = [];
+        let projectIds = [];
+
+        const filterContainer = $('.variable--container');
+
         $('.select-all').click(e => {
             e.preventDefault();
             $('.variable-checkbox').prop('checked', true);
@@ -241,29 +247,65 @@
         addBulkAddHandler();
         addBulkRemoveHandler();
 
-        {#        $('#by_tag').autocomplete({#}
-{#            source: "/coder_project/get_tag_names",#}
-{#            select: function(event, ui) {#}
-{#                let projectId = $('.input--project-id').val()#}
-{#                let url = '/coder_project/' + projectId.toString() + '/edit_project/';#}
-{##}
-{#                $.ajax({#}
-{#                    url: url,#}
-{#                    type: 'POST',#}
-{#                    data: {#}
-{#                        'tag_id': ui.item.id,#}
-{#                        'add_tag_to_project': true#}
-{#                    },#}
-{#                    success: function(json) {#}
-{#                        window.location.href = json.redirect_url;#}
-{#                    },#}
-{#                    error: function(xhr,errmsg,err) {#}
-{#                        console.log(err);#}
-{#                    }#}
-{#                });#}
-{#            },#}
-{#            minLength: 2#}
-{#        });#}
+        $('#by_project').autocomplete({
+           source: "/coder_project/get_project_names",
+           select: function (event, ui) {
+            console.log('here');
+           },
+           minLength: 2
+        });
+
+        $('#by_tag_name').autocomplete({
+          source: "/coder_project/get_tag_names",
+          minLength: 2
+        });
+
+        $('#by_name').autocomplete({
+          source: '/coder_project/get_variable_names',
+          select: function (event, ui) {
+            let variableId;
+            if ($.inArray(ui.item.id, variableIds) < 0) {
+                variableId = ui.item.id;
+                variableIds.push(variableId);
+            }
+
+            $.ajax({
+                url: '/coder_project/filter_variables',
+                type: 'POST',
+                data: {
+                    'variable_ids': JSON.stringify(variableIds),
+                    'project_ids': JSON.stringify(projectIds),
+                    'tag_ids': JSON.stringify(tagIds),
+                    'variable_action': 'filter_variables'
+                },
+                success: function (json) {
+
+                renderFilterContainer(filters);
+
+                },
+                error: function() {
+
+                }
+            });
+
+          },
+          minLength: 2
+        });
+
+        function renderFilterContainer(filteredVariables) {
+            console.log('made it here');
+            $(filterContainer).empty();
+
+            $(filters).each(( index, filterArray) => {
+                $(filterArray).each(( index, filterData) => {
+                    let filterNode =
+                        $(`<span name='${filterData.id}'>${filterData.name}<span class='badge filter-remove'>X</span><br/></span>`);
+                        $(filterContainer).append(filterNode);
+                });
+            });
+        }
+
+
     </script>
 
 {% endblock %}

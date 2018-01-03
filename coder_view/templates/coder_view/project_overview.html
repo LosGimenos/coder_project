@@ -2,6 +2,16 @@
 
 {% block content %}
     <h2>{{ project_data.name }}</h2>
+    <div class="row" style="height: 40vh;">
+        <div class="col-sm-12">
+{#            <div class="col-sm-1"></div>#}
+            <div class="col-sm-4">
+                <h4>Project Introduction</h4>
+                {{ project_data.metadata }}
+            </div>
+        </div>
+    </div>
+    <br/>
 
     <form action="{% url 'coder_view:coder_project_answering' coder_id=coder_id project_id=project_data.id row_id=row_id column_id=column_data.id %}" method="post" class="input-group">
         {% csrf_token %}

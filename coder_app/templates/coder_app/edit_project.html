@@ -20,6 +20,8 @@
                 <input class="form-control" type="input" name="project-rate" value={{ project_data.rate }} /> <br />
                 <label for="projected-cost">Estimated Project Cost</label><br/>
                 <span name="projected-cost"><p>{{ projected_project_cost }}</p></span>
+                <label for="project-introduction">Project Introduction</label>
+                <textarea style="height: 30vh;" class="form-control" name="project-introduction">{{ project_data.metadata }}</textarea><br/>
                 <input class='btn btn-primary' type="submit" value="Submit"/>
         </div>
         </form>
@@ -85,6 +87,8 @@
                 <input style="display: none;" name="project_id" value="{{ id }}" />
                 {% if not assigned_or_available %}
                     <input class="btn btn-primary" type="submit" name="add-coders-button" value="Add Coders" />
+                    {% elif assigned_or_available %}
+                    <input class="btn btn-primary" type="submit" name="remove-coders-button" value="Remove Coders" />
                 {% endif %}
             </form>
         {% elif project_edit_view == 'mention'%}

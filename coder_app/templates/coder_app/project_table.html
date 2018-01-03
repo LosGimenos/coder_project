@@ -11,6 +11,7 @@
             <th class="header">Project Rate</th>
             <th class="header">Dataset</th>
             <th class="header">Contains Adverse Events</th>
+            <th class="header">Pause Project</th>
             <th class="header"></th>
             <th class="header"></th>
         </tr>
@@ -23,18 +24,35 @@
                         <td>{{ project.rate }}</td>
                         <td>{{ project.dataset_name }}</td>
                         <td>{{ project.contains_adverse_events }}</td>
+                        <td style="text-align: center;">
+                            <form  method='post'>
+                                {% csrf_token %}
+                                <input
+                                        type="submit"
+                                        name="toggle_freeze_project"
+                                        {% if not project.is_frozen %}
+                                        class="btn btn-info btn-xs"
+                                        value='PAUSE'
+                                        {% else %}
+                                        class="btn btn-warning btn-xs"
+                                        value="UNPAUSE"
+                                        {% endif %}
+                                />
+                                <input style="display:none;" name="project_id" value={{ project.id }} />
+                            </form>
+                        </td>
                         <td>
                             <a href={% url 'coder_app:edit_project' project_id=project.id %}><span>Edit</span></a>
                         </td>
                         <td>
-                            <form action={% url 'coder_app:index' %} method='post'>
+                            <form action={% url 'coder_app:homepage' %} method='post'>
                                 {% csrf_token %}
                                 <input
                                         type="submit"
                                         class="btn btn-danger btn-xs"
                                         name="delete_project_button"
                                         value='X' />
-                                <input style="display:none;" name="delete_project" value={{ project.id }} />
+                                <input style="display:none;" name="project_id" value={{ project.id }} />
                             </form>
                         </td>
                     </tr>

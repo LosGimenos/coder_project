@@ -1,0 +1,250 @@
+body {
+    padding-top: 80px; /* 60px to make the container go all the way to the bottom of the topbar */
+  }
+
+.loader {
+    border: 16px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 16px solid #3498db;
+    width: 120px;
+    height: 120px;
+    -webkit-animation: spin 2s linear infinite;
+    animation: spin 2s linear infinite;
+    visibility: hidden;
+  }
+
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+label {
+  font-weight: normal !important;
+}
+
+li.collect-span {
+    width: 320px;
+    margin-right: 30px;
+}
+
+li.collect-span a {
+    display: block;
+}
+
+li.collect-span a:hover {
+    text-decoration: none;
+}
+
+li.collect-span:hover{
+
+}
+
+div.collect-thumbnail {
+  height: 250px;
+}
+
+div.collect-thumbnail:hover{
+    border-color: limegreen;
+    border-width:1px;
+    /*background-color: grey;*/
+}
+
+.collect-app-img-frame {
+  height: 100px;
+  width: 260px;
+  position: relative;
+    margin: auto;
+}
+
+.collect-app-img {
+  max-height: 100%;
+  margin: auto;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+    padding-top: 10px;
+}
+
+.caption {
+    text-align: center;
+}
+
+hr {
+    border-width: 1px;
+    border-color: lightgrey;
+}
+
+.thumbnail {
+  height: 360px;
+    background-color: transparent;
+}
+
+.back-to-all-apps-link {
+  margin-bottom: 20px;
+}
+
+.progress-initial-load {
+    margin-top: 18px;
+}
+
+.alert-success {
+    margin-top:18px;
+}
+
+.updates-panel {
+    margin-top: 18px;
+    clear: both;
+}
+
+li.updates-tab {
+    float: right;
+}
+
+.back-button-updates {
+    float: right;
+}
+
+.pager{
+    margin-top: 0px;
+    margin-bottom: 0px;
+    float: right;
+}
+
+.pager-top-left{
+    margin-top: 0px;
+    margin-bottom: 18px;
+    float: left;
+}
+
+.breadcrumb-top-left{
+    clear: both;
+}
+
+.nav-tabs-top-left{
+    margin-top: 0px;
+}
+
+.well-instructions{
+    margin-top: 18px;
+}
+
+.submit-button-table-list{
+    margin-top: 8px;
+}
+
+li.user-account-dropdown {
+    float: right;
+    margin-top: 6px;
+}
+
+.cambrian-navbar-logo {
+    float: left;
+    margin-top: -5px;
+    height: 30px;
+    width: auto;
+}
+
+.navbar-brand {
+    padding-right: 40px;
+}
+
+.user-account-dropdown-btn{
+    background: none;
+    border: none;
+}
+
+.user-account-dropdown-btn:hover{
+    background: none;
+    border: none;
+}
+
+.user-account-dropdown-icon{
+    padding-right: 6px;
+}
+
+.glyphicon-bell{
+    margin-top: -3px;
+    font-size: 18px;
+}
+
+#unviewed-updates-count{
+    margin-top: -9px;
+    margin-left: 5px;
+    margin-right: 5px;
+    background-color: lightseagreen;
+}
+
+.password-input-field{
+    margin-left: 10px;
+}
+
+.user-account-dropdown-name{
+    margin-left: 20px;
+}
+
+.locked-cell{
+    background-color: lightsalmon;
+}
+
+.filter-toggle{
+    float: right;
+    margin-top: 8px;
+    margin-bottom: 18px;
+}
+
+.filter-toggle-selected{
+    background-color: cornflowerblue;
+    color: white;
+}
+
+.filter-toggle-selected:hover{
+    background-color: cornflowerblue;
+    color: white;
+}
+
+li.chart-style-tab{
+    float: right;
+}
+
+.share-dropdown-btn{
+    background: none;
+    border: none;
+    margin-top: -7px;
+    padding-top: 3px;
+    margin-bottom: 0px;
+    padding-bottom: 2px;
+}
+
+.share-sharing-section-title{
+    font-weight:bold;
+    margin-left: 16px;
+}
+
+.share-not-sharing-section-title{
+    font-weight:bold;
+    margin-left: 18px;
+}
+
+.share-add-text{
+    color: green;
+}
+
+.share-remove-text{
+    color: red;
+}
+
+.unread-update-succeeded{
+    background-color: #e3f2fd;
+}
+
+.unread-update-failed{
+    background-color: lightpink;
+}
+

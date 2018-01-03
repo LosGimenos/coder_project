@@ -1,0 +1,31 @@
+{% extends 'auth/base_login.html' %}
+
+{% load static %}
+
+{% block css %}
+    {{ block.super }}
+    <link href="{% static 'common/css/login.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+
+<div class="wrapper">
+    <form class="form-signin" method="post" action="{{ action_url }}">
+        {% csrf_token %}
+        <h2 class="form-signin-heading">Welcome to Pangea</h2>
+        {% if error_message != '' %}
+        <div class='alert alert-danger'>{{ error_message }}</div>
+        {% endif %}
+        <input type="text" class="form-control" name="username" placeholder="Username" required autofocus="" id="id_username" />
+        <input type="password" class="form-control" name="password" placeholder="Password" required id="id_password" />
+        <label class="checkbox">
+{#        <a href="{% url 'password_reset' %}">Forgot password?</a>#}
+        <a href="#">Forgot password?</a>
+        </label>
+        <button class="btn btn-lg btn-primary btn-block" type="submit">Login</button>
+        <input type="hidden" name="next" value="{{ next }}" />
+    </form>
+</div>
+
+{% endblock %}
+

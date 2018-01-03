@@ -7,7 +7,9 @@
     <meta name="robots" content="noindex">
     <meta name="googlebot" content="noindex">
 
-    <title>Cambrian Analytics Platform</title>
+    <title>Pangea Analytics Platform</title>
+
+    {% load static %}
 
     <!-- Styles -->
 
@@ -17,14 +19,19 @@
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
 
+    {% block css %}
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static 'common/lib/google-code-prettify/prettify.css' %}" />
+    <link rel="stylesheet" href="{% static 'common/css/bootstrap-responsive.css' %}" />
 
     {# Bootstrap customization   #}
+    <link href="{% static 'common/css/custom.css' %}" rel="stylesheet">
+    {% endblock %}
 
 </head>
 
 <body>
-    <nav class="navbar navbar-inverse navbar-static-top">
+    <nav class="navbar navbar-default navbar-fixed-top">
       <div class="container">
         <div class="navbar-header">
           <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
@@ -33,16 +40,55 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#">Cambrian Analytics Platform</a>
+          {% block navbar_home %}
+            <a class="navbar-brand" href="#">
+              <img class="cambrian-navbar-logo" alt="Brand" src="https://s3.us-east-2.amazonaws.com/cambriananalytics/files/Analytics+Platform/Images/cambrian+no+text+transparent.png">
+              Pangea
+            </a>
+          {% endblock %}
         </div>
-          {% url 'coder_app:index' as index_url %}
-          {% url 'coder_app:submit_new_project' as project_url %}
-          {% url 'coder_app:submit_new_variable' as variable_url %}
-          {% url 'coder_app:edit_project' as edit_project_url %}
-          {% url 'coder_app:add_coder' as add_coder %}
         <div id="navbar" class="collapse navbar-collapse">
+
+          {% block navbar_left %}
           <ul class="nav navbar-nav">
+            <li><a href="#">Collect</a></li>
+            <li><a href="#">Process</a></li>
+            <li><a href="#}">Visualize</a></li>
           </ul>
+          {% endblock %}
+
+          {% block navbar_right %}
+            <ul class="nav navbar-nav navbar-right">
+                <li class="notifications-icon-navbar">
+                        <a href="#{% if back_url_name is not None %}?back_url={{ back_url_name }}{% endif %}">
+                            <span class="glyphicon glyphicon-bell" aria-hidden="true"></span>
+                            <span id="unviewed-updates-count" class="badge"></span>
+                        </a>
+                </li>
+                <li class="user-account-dropdown">
+                    <div class="dropdown">
+                      <button class="btn btn-default dropdown-toggle user-account-dropdown-btn" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                        <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+                        <span class="caret"></span>
+                      </button>
+                      <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                        <li class="user-account-dropdown-name">{{ request.user.first_name }} {{ request.user.last_name }}</li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="#"><span class="glyphicon glyphicon-cog user-account-dropdown-icon" aria-hidden="true"></span>Account Settings</a></li>
+                        {% if perms.auth_pangea.view_accounts %}
+                            <li><a href="#"><span class="glyphicon glyphicon-folder-close user-account-dropdown-icon" aria-hidden="true"></span>Admin</a></li>
+                        {% elif perms.auth.view_users %}
+                            <li><a href="#"><span class="glyphicon glyphicon-folder-close user-account-dropdown-icon" aria-hidden="true"></span>Admin</a></li>
+                        {% endif %}
+                        <li><a href="#"><span class="glyphicon glyphicon-question-sign user-account-dropdown-icon" aria-hidden="true"></span>Support</a></li>
+                        <li role="separator" class="divider"></li>
+                        <li><a href="#"><span class="glyphicon glyphicon-arrow-left user-account-dropdown-icon" aria-hidden="true"></span>Logout</a></li>
+                      </ul>
+                    </div>
+                </li>
+            </ul>
+          {% endblock %}
+
         </div><!--/.nav-collapse -->
       </div>
     </nav>
@@ -53,7 +99,7 @@
 
         <div id="asynchronous-confirmation-messages"></div>
 
-        <div id="error-messages"></div>
+        <div id="error-messages">{% block error_messages %}{% endblock %}</div>
 
         {% block content %}{% endblock %}
 
@@ -63,7 +109,14 @@
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
 
+    {% block javascript %}
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+{#    <script src="{% static 'js/main.js' %}"></script>#}
+{#    <script src="{% static 'js/asynchronous_task_handler.js' %}"></script>#}
+{#    <script src="{% static 'common/js/multiselect.js' %}"></script>#}
+{#    <script src="{% static 'common/js/multiselect_implementation.js' %}"></script>#}
+    {% endblock %}
+
 </body>
 </html>

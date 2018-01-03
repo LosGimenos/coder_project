@@ -12,13 +12,33 @@
                 <span>
                     <p>
                         <strong>Variables Corrected:</strong>
-                        {{ project.corrected_var_count }} out of {{ project.total_answered_vars }}
+                        {% if project.corrected_var_count > 0 %}
+                            {{ project.corrected_var_count }} out of {{ project.total_answered_vars }}
+                        {% else %}
+                            None
+                        {% endif %}
                     </p>
                 </span>
             </div>
         </div>
         <br/>
-                {% else %}
+
+    {% elif project.is_frozen %}
+        <div class="row project--frozen">
+                <div class="col-md-6">
+                    <h4 style="text-decoration: underline;">{{ project.name }}</h4>
+                    <span><p><strong>Rate per Mention:</strong> ${{ project.rate }}</p></span>
+                    <span><p><strong>Total Mentions in Project:</strong> {{ project.all_rows_count }}</p></span>
+                    <span>
+                        <p>
+                            <strong>Mentions Completed by You:</strong>
+                            {% if project.completed_rows_by_coder %}{{ project.completed_rows_by_coder }} {% else %} 0 {% endif %}
+                        </p>
+                    </span>
+                    <span><p><strong>Variables per Mention:</strong> {{ project.num_variables_in_project }}</p></span>
+                </div>
+            </div>
+    {% else %}
         <a
             href="{% url 'coder_view:coder_project_overview' coder_id=coder_data.id project_id=project.id row_id=project.row_id %}"
             style="color: inherit;"
@@ -36,10 +56,27 @@
                     </span>
                     <span><p><strong>Variables per Mention:</strong> {{ project.num_variables_in_project }}</p></span>
                 </div>
-        </div>
+            </div>
         </a>
         <br />
 
         <br/>
     {% endif %}
 {% endfor %}
+
+<style>
+    .project--frozen {
+        border: 1px solid black;
+        background-color: red;
+    }
+
+    .project--frozen::after {
+        content: "Project has been Paused by Admin";
+        color: white;
+        font-size: 4em;
+        position: relative;
+        left: 210px;
+        bottom: 100px;
+    }
+
+</style>

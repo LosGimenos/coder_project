@@ -113,6 +113,10 @@
         <br/>
         <input class="hidden" value="{{ completed_variable_ids }}" name="completed_variables" />
         <input type="hidden" name="completed_variable_id" value="{{ answer_data.id }}" />
+        {% if is_review_all %}
+        <input class="btn btn-primary" type="submit" name="submit_review_all" value="Submit Changes and Mark Reviewed"/>
+        {% else %}
         <input class="btn btn-primary" type="submit" name="confirm-variable" value="Submit Changes and Mark Reviewed"/>
+        {% endif %}
     </form>
 {% endblock %}
