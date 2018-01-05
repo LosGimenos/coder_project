@@ -1,42 +1,43 @@
 {% extends "coder_app/base.html" %}
 
 {% block content %}
+    {% include 'coder_app/nav_tabs.html' %}
 
-    <ul class="nav nav-tabs" role="tablist">
-      <li class='nav-home' role="presentation" class="active">
-          <a href="#home" aria-controls="home" role="tab" data-toggle="tab">Home</a></li>
-      <li class='nav-coders' role="presentation">
-          <a href="#coders" aria-controls="coders" role="tab" data-toggle="tab">Coders</a></li>
-        <li class="nav-tags" role="presentation">
-            <a href="#tags" aria-controls="tags" role="tab" data-toggle="tab">Tags</a></li>
-        <li class='nav-variables'role="presentation">
-            <a href="#variables" aria-controls="variables" role="tab" data-toggle="tab">Variables</a></li>
-    </ul>
+{#    <ul class="nav nav-tabs" role="tablist">#}
+{#      <li class='nav-home' role="presentation" class="active">#}
+{#          <a href="#home" aria-controls="home" role="tab" data-toggle="tab">Home</a></li>#}
+{#      <li class='nav-coders' role="presentation">#}
+{#          <a href="#coders" aria-controls="coders" role="tab" data-toggle="tab">Coders</a></li>#}
+{#        <li class="nav-tags" role="presentation">#}
+{#            <a href="#tags" aria-controls="tags" role="tab" data-toggle="tab">Tags</a></li>#}
+{#        <li class='nav-variables'role="presentation">#}
+{#            <a href="#variables" aria-controls="variables" role="tab" data-toggle="tab">Variables</a></li>#}
+{#    </ul>#}
 
-    <div class="tab-content">
-    <div role="tabpanel" class="tab-pane active" id="home">
-        {% include 'coder_app/project_table.html' %}
-    </div>
-    <div role="tabpanel" class="tab-pane" id="coders">
-        {% include 'coder_app/add_coder.html' %}
-    </div>
-    <div role="tabpanel" class="tab-pane" id="tags">
-        {% include 'coder_app/edit_tags.html' %}
-    </div>
-    <div role="tabpanel" class="tab-pane" id="variables">
-        {% include 'coder_app/edit_variables.html' %}
-    </div>
-  </div>
+{#    <div class="tab-content">#}
+{#        <div role="tabpanel" class="tab-pane active" id="home">#}
+{#            {% include 'coder_app/project_table.html' %}#}
+{#        </div>#}
+{#        <div role="tabpanel" class="tab-pane" id="coders">#}
+{#            {% include 'coder_app/add_coder.html' %}#}
+{#        </div>#}
+{#        <div role="tabpanel" class="tab-pane" id="tags">#}
+{#            {% include 'coder_app/edit_tags.html' %}#}
+{#        </div>#}
+{#        <div role="tabpanel" class="tab-pane" id="variables">#}
+{#            {% include 'coder_app/edit_variables.html' %}#}
+{#        </div>#}
+{#    </div>#}
 
 {% endblock %}
 
 <script>
-    $('.nav-home a').click(e => {
-        e.preventDefault();
-        $(this).tab('show')
-    });
-    $('.nav-coders a').click(e => {
-        e.preventDefault();
-        $(this).tab('show')
-    });
+{#    $('.nav-home a').click(e => {#}
+{#        e.preventDefault();#}
+{#        $(this).tab('show')#}
+{#    });#}
+{#    $('.nav-coders a').click(e => {#}
+{#        e.preventDefault();#}
+{#        $(this).tab('show')#}
+{#    });#}
 </script>

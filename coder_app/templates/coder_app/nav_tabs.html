@@ -1,0 +1,41 @@
+{% url 'coder_app:edit_variables' as edit_variables %}
+{% url 'coder_app:view_projects' as view_projects %}
+{% url 'coder_app:add_coder' as add_coder %}
+{% url 'coder_app:edit_tags' as edit_tags %}
+
+    <ul class="nav nav-tabs" role="tablist">
+      <li class='nav-home' role="presentation">
+          <a href="#home" aria-controls="home" role="tab" data-toggle="tab">Home</a></li>
+      <li
+               {% if request.path == view_projects %}
+                   class="nav-project active"
+               {% else %}
+                   class='nav-project'
+               {% endif %}
+                    role="presentation">
+          <a href="{{ view_projects }}" aria-controls="home" role="tab">Projects</a></li>
+      <li
+              {% if request.path == add_coder %}
+                class='nav-coders active'
+              {% else %}
+                class='nav-coders'
+              {% endif %}
+              role="presentation">
+          <a href="{{ add_coder }}" aria-controls="coders" role="tab">Coders</a></li>
+        <li
+                {% if request.path == edit_tags %}
+                    class="nav-tags active"
+                {% else %}
+                    class="nav-tags"
+                {% endif %}
+                role="presentation">
+            <a href="{{ edit_tags }}" aria-controls="tags" role="tab">Tags</a></li>
+        <li
+            {% if request.path == edit_variables %}
+                class='nav-variables active'
+                {% else %}
+                class='nav-variables'
+            {% endif %}
+                role="presentation">
+            <a href="{{ edit_variables }}" aria-controls="variables" role="tab" >Variables</a></li>
+    </ul>

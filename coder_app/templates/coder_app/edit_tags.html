@@ -1,5 +1,8 @@
+{% extends 'coder_app/base.html' %}
+
 {% block content %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
+    {% include 'coder_app/nav_tabs.html' %}
 
     <h3>Edit Tags</h3>
 
@@ -17,7 +20,7 @@
         <div class="col-md-2"></div>
         <div class="col-md-4">
             <label for="filter--container">Selected Filters</label>
-            <div class="filter--container tag--container" name="filter--container">
+            <div class="col-md-12 filter--container tag--container" name="filter--container">
             </div>
         </div>
 
@@ -171,7 +174,6 @@
                           'tag_id': tagId
                         },
                         success: function(json) {
-                            console.log(json);
                             $(e.currentTarget).remove();
                             $(parentNode).append(tagNameNode);
                         },
@@ -256,7 +258,6 @@
                         'tag_id': tagId
                     },
                     success: function(json) {
-                        console.log(json)
                         window.location.href = json.url_redirect;
                     },
                     error: function() {}
@@ -265,6 +266,7 @@
         }
 
         function renderFilterContainer(array, container, type) {
+            console.log('render from tags fired')
             $(container).empty();
 
             switch (type) {

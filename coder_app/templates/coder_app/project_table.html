@@ -1,3 +1,8 @@
+{% extends 'coder_app/base.html' %}
+
+{% block content %}
+
+{% include 'coder_app/nav_tabs.html' %}
 <h3>Your Projects</h3>
 
 <form action={% url 'coder_app:submit_new_project' %}>
@@ -67,3 +72,5 @@
         {% endif %}
     </table>
 </div>
+
+{% endblock %}

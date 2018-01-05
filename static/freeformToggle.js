@@ -71,25 +71,26 @@ getOptionValues();
 radioButtons.forEach(button => {
     button.addEventListener('click', (e) => {
        if (button.value == 'multiple_choice') {
-           let previous_multiple_choice_box;
            choiceArray = storedChoiceValues;
+           let previous_multiple_choice_box = document.querySelector('#multiple_choice_box');
 
-           try {
-               previous_multiple_choice_box = $('#multiple_choice_box');
+           if (previous_multiple_choice_box) {
                optionsWrapper.removeChild(previous_multiple_choice_box);
-           } catch (err) {
-               console.log('Nodes aint here bub')
            }
 
            const addChoiceButton = $('<button />', {
               text: 'Add Choice',
+              class: 'button--add',
               click: function (e) {e.preventDefault(); createChoice(); renderChoices()}
            });
 
            const lineBreak = $('<br />');
-           $(optionsWrapper).append(addChoiceButton);
-           $(optionsWrapper).append(lineBreak);
-           renderChoices()
+
+           if (!document.querySelector('.button--add')) {
+               $(optionsWrapper).append(addChoiceButton);
+               $(optionsWrapper).append(lineBreak);
+               renderChoices()
+           }
         } else if (button.value == 'freeform') {
            while (optionsWrapper.firstChild) {
                optionsWrapper.removeChild(optionsWrapper.firstChild);

@@ -26,6 +26,8 @@
                 <input type="radio" name="variable_answer_option" value="multiple_choice">Multiple Choice</label>
             <label class="radio-inline">
                 <input type="radio" name="variable_answer_option" value="freeform" checked="checked">Freeform</label> <br />
+            <div class="input-group options-wrapper">
+            </div>
         {% elif variable_data.is_multiple_choice %}
             <label class="radio-inline">
                 <input type="radio" name="variable_answer_option" value="multiple_choice" checked="checked">Multiple Choice</label>
@@ -33,7 +35,7 @@
                 <input type="radio" name="variable_answer_option" value="freeform">Freeform</label> <br />
 
             <div class="input-group options-wrapper">
-                <button>Add Choice</button> <br />
+{#                <button>Add Choice</button> <br />#}
                 {% for choice in choice_data %}
                     <label>Choice {{ choice.index }}</label> <br/>
                     <input

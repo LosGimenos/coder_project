@@ -1,4 +1,7 @@
+{% extends 'coder_app/base.html' %}
+
 {% block content %}
+    {% include 'coder_app/nav_tabs.html' %}
     <h3>Add Coder</h3>
     <form action="{% url 'coder_app:add_coder' %}" class="input-group" method="post">
         {% csrf_token %}

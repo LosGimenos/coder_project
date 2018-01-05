@@ -2,113 +2,20 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="df9aed33-e054-4998-906c-299fd6c9ccc9" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/screenshots/blog.jpg" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/screenshots/carousel.jpg" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/screenshots/cover.jpg" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/screenshots/dashboard.jpg" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/screenshots/equal-height-columns.jpg" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/screenshots/grid.jpg" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/screenshots/jumbotron-narrow.jpg" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/screenshots/jumbotron.jpg" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/screenshots/justified-nav.jpg" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/screenshots/navbar-fixed.jpg" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/screenshots/navbar-static.jpg" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/screenshots/navbar.jpg" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/screenshots/non-responsive.jpg" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/screenshots/offcanvas.jpg" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/screenshots/sign-in.jpg" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/screenshots/starter-template.jpg" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/screenshots/sticky-footer-navbar.jpg" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/screenshots/sticky-footer.jpg" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/screenshots/theme.jpg" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/img/Homepage Banner.jpg" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/img/cambrian no text transparent.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/img/cambrian no text.jpg" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/img/glyphicons-halflings-white.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/img/glyphicons-halflings.png" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/js/.Rhistory" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/coder_app/auth_pangea_common_views.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/coder_app/templates/auth/base_login.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/coder_app/templates/auth/login.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/coder_app/templates/auth/password_reset.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/coder_app/templates/auth/password_reset_complete.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/coder_app/templates/auth/password_reset_confirm.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/coder_app/templates/auth/password_reset_done.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/coder_app/templates/auth/password_reset_email.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/coder_app/templates/auth/password_reset_subject.txt" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/bootstrap-responsive.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/bootstrap-responsive.min.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/bootstrap.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/bootstrap.min.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/custom.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/blog/blog.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/blog/index.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/carousel/carousel.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/carousel/index.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/cover/cover.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/cover/index.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/dashboard/dashboard.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/dashboard/index.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/grid/grid.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/grid/index.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/jumbotron-narrow/index.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/jumbotron-narrow/jumbotron-narrow.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/jumbotron/index.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/jumbotron/jumbotron.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/justified-nav/index.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/justified-nav/justified-nav.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/navbar-fixed-top/index.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/navbar-fixed-top/navbar-fixed-top.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/navbar-static-top/index.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/navbar-static-top/navbar-static-top.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/navbar/index.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/navbar/navbar.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/non-responsive/index.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/non-responsive/non-responsive.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/offcanvas/index.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/offcanvas/offcanvas.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/offcanvas/offcanvas.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/signin/index.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/signin/signin.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/starter-template/index.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/starter-template/starter-template.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/sticky-footer-navbar/index.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/sticky-footer-navbar/sticky-footer-navbar.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/sticky-footer/index.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/sticky-footer/sticky-footer.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/theme/index.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/theme/theme.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/tooltip-viewport/index.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/tooltip-viewport/tooltip-viewport.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/examples/tooltip-viewport/tooltip-viewport.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/login.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/css/style.css" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/js/bootstrap.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/js/bootstrap.min.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/js/jquery-3.1.0.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/js/multiselect.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/js/multiselect_implementation.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/common/lib/google-code-prettify/prettify.css" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/coder_app/models.py" afterPath="$PROJECT_DIR$/coder_app/models.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/common" afterPath="$PROJECT_DIR$/common" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/coder_app/templates/coder_app/add_coder.html" afterPath="$PROJECT_DIR$/coder_app/templates/coder_app/add_coder.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/coder_app/templates/coder_app/base.html" afterPath="$PROJECT_DIR$/coder_app/templates/coder_app/base.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/coder_app/templates/coder_app/coder_table.html" afterPath="$PROJECT_DIR$/coder_app/templates/coder_app/coder_table.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/coder_app/templates/coder_app/create_tag.html" afterPath="$PROJECT_DIR$/coder_app/templates/coder_app/create_tag.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/coder_app/templates/coder_app/edit_coder.html" afterPath="$PROJECT_DIR$/coder_app/templates/coder_app/edit_coder.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/coder_app/templates/coder_app/edit_project.html" afterPath="$PROJECT_DIR$/coder_app/templates/coder_app/edit_project.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/coder_app/templates/coder_app/edit_tags.html" afterPath="$PROJECT_DIR$/coder_app/templates/coder_app/edit_tags.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/coder_app/templates/coder_app/edit_variable.html" afterPath="$PROJECT_DIR$/coder_app/templates/coder_app/edit_variable.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/coder_app/templates/coder_app/edit_variables.html" afterPath="$PROJECT_DIR$/coder_app/templates/coder_app/edit_variables.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/coder_app/templates/coder_app/home_tab.html" afterPath="$PROJECT_DIR$/coder_app/templates/coder_app/home_tab.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/coder_app/templates/coder_app/index.html" afterPath="$PROJECT_DIR$/coder_app/templates/coder_app/index.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/coder_app/templates/coder_app/project.html" afterPath="$PROJECT_DIR$/coder_app/templates/coder_app/project.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/coder_app/templates/coder_app/project_table.html" afterPath="$PROJECT_DIR$/coder_app/templates/coder_app/project_table.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/coder_app/templates/coder_app/review_variables.html" afterPath="$PROJECT_DIR$/coder_app/templates/coder_app/review_variables.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/coder_app/templates/coder_app/select_mention.html" afterPath="$PROJECT_DIR$/coder_app/templates/coder_app/select_mention.html" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/coder_app/templates/coder_app/variables.html" afterPath="$PROJECT_DIR$/coder_app/templates/coder_app/variables.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/coder_app/urls.py" afterPath="$PROJECT_DIR$/coder_app/urls.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/coder_app/views.py" afterPath="$PROJECT_DIR$/coder_app/views.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/coder_app_project/settings.py" afterPath="$PROJECT_DIR$/coder_app_project/settings.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/coder_app_project/urls.py" afterPath="$PROJECT_DIR$/coder_app_project/urls.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/coder_view/templates/coder_view/cv_project_table.html" afterPath="$PROJECT_DIR$/coder_view/templates/coder_view/cv_project_table.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/coder_view/templates/coder_view/project_overview.html" afterPath="$PROJECT_DIR$/coder_view/templates/coder_view/project_overview.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/coder_view/views.py" afterPath="$PROJECT_DIR$/coder_view/views.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/static/freeformToggle.js" afterPath="$PROJECT_DIR$/static/freeformToggle.js" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -125,42 +32,8 @@
       <file leaf-file-name="views.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/coder_app/views.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="340">
-              <caret line="63" column="42" lean-forward="false" selection-start-line="63" selection-start-column="42" selection-end-line="63" selection-end-column="42" />
-              <folding>
-                <element signature="e#24#63#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="index.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/index.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="255">
-              <caret line="17" column="52" lean-forward="false" selection-start-line="17" selection-start-column="52" selection-end-line="17" selection-end-column="52" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="models.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/coder_app/models.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="329">
-              <caret line="32" column="49" lean-forward="false" selection-start-line="32" selection-start-column="49" selection-end-line="32" selection-end-column="49" />
-              <folding>
-                <element signature="e#24#63#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="views.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/coder_view/views.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="327">
-              <caret line="293" column="0" lean-forward="true" selection-start-line="293" selection-start-column="0" selection-end-line="293" selection-end-column="0" />
+            <state relative-caret-position="189">
+              <caret line="1301" column="0" lean-forward="false" selection-start-line="1301" selection-start-column="0" selection-end-line="1301" selection-end-column="0" />
               <folding>
                 <element signature="e#24#63#0" expanded="true" />
               </folding>
@@ -169,55 +42,41 @@
         </entry>
       </file>
       <file leaf-file-name="urls.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/coder_view/urls.py">
+        <entry file="file://$PROJECT_DIR$/coder_app/urls.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="0">
-              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-              <folding>
-                <element signature="e#0#32#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="project_overview.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/coder_view/templates/coder_view/project_overview.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="195">
-              <caret line="13" column="9" lean-forward="false" selection-start-line="13" selection-start-column="9" selection-end-line="13" selection-end-column="9" />
+            <state relative-caret-position="90">
+              <caret line="19" column="65" lean-forward="false" selection-start-line="19" selection-start-column="65" selection-end-line="19" selection-end-column="65" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="cv_project_table.html" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/coder_view/templates/coder_view/cv_project_table.html">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="255">
-              <caret line="17" column="28" lean-forward="false" selection-start-line="17" selection-start-column="28" selection-end-line="17" selection-end-column="28" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="project_answering.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/coder_view/templates/coder_view/project_answering.html">
+      <file leaf-file-name="nav_tabs.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/nav_tabs.html">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="330">
-              <caret line="22" column="14" lean-forward="false" selection-start-line="22" selection-start-column="14" selection-end-line="22" selection-end-column="14" />
+              <caret line="28" column="20" lean-forward="false" selection-start-line="28" selection-start-column="20" selection-end-line="28" selection-end-column="20" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="project_table.html" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/project_table.html">
+      <file leaf-file-name="edit_tags.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/edit_tags.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="280">
-              <caret line="36" column="62" lean-forward="false" selection-start-line="36" selection-start-column="62" selection-end-line="36" selection-end-column="62" />
-              <folding>
-                <element signature="n#style#0;n#td#4;n#tr#0;n#tbody#0;n#table#0;n#div#0;n#!!top" expanded="true" />
-              </folding>
+            <state relative-caret-position="60">
+              <caret line="4" column="39" lean-forward="false" selection-start-line="4" selection-start-column="39" selection-end-line="4" selection-end-column="39" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="add_coder.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/add_coder.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="45">
+              <caret line="3" column="39" lean-forward="false" selection-start-line="3" selection-start-column="39" selection-end-line="3" selection-end-column="39" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -225,9 +84,51 @@
       <file leaf-file-name="project.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/project.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="523">
-              <caret line="49" column="56" lean-forward="false" selection-start-line="49" selection-start-column="56" selection-end-line="49" selection-end-column="56" />
+            <state relative-caret-position="60">
+              <caret line="4" column="39" lean-forward="false" selection-start-line="4" selection-start-column="39" selection-end-line="4" selection-end-column="39" />
               <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="edit_coder.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/edit_coder.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="45">
+              <caret line="3" column="39" lean-forward="false" selection-start-line="3" selection-start-column="39" selection-end-line="3" selection-end-column="39" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="variables.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/variables.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="75">
+              <caret line="5" column="39" lean-forward="false" selection-start-line="5" selection-start-column="39" selection-end-line="5" selection-end-column="39" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="create_tag.html" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/create_tag.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="45">
+              <caret line="3" column="34" lean-forward="false" selection-start-line="3" selection-start-column="34" selection-end-line="3" selection-end-column="34" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="edit_variables.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/edit_variables.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="109">
+              <caret line="41" column="58" lean-forward="false" selection-start-line="41" selection-start-column="58" selection-end-line="41" selection-end-column="58" />
+              <folding>
+                <element signature="n#style#0;n#div#0;n#!!top" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -245,15 +146,23 @@
       <find>addFi</find>
       <find>json</find>
       <find>this is variable pk after save</find>
-      <find>console</find>
       <find>edit_co</find>
       <find>selec</find>
-      <find>edit_variables</find>
       <find>project=project</find>
       <find>completed</find>
       <find>completed_variable</find>
       <find>add_cod</find>
       <find>edit_project</find>
+      <find>renderFilter</find>
+      <find>made it here</find>
+      <find>edit_tags</find>
+      <find>Add Choice</find>
+      <find>edit_variable</find>
+      <find>review_</find>
+      <find>edit_tag</find>
+      <find>console</find>
+      <find>edit_variables</find>
+      <find>filters</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -262,10 +171,8 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/static/editVariableFreeformToggle.js" />
         <option value="$PROJECT_DIR$/coder_view/templates/coder_view/index.html" />
         <option value="$PROJECT_DIR$/coder_app/templates/coder_app/app_coder.html" />
-        <option value="$PROJECT_DIR$/static/freeformToggle.js" />
         <option value="$PROJECT_DIR$/static/freeformToggleInit.js" />
         <option value="$PROJECT_DIR$/coder_view/templates/coder_view/answer_project.html" />
         <option value="$PROJECT_DIR$/coder_view/templates/coder_view/answer_variables.html" />
@@ -276,43 +183,45 @@
         <option value="$PROJECT_DIR$/coder_app/templates/coder_app/mention_table.html" />
         <option value="$PROJECT_DIR$/coder_view/urls.py" />
         <option value="$PROJECT_DIR$/coder_view/templates/coder_view/select_project.html" />
-        <option value="$PROJECT_DIR$/coder_app/templates/coder_app/index.html" />
         <option value="$PROJECT_DIR$/coder_app/templates/coder_app/variable_library.html" />
-        <option value="$PROJECT_DIR$/coder_app/templates/coder_app/variables.html" />
         <option value="$PROJECT_DIR$/coder_app/modelsTest.py" />
-        <option value="$PROJECT_DIR$/coder_app/templates/coder_app/create_tag.html" />
         <option value="$PROJECT_DIR$/coder_app/templates/coder_app/review_variable.html" />
         <option value="$PROJECT_DIR$/coder_app/templates/coder_app/review_tag.html" />
         <option value="$PROJECT_DIR$/static/tagSubmitHandler.js" />
         <option value="$PROJECT_DIR$/static/toggleTags.js" />
-        <option value="$PROJECT_DIR$/coder_app/templates/coder_app/edit_variable.html" />
         <option value="$PROJECT_DIR$/coder_app/templates/coder_app/variable_table.html" />
         <option value="$PROJECT_DIR$/coder_app/templates/coder_app/select_variable.html" />
-        <option value="$PROJECT_DIR$/coder_app/templates/coder_app/project.html" />
         <option value="$PROJECT_DIR$/coder_view/templates/coder_view/project_overview.html" />
         <option value="$PROJECT_DIR$/coder_app/templates/coder_app/base.html" />
         <option value="$PROJECT_DIR$/coder_app/templates/auth/base_login.html" />
         <option value="$PROJECT_DIR$/coder_app/templates/auth/login.html" />
-        <option value="$PROJECT_DIR$/coder_app/templates/coder_app/edit_tags.html" />
-        <option value="$PROJECT_DIR$/coder_app/templates/coder_app/edit_variables.html" />
         <option value="$PROJECT_DIR$/coder_app/templates/coder_app/home_tab.html" />
         <option value="$PROJECT_DIR$/coder_app/templates/coder_app/review_variables.html" />
         <option value="$PROJECT_DIR$/coder_app/templates/coder_app/select_mention.html" />
         <option value="$PROJECT_DIR$/coder_app_project/settings.py" />
-        <option value="$PROJECT_DIR$/coder_app/urls.py" />
         <option value="$PROJECT_DIR$/coder_app_project/urls.py" />
         <option value="$PROJECT_DIR$/common/auth_pangea_common_views.py" />
         <option value="$PROJECT_DIR$/common/urls.py" />
         <option value="$PROJECT_DIR$/coder_app/auth_pangea_common_views.py" />
-        <option value="$PROJECT_DIR$/coder_app/templates/coder_app/add_coder.html" />
-        <option value="$PROJECT_DIR$/coder_app/templates/coder_app/edit_coder.html" />
         <option value="$PROJECT_DIR$/coder_app/templates/coder_app/coder_table.html" />
         <option value="$PROJECT_DIR$/coder_app/models.py" />
         <option value="$PROJECT_DIR$/coder_app/templates/coder_app/edit_project.html" />
-        <option value="$PROJECT_DIR$/coder_app/views.py" />
-        <option value="$PROJECT_DIR$/coder_app/templates/coder_app/project_table.html" />
         <option value="$PROJECT_DIR$/coder_view/views.py" />
         <option value="$PROJECT_DIR$/coder_view/templates/coder_view/cv_project_table.html" />
+        <option value="$PROJECT_DIR$/static/freeformToggle.js" />
+        <option value="$PROJECT_DIR$/coder_app/templates/coder_app/edit_variable.html" />
+        <option value="$PROJECT_DIR$/coder_app/templates/coder_app/index.html" />
+        <option value="$PROJECT_DIR$/coder_app/urls.py" />
+        <option value="$PROJECT_DIR$/coder_app/templates/coder_app/project_table.html" />
+        <option value="$PROJECT_DIR$/coder_app/templates/coder_app/add_coder.html" />
+        <option value="$PROJECT_DIR$/coder_app/templates/coder_app/edit_tags.html" />
+        <option value="$PROJECT_DIR$/coder_app/templates/coder_app/nav_tabs.html" />
+        <option value="$PROJECT_DIR$/coder_app/views.py" />
+        <option value="$PROJECT_DIR$/coder_app/templates/coder_app/edit_variables.html" />
+        <option value="$PROJECT_DIR$/coder_app/templates/coder_app/project.html" />
+        <option value="$PROJECT_DIR$/coder_app/templates/coder_app/edit_coder.html" />
+        <option value="$PROJECT_DIR$/coder_app/templates/coder_app/variables.html" />
+        <option value="$PROJECT_DIR$/coder_app/templates/coder_app/create_tag.html" />
       </list>
     </option>
   </component>
@@ -373,6 +282,32 @@
               <item name="coder_app" type="462c0819:PsiDirectoryNode" />
               <item name="templates" type="462c0819:PsiDirectoryNode" />
               <item name="coder_app" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="coder_app_project" type="b2602c69:ProjectViewProjectNode" />
+              <item name="coder_app_project" type="462c0819:PsiDirectoryNode" />
+              <item name="common" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="coder_app_project" type="b2602c69:ProjectViewProjectNode" />
+              <item name="coder_app_project" type="462c0819:PsiDirectoryNode" />
+              <item name="common" type="462c0819:PsiDirectoryNode" />
+              <item name="templates" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="coder_app_project" type="b2602c69:ProjectViewProjectNode" />
+              <item name="coder_app_project" type="462c0819:PsiDirectoryNode" />
+              <item name="common" type="462c0819:PsiDirectoryNode" />
+              <item name="templates" type="462c0819:PsiDirectoryNode" />
+              <item name="common" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="coder_app_project" type="b2602c69:ProjectViewProjectNode" />
+              <item name="coder_app_project" type="462c0819:PsiDirectoryNode" />
+              <item name="common" type="462c0819:PsiDirectoryNode" />
+              <item name="templates" type="462c0819:PsiDirectoryNode" />
+              <item name="common" type="462c0819:PsiDirectoryNode" />
+              <item name="base" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -448,8 +383,9 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1280" height="800" extended-state="0" />
+    <editor active="true" />
     <layout>
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.19789983" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.19789983" sideWeight="0.5" order="1" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -481,28 +417,6 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/coder_app/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/coder_view/models.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/coder_view/tests.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/coder_app/modelsDep.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="176">
@@ -513,25 +427,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/static/freeformToggleInit.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="433">
-          <caret line="73" column="38" lean-forward="false" selection-start-line="73" selection-start-column="38" selection-end-line="73" selection-end-column="38" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/mention_table.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="480">
           <caret line="32" column="32" lean-forward="false" selection-start-line="32" selection-start-column="32" selection-end-line="32" selection-end-column="32" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/create_tag.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="225">
-          <caret line="15" column="14" lean-forward="true" selection-start-line="15" selection-start-column="14" selection-end-line="15" selection-end-column="14" />
           <folding />
         </state>
       </provider>
@@ -567,41 +466,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/variable_library.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="243">
-          <caret line="199" column="24" lean-forward="false" selection-start-line="199" selection-start-column="24" selection-end-line="201" selection-end-column="58" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/variables.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-746">
-          <caret line="32" column="0" lean-forward="false" selection-start-line="32" selection-start-column="0" selection-end-line="48" selection-end-column="14" />
-          <folding>
-            <marker date="1513198793000" expanded="false" signature="1634:1648" ph="..." />
-            <marker date="1513198793000" expanded="false" signature="2239:2294" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/common/templates/common/base/base.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1545">
-          <caret line="103" column="41" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="121" selection-end-column="7" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/base.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1755">
-          <caret line="117" column="86" lean-forward="true" selection-start-line="117" selection-start-column="86" selection-end-line="117" selection-end-column="86" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/coder_app/templates/auth/base_login.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -614,22 +478,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="180">
           <caret line="12" column="67" lean-forward="false" selection-start-line="12" selection-start-column="67" selection-end-line="12" selection-end-column="67" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/edit_tags.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="334">
-          <caret line="29" column="52" lean-forward="false" selection-start-line="29" selection-start-column="52" selection-end-line="29" selection-end-column="52" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/variable_table.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="228">
-          <caret line="21" column="36" lean-forward="false" selection-start-line="21" selection-start-column="36" selection-end-line="21" selection-end-column="36" />
           <folding />
         </state>
       </provider>
@@ -658,34 +506,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/edit_variable.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="120">
-          <caret line="8" column="78" lean-forward="false" selection-start-line="8" selection-start-column="78" selection-end-line="8" selection-end-column="78" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/home_tab.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30">
-          <caret line="2" column="43" lean-forward="false" selection-start-line="2" selection-start-column="43" selection-end-line="2" selection-end-column="43" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/common/views.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/edit_variables.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-177">
-          <caret line="37" column="52" lean-forward="false" selection-start-line="37" selection-start-column="52" selection-end-line="37" selection-end-column="52" />
           <folding />
         </state>
       </provider>
@@ -698,30 +522,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/review_variables.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="418">
-          <caret line="116" column="76" lean-forward="false" selection-start-line="116" selection-start-column="76" selection-end-line="116" selection-end-column="76" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/select_variable.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="297">
           <caret line="27" column="54" lean-forward="false" selection-start-line="27" selection-start-column="54" selection-end-line="27" selection-end-column="54" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/select_mention.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="660">
-          <caret line="44" column="20" lean-forward="true" selection-start-line="44" selection-start-column="20" selection-end-line="44" selection-end-column="20" />
-          <folding>
-            <element signature="e#1523#1561#0#HTML" expanded="false" />
-            <element signature="e#2172#2192#0#HTML" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -769,39 +574,13 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/coder_app/urls.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="511">
-          <caret line="46" column="4" lean-forward="false" selection-start-line="46" selection-start-column="6" selection-end-line="59" selection-end-column="51" />
-          <folding>
-            <element signature="e#0#32#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/common/models.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="126">
           <caret line="11" column="100" lean-forward="true" selection-start-line="11" selection-start-column="100" selection-end-line="11" selection-end-column="100" />
           <folding>
-            <element signature="e#0#28#0" expanded="true" />
+            <element signature="e#0#28#0" expanded="false" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/add_coder.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="90">
-          <caret line="6" column="81" lean-forward="false" selection-start-line="6" selection-start-column="81" selection-end-line="6" selection-end-column="81" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/edit_coder.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="165">
-          <caret line="11" column="115" lean-forward="false" selection-start-line="11" selection-start-column="115" selection-end-line="11" selection-end-column="115" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -813,56 +592,12 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/edit_project.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="345">
-          <caret line="23" column="140" lean-forward="false" selection-start-line="23" selection-start-column="140" selection-end-line="23" selection-end-column="140" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/index.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="255">
-          <caret line="17" column="52" lean-forward="false" selection-start-line="17" selection-start-column="52" selection-end-line="17" selection-end-column="52" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/project.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="523">
-          <caret line="49" column="56" lean-forward="false" selection-start-line="49" selection-start-column="56" selection-end-line="49" selection-end-column="56" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/coder_app/models.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="329">
           <caret line="32" column="49" lean-forward="false" selection-start-line="32" selection-start-column="49" selection-end-line="32" selection-end-column="49" />
           <folding>
-            <element signature="e#24#63#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/coder_app/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="340">
-          <caret line="63" column="42" lean-forward="false" selection-start-line="63" selection-start-column="42" selection-end-line="63" selection-end-column="42" />
-          <folding>
-            <element signature="e#24#63#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/project_table.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="280">
-          <caret line="36" column="62" lean-forward="false" selection-start-line="36" selection-start-column="62" selection-end-line="36" selection-end-column="62" />
-          <folding>
-            <element signature="n#style#0;n#td#4;n#tr#0;n#tbody#0;n#table#0;n#div#0;n#!!top" expanded="true" />
+            <element signature="e#24#63#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -880,7 +615,7 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="e#0#32#0" expanded="true" />
+            <element signature="e#0#32#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -896,9 +631,9 @@
     <entry file="file://$PROJECT_DIR$/coder_view/views.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="327">
-          <caret line="293" column="0" lean-forward="true" selection-start-line="293" selection-start-column="0" selection-end-line="293" selection-end-column="0" />
+          <caret line="293" column="0" lean-forward="false" selection-start-line="293" selection-start-column="0" selection-end-line="293" selection-end-column="0" />
           <folding>
-            <element signature="e#24#63#0" expanded="true" />
+            <element signature="e#24#63#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -907,6 +642,202 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="255">
           <caret line="17" column="28" lean-forward="false" selection-start-line="17" selection-start-column="28" selection-end-line="17" selection-end-column="28" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/variable_table.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="315">
+          <caret line="21" column="36" lean-forward="false" selection-start-line="21" selection-start-column="36" selection-end-line="21" selection-end-column="36" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/static/freeformToggleInit.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="709">
+          <caret line="73" column="38" lean-forward="false" selection-start-line="73" selection-start-column="38" selection-end-line="73" selection-end-column="38" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/coder_app/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/static/freeformToggle.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1140">
+          <caret line="76" column="11" lean-forward="false" selection-start-line="76" selection-start-column="11" selection-end-line="76" selection-end-column="11" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/edit_variable.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="98">
+          <caret line="38" column="47" lean-forward="true" selection-start-line="38" selection-start-column="47" selection-end-line="38" selection-end-column="47" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/select_mention.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="622">
+          <caret line="44" column="20" lean-forward="true" selection-start-line="44" selection-start-column="20" selection-end-line="44" selection-end-column="20" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/review_variables.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="380">
+          <caret line="116" column="76" lean-forward="false" selection-start-line="116" selection-start-column="76" selection-end-line="116" selection-end-column="76" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/variable_library.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2140">
+          <caret line="199" column="24" lean-forward="false" selection-start-line="199" selection-start-column="24" selection-end-line="201" selection-end-column="58" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/base.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1755">
+          <caret line="117" column="86" lean-forward="true" selection-start-line="117" selection-start-column="86" selection-end-line="117" selection-end-column="86" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/common/templates/common/base/base.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1300">
+          <caret line="96" column="0" lean-forward="true" selection-start-line="96" selection-start-column="0" selection-end-line="96" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/home_tab.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="30">
+          <caret line="2" column="43" lean-forward="false" selection-start-line="2" selection-start-column="43" selection-end-line="2" selection-end-column="43" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/project_table.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="60">
+          <caret line="4" column="35" lean-forward="false" selection-start-line="4" selection-start-column="35" selection-end-line="4" selection-end-column="35" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/index.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="450">
+          <caret line="30" column="0" lean-forward="true" selection-start-line="30" selection-start-column="0" selection-end-line="30" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/edit_project.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-544">
+          <caret line="7" column="0" lean-forward="false" selection-start-line="7" selection-start-column="0" selection-end-line="8" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/coder_app/urls.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="90">
+          <caret line="19" column="65" lean-forward="false" selection-start-line="19" selection-start-column="65" selection-end-line="19" selection-end-column="65" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/add_coder.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="45">
+          <caret line="3" column="39" lean-forward="false" selection-start-line="3" selection-start-column="39" selection-end-line="3" selection-end-column="39" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/edit_tags.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="60">
+          <caret line="4" column="39" lean-forward="false" selection-start-line="4" selection-start-column="39" selection-end-line="4" selection-end-column="39" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/nav_tabs.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="330">
+          <caret line="28" column="20" lean-forward="false" selection-start-line="28" selection-start-column="20" selection-end-line="28" selection-end-column="20" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/coder_app/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="189">
+          <caret line="1301" column="0" lean-forward="false" selection-start-line="1301" selection-start-column="0" selection-end-line="1301" selection-end-column="0" />
+          <folding>
+            <element signature="e#24#63#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/edit_variables.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="109">
+          <caret line="41" column="58" lean-forward="false" selection-start-line="41" selection-start-column="58" selection-end-line="41" selection-end-column="58" />
+          <folding>
+            <element signature="n#style#0;n#div#0;n#!!top" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/project.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="60">
+          <caret line="4" column="39" lean-forward="false" selection-start-line="4" selection-start-column="39" selection-end-line="4" selection-end-column="39" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/edit_coder.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="45">
+          <caret line="3" column="39" lean-forward="false" selection-start-line="3" selection-start-column="39" selection-end-line="3" selection-end-column="39" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/variables.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="75">
+          <caret line="5" column="39" lean-forward="false" selection-start-line="5" selection-start-column="39" selection-end-line="5" selection-end-column="39" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/coder_app/templates/coder_app/create_tag.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="45">
+          <caret line="3" column="34" lean-forward="false" selection-start-line="3" selection-start-column="34" selection-end-line="3" selection-end-column="34" />
           <folding />
         </state>
       </provider>

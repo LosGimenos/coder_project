@@ -3,7 +3,7 @@
 {% block content %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
     {% load static %}
-
+    {% include 'coder_app/nav_tabs.html' %}
     <h2>Create New Variable</h2>
 
     <form action={% url 'coder_app:submit_new_variable' %} class="input-group" method="post">
@@ -27,112 +27,91 @@
                 </div>
             </div>
         </div>
-{#        <select multiple id="tag-ids-container" style="display: none;" name="tag-ids"></select>#}
     </form>
-
-{#    <div class="row">#}
-{#        <div class="col-md-3">#}
-{#            <div class="ui-widget">#}
-{#                <label for="variable-tag">Load or Create Tag</label>#}
-{#                <input id='by_tag' class="form-control" type="input" name="variable-tag" />#}
-{#            </div>#}
-{#            <div>#}
-{#                <button id='create-tag' class="btn btn-default">Create Tag</button>#}
-{#            </div>#}
-{#        </div>#}
-{#    </div>#}
-{#    <br />#}
-{#    <div class="row">#}
-{#     <div class="col-md-3 tag-wrapper" style="height: 20vh; border: 1px solid grey; overflow: scroll;">#}
-{#         <p>No tags for this variable</p>#}
-{#     </div>#}
-{#    </div>#}
-{#     <br />#}
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="{% static 'token_injector.js' %}"></script>
-{#    <script src="{% static 'tagSubmitHandler.js' %}"></script>#}
     <script src="{% static 'freeformToggle.js' %}"></script>
-    <script>
-
-        const tagsArray = [];
-        const globalTagIds = [];
-        const tagContainer = $('.tag-wrapper');
-        const tagIdContainer = $('#tag-ids-container');
-        const createTagButton = $('#create-tag');
-
-        $(createTagButton).click(e => {
-            e.preventDefault();
-            let tagName = $('#by_tag').val();
-            $.ajax({
-                url: '/coder_project/variables',
-                type: 'POST',
-                data: {
-                    'tag_name': tagName,
-                    'add_tag': true
-                },
-                success: function(json) {
-                    let tagData = json.tag_data;
-
-                    if ($.inArray(tagData.id, globalTagIds) < 0) {
-                        tagsArray.unshift(tagData);
-                        globalTagIds.push(tagData.id);
-                    }
-
-                    renderContainer(tagsArray, tagContainer);
-                    $('#by_tag').val('');
-                },
-                error: function(xhr,errmsg,err) {
-                    console.log(err);
-                }
-            });
-        });
-
-        function renderContainer(array, container) {
-            $(tagIdContainer).empty();
-            $(container).empty();
-
-            array.forEach(itemData => {
-                let tagNode = $(`<option value='${itemData.id}' selected='selected'></option>`);
-                $(tagIdContainer).append(tagNode);
-
-                let variableNode = $(`<span name='${itemData.id}'>${itemData.name}</br></span>`);
-                $(container).append(variableNode);
-            });
-        };
-
-        $('#by_tag').autocomplete({
-           source: "/coder_project/get_tag_names",
-            select: function (event, ui) {
-                $.ajax({
-                    url: '/coder_project/get_tag_names',
-                    type: 'POST',
-                    data: {
-                        'tag_id_to_add_to_variable': ui.item.id
-                    },
-                    success: function(json) {
-                        let tagData = json.tag_data;
-
-                        let tag = {
-                            'name': tagData.name,
-                            'id': tagData.id
-                        };
-
-                        if ($.inArray(tagData.id, globalTagIds) < 0) {
-                            tagsArray.unshift(tag);
-                            globalTagIds.push(tagData.id);
-                        }
-
-                        renderContainer(tagsArray, tagContainer);
-                        $('#by_tag').val('');
-                    },
-                    error: function(xhr,errmsg,err) {
-                        console.log(err);
-                    }
-                })
-            },
-           minLength: 2
-        });
-    </script>
+{#    <script>#}
+{##}
+{#        const tagsArray = [];#}
+{#        const globalTagIds = [];#}
+{#        const tagContainer = $('.tag-wrapper');#}
+{#        const tagIdContainer = $('#tag-ids-container');#}
+{#        const createTagButton = $('#create-tag');#}
+{##}
+{#        $(createTagButton).click(e => {#}
+{#            e.preventDefault();#}
+{#            let tagName = $('#by_tag').val();#}
+{#            $.ajax({#}
+{#                url: '/coder_project/variables',#}
+{#                type: 'POST',#}
+{#                data: {#}
+{#                    'tag_name': tagName,#}
+{#                    'add_tag': true#}
+{#                },#}
+{#                success: function(json) {#}
+{#                    let tagData = json.tag_data;#}
+{##}
+{#                    if ($.inArray(tagData.id, globalTagIds) < 0) {#}
+{#                        tagsArray.unshift(tagData);#}
+{#                        globalTagIds.push(tagData.id);#}
+{#                    }#}
+{##}
+{#                    renderContainer(tagsArray, tagContainer);#}
+{#                    $('#by_tag').val('');#}
+{#                },#}
+{#                error: function(xhr,errmsg,err) {#}
+{#                    console.log(err);#}
+{#                }#}
+{#            });#}
+{#        });#}
+{##}
+{#        function renderContainer(array, container) {#}
+{#            $(tagIdContainer).empty();#}
+{#            $(container).empty();#}
+{##}
+{#            array.forEach(itemData => {#}
+{#                let tagNode = $(`<option value='${itemData.id}' selected='selected'></option>`);#}
+{#                $(tagIdContainer).append(tagNode);#}
+{##}
+{#                let variableNode = $(`<span name='${itemData.id}'>${itemData.name}</br></span>`);#}
+{#                $(container).append(variableNode);#}
+{#            });#}
+{#        };#}
+{##}
+{#        $('#by_tag').autocomplete({#}
+{#           source: "/coder_project/get_tag_names",#}
+{#            select: function (event, ui) {#}
+{#                $.ajax({#}
+{#                    url: '/coder_project/get_tag_names',#}
+{#                    type: 'POST',#}
+{#                    data: {#}
+{#                        'tag_id_to_add_to_variable': ui.item.id#}
+{#                    },#}
+{#                    success: function(json) {#}
+{#                        let tagData = json.tag_data;#}
+{##}
+{#                        let tag = {#}
+{#                            'name': tagData.name,#}
+{#                            'id': tagData.id#}
+{#                        };#}
+{##}
+{#                        if ($.inArray(tagData.id, globalTagIds) < 0) {#}
+{#                            tagsArray.unshift(tag);#}
+{#                            globalTagIds.push(tagData.id);#}
+{#                        }#}
+{##}
+{#                        renderContainer(tagsArray, tagContainer);#}
+{#                        $('#by_tag').val('');#}
+{#                    },#}
+{#                    error: function(xhr,errmsg,err) {#}
+{#                        console.log(err);#}
+{#                    }#}
+{#                })#}
+{#            },#}
+{#           minLength: 2#}
+{#        });#}
+{#    </script>#}
 {% endblock %}

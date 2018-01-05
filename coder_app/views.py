@@ -33,12 +33,6 @@ def index(request):
             tag = Tag.objects.get(id=tag_to_delete)
             tag.delete()
 
-    if request.method == "POST" and 'bulk-variable-delete' in request.POST:
-        variables_to_delete = request.POST.getlist('variable-names[]')
-        for variable_to_delete in variables_to_delete:
-            variable = Variable.objects.get(id=variable_to_delete)
-            variable.delete()
-
     project_data_list = []
     projects = Project.objects.all()
     coder_data = Coder.objects.all()
@@ -74,6 +68,18 @@ def index(request):
             'tag_data': tag_data,
             'variable_data': variable_data
         })
+
+@login_required()
+def view_projects(request):
+    project_data = Project.objects.all()
+
+    return render(
+        request,
+        'coder_app/project_table.html',
+        {
+            'project_data': project_data
+        }
+    )
 
 @login_required()
 def submit_new_variable(request):
@@ -506,6 +512,44 @@ def edit_variable(request, variable_id):
     project_id = request.POST.get('project_id')
 
     v = Variable.objects.get(id=variable_id)
+
+    if request.method == 'POST':
+        variable_name = request.POST.get('variable-name')
+        variable_description = request.POST.get('variable-description')
+        variable_instructions = request.POST.get('variable-instructions')
+        multiple_or_freeform = request.POST.get('variable_answer_option')
+
+        if multiple_or_freeform == 'multiple_choice':
+            v.is_freeform = False
+            v.is_multiple_choice = True
+
+            variable_choices = {}
+
+            for index in range(1, 8):
+                node_name_string = 'variable-choice-' + str(index)
+                choice_content = request.POST.get(node_name_string)
+
+                variable_choices[node_name_string] = choice_content
+
+            v.multiple_choice_option_one = variable_choices['variable-choice-1']
+            v.multiple_choice_option_two = variable_choices['variable-choice-2']
+            v.multiple_choice_option_three = variable_choices['variable-choice-3']
+            v.multiple_choice_option_four = variable_choices['variable-choice-4']
+            v.multiple_choice_option_five = variable_choices['variable-choice-5']
+            v.multiple_choice_option_six = variable_choices['variable-choice-6']
+            v.multiple_choice_option_seven = variable_choices['variable-choice-7']
+        elif multiple_or_freeform == 'freeform':
+            v.is_freeform = True
+            v.is_multiple_choice = False
+
+        v.name = variable_name
+        v.description = variable_description
+        v.instructions = variable_instructions
+        v.save()
+        # redirect_url = '/coder_project/' + str(project_id) + '/edit_project/'
+
+        # return redirect('/coder_project/')
+
     variable_data = {
         'id': v.id,
         'name': v.name,
@@ -539,27 +583,6 @@ def edit_variable(request, variable_id):
                 choice_data.append(choice[str(index + 1)])
 
     tag_data = v.tag_set.all()
-
-    if request.method == 'POST':
-        variable_name = request.POST.get('variable-name')
-        variable_description = request.POST.get('variable-description')
-        variable_instructions = request.POST.get('variable-instructions')
-        multiple_or_freeform = request.POST.get('variable_answer_option')
-
-        if multiple_or_freeform == 'multiple_choice':
-            v.is_freeform = False
-            v.is_multiple_choice = True
-        elif multiple_or_freeform == 'freeform':
-            v.is_freeform = True
-            v.is_multiple_choice = False
-
-        v.name = variable_name
-        v.description = variable_description
-        v.instructions = variable_instructions
-        v.save()
-        # redirect_url = '/coder_project/' + str(project_id) + '/edit_project/'
-
-        # return redirect('/coder_project/')
 
     return render(
         request,
@@ -681,6 +704,8 @@ def edit_variable_library(request):
                 if variable_project_origin:
                     project_origin_tag_ids = [tag.id for tag in variable_project_origin.tag_set.all()]
                     tags_attached_to_original_variable = variable.tag_set.exclude(id__in=project_origin_tag_ids)
+                else:
+                    tags_attached_to_original_variable = variable.tag_set.all()
 
                 greatest_col_index = \
                     ColumnMeta.objects\
@@ -765,7 +790,6 @@ def review_variables(request, coder_id, project_id):
     completed_variable_ids = request.POST.get('completed_variables')
     completed_variable_id = request.POST.get('completed_variable_id')
     is_review_all = False
-    variable_index = 0
 
     if request.POST and 'submit_review_all' in request.POST:
         completed_variable_ids = completed_variable_ids.split(',')
@@ -877,8 +901,16 @@ def select_variable(request, coder_id, project_id):
         total_coder_answer_count = DataMeta.objects.filter(coder=coder_data).count()
         corrected_coder_answer_count = DataMeta.objects.filter(coder=coder_data, corrected=True).count()
 
-        coder_rating = (100 - ((corrected_coder_answer_count / total_coder_answer_count) * 100)) / 10
-        coder_rating = round(coder_rating, 1)
+        if corrected_coder_answer_count == 0:
+            coder_rating = 10.0
+        else:
+            coder_rating_decimal = float(corrected_coder_answer_count) / float(total_coder_answer_count)
+            coder_rating_percentage = float(coder_rating_decimal * 100)
+            coder_rating_from_hundred = float(100 - coder_rating_percentage)
+            coder_rating = float(coder_rating_from_hundred / 10)
+            coder_rating = round(coder_rating, 1)
+
+            print(coder_rating, 'after rounding')
 
         coder_data.rating = float(coder_rating)
         coder_data.save()
@@ -1125,8 +1157,10 @@ def edit_tags(request):
         tag_id = request.POST.get('tag_id')
         tag = Tag.objects.get(id=tag_id)
         new_name = request.POST.get('new_tag_name')
-        tag.name = new_name
-        tag.save()
+
+        if new_name != tag.name:
+            tag.name = new_name
+            tag.save()
 
         tag_data = serializers.serialize('json', Tag.objects.all())
 
@@ -1209,17 +1243,33 @@ def create_tag(request):
 
 @login_required()
 def edit_variables(request):
+    redirect_url = reverse('coder_app:edit_variables')
+
+    if request.is_ajax() and request.POST.get('variable_action') == 'redirect':
+        variable_id = request.POST.get('variable_id')
+        base_url = '/coder_project/review_variable/'
+        redirect_url = base_url + str(variable_id)
+
+        return HttpResponse(
+            json.dumps({
+                'result': 'successful!',
+                'redirect_url': redirect_url
+            }),
+            content_type="application/json"
+        )
+
     if request.is_ajax() and request.POST.get('variable_action') == 'bulk_add':
-        tag_id = request.POST.get('tag_id')
+        tag_name = request.POST.get('tag_name')
         variable_ids = json.loads(request.POST.get('variable_ids'))
 
-        tag_to_add = Tag.objects.get(id=tag_id)
+        print(variable_ids, 'var ids')
 
-        for variable_id in variable_ids:
-            variable = Variable.objects.get(id=variable_id)
-            variable.tag_set.add(tag_to_add)
+        tag_to_add = Tag.objects.get(name=tag_name)
 
-        redirect_url = '/coder_project/'
+        if tag_to_add:
+            for variable_id in variable_ids:
+                variable = Variable.objects.get(id=variable_id)
+                variable.tag_set.add(tag_to_add)
 
         return HttpResponse(
             json.dumps({
@@ -1229,16 +1279,15 @@ def edit_variables(request):
             content_type="application/json"
         )
     elif request.is_ajax() and request.POST.get('variable_action') == 'bulk_remove':
-        tag_id = request.POST.get('tag_id')
+        tag_name = request.POST.get('tag_name')
         variable_ids = json.loads(request.POST.get('variable_ids'))
 
-        tag_to_remove = Tag.objects.get(id=tag_id)
+        tag_to_remove = Tag.objects.get(name=tag_name)
 
-        for variable_id in variable_ids:
-            variable = Variable.objects.get(id=variable_id)
-            variable.tag_set.remove(tag_to_remove)
-
-        redirect_url = '/coder_project/'
+        if tag_to_remove:
+            for variable_id in variable_ids:
+                variable = Variable.objects.get(id=variable_id)
+                variable.tag_set.remove(tag_to_remove)
 
         return HttpResponse(
             json.dumps({
@@ -1247,14 +1296,21 @@ def edit_variables(request):
             }),
             content_type="application/json"
         )
-    else:
-        variable_id = request.POST.get('variable_id')
-        variable = Variable.objects.get(id=variable_id)
+    # else:
+    #     variable_id = request.POST.get('variable_id')
+    #     variable = Variable.objects.get(id=variable_id)
+
+    if request.method == "POST" and 'bulk-variable-delete' in request.POST:
+        variables_to_delete = request.POST.getlist('variable-names[]')
+        for variable_to_delete in variables_to_delete:
+            variable = Variable.objects.get(id=variable_to_delete)
+            variable.delete()
 
     if request.is_ajax() and request.POST.get('variable_action') == 'delete_single_variable':
+        variable_id = request.POST.get('variable_id')
+        variable = Variable.objects.get(id=variable_id)
         variable.delete()
         variable_data = serializers.serialize('json', Variable.objects.all())
-        redirect_url = '/coder_project/'
 
         return HttpResponse(
             json.dumps({
@@ -1266,7 +1322,7 @@ def edit_variables(request):
         )
 
     if request.is_ajax() and request.POST.get('variable_action') == 'edit_variable':
-
+        variable_id = request.POST.get('variable_id')
         redirect_url = '/coder_project/edit_variable/' + str(variable_id)
 
         return HttpResponse(
@@ -1278,9 +1334,15 @@ def edit_variables(request):
         )
 
     if request.is_ajax() and request.POST.get('variable_action') == 'copy_variable':
+        variable_id = request.POST.get('variable_id')
+        variable = Variable.objects.get(id=variable_id)
         project_data = variable.project
-        project_tags = project_data.tag_set.all()
-        project_tag_ids = [tag.id for tag in project_tags]
+
+        if project_data:
+            project_tags = project_data.tag_set.all()
+            project_tag_ids = [tag.id for tag in project_tags]
+        else:
+            project_tag_ids = []
 
         tag_data = variable.tag_set.exclude(id__in=project_tag_ids)
 
@@ -1288,13 +1350,17 @@ def edit_variables(request):
         variable.save()
 
         variable.project = None
+        variable.name = variable.name + ' COPY'
+        variable.save()
 
         for tag in tag_data:
             variable.tag_set.add(tag)
 
-        variable_data = serializers.serialize('json', Variable.objects.all())
+        copy_tag, created = Tag.objects.get_or_create(name='copy')
 
-        redirect_url = '/coder_project/'
+        variable.tag_set.add(copy_tag)
+
+        variable_data = serializers.serialize('json', Variable.objects.all())
 
         return HttpResponse(
             json.dumps({
@@ -1304,6 +1370,16 @@ def edit_variables(request):
             }),
             content_type="application/json"
         )
+
+    variable_data = Variable.objects.all()
+
+    return render(
+        request,
+        'coder_app/edit_variables.html',
+        {
+            'variable_data': variable_data
+        }
+    )
 
 @login_required()
 def review_variable(request, variable_id):
@@ -1403,7 +1479,7 @@ def filter_variables(request):
 
         projects = Project.objects.filter(id__in=project_ids)
         project_data = []
-        tags = Tag.objects.filter(id__in=tag_id)
+        tags = Tag.objects.filter(id__in=tag_ids)
         tag_data = []
         variables = Variable.objects.filter(id__in=variable_ids)
         variable_data = []
@@ -1411,23 +1487,26 @@ def filter_variables(request):
         for project in projects:
             project_info = {
                 'id': project.id,
-                'name': project.name
+                'name': project.name,
+                'type': 'project'
             }
             project_data.append(project_info)
 
         for tag in tags:
             tag_info = {
                 'id': tag.id,
-                'name': tag.name
+                'name': tag.name,
+                'type': 'tag'
             }
             tag_data.append(tag_info)
 
         for variable in variables:
-            variable_data = {
+            variable_info = {
                 'id': variable.id,
-                'name': variable.name
+                'name': variable.name,
+                'type': 'variable'
             }
-            variable_data.append(variable_data)
+            variable_data.append(variable_info)
 
         filtered_variables = Variable.objects.all()
         filtered_variable_data = []
@@ -1439,16 +1518,14 @@ def filter_variables(request):
             filtered_variables = filtered_variables.filter(id__in=variable_ids)
 
         if tag_ids !=[]:
-            filtered_variables = filtered_variables.filter(tag_id__in=tag_ids)
-
-        print(filtered_variables)
+            filtered_variables = filtered_variables.filter(tag__in=tags)
 
         for filtered_variable in filtered_variables:
-            variable_data = {
+            variable_info = {
                 'id': filtered_variable.id,
                 'name': filtered_variable.name
             }
-            filtered_variable_data.append(variable_data)
+            filtered_variable_data.append(variable_info)
 
         return HttpResponse(
             json.dumps({

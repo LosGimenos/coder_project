@@ -2,7 +2,7 @@
 
 {% block content %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
-
+    {% include 'coder_app/nav_tabs.html' %}
     <h3>Add New Project</h3>
 
     <form action={% url 'coder_app:submit_new_project' %} method="post">
@@ -58,14 +58,6 @@
         </div>
 
     </form>
-
-    <style>
-        .filter--container {
-            border: 1px solid black;
-            height: 15vh;
-            overflow: scroll;
-        }
-    </style>
 
     {% load static %}
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
