@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'storages',
+    'boto3'
 ]
 
 MIDDLEWARE = [
@@ -123,6 +125,16 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
+
+AWS_STORAGE_BUCKET_NAME = os.environ['AWS_STORAGE_BUCKET_NAME']
+AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
+AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
+
+AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
+MEDIAFILES_LOCATION = 'files'
+MEDIA_URL = "https://%s/" % (AWS_S3_CUSTOM_DOMAIN)
+MEDIA_ROOT = MEDIA_URL
+DEFAULT_FILE_STORAGE = 'coder_app_project.storage_backends.MediaStorage'
 
 STATIC_URL = '/static/'
 

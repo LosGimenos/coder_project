@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from django.db import models
 from django.contrib.auth.models import User
-from common.models import UserInfo
+from common.models import UserInfo, Account
 
 class Coder(models.Model):
     rating = models.DecimalField(max_digits=3, decimal_places=1, default=10.0)
@@ -31,6 +31,7 @@ class Project(models.Model):
     coder = models.ManyToManyField(Coder)
     is_completed = models.BooleanField(default=False)
     is_frozen = models.BooleanField(default=False)
+    account = models.ForeignKey(Account, null=True)
     class Meta:
         permissions = (
             ('is_coding_app_admin', 'Is admin for Coding App'),

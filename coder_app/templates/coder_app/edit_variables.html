@@ -5,7 +5,7 @@
 
     {% include 'coder_app/nav_tabs.html' %}
 
-    <h3>Edit Variables</h3>
+    <h3>Variable Library</h3>
 
     <form action="{%  url 'coder_app:submit_new_variable' %}" method="post">
         {% csrf_token %}
@@ -14,9 +14,16 @@
 
     <div class="row" style="margin-top: 2%; margin-bottom: 2%;">
         <div class="col-md-4">
-            <div class="ui-widget" style="margin-bottom: 1%;">
-                <label for="tag_filter">Filter by Variable Name</label>
-                <input id='by_name' class="form-control" type="text" name="name_filter" placeholder="...variable name" />
+{#            <div class="ui-widget" style="margin-bottom: 1%;">#}
+{#                <label for="tag_filter">Filter by Variable Name</label>#}
+{#                <input id='by_name' class="form-control" type="text" name="name_filter" placeholder="...variable name" />#}
+{#            </div>#}
+            <label for="variable_name_filter">Filter by Variable Keyword</label>
+            <div class="input-group">
+                <input id='by_keyword' class='form-control' type="text" name="variable_name_filter"  /><br/>
+                <span class="input-group-btn">
+                    <button id='button--add__keyword' class="btn btn-default" type="button">Add</button>
+                </span>
             </div>
             <div class="ui-widget" style="margin-bottom: 1%;">
                 <label for="tag_filter">Filter by Tag</label>
@@ -47,7 +54,7 @@
         </div>
         <div class="col-md-1"></div>
         <div class="col-md-4 input-group">
-            <label style="margin-right: 2%;" for="tag-name-to-add">Add/Remove Tags</label>
+            <label style="margin-right: 2%;" for="tag-name-to-add">Bulk Add/Remove Tags</label>
             <input id="bulk-tag" type="text" name="tag-name-to-add" style="margin-right: 2%;"/>
             <span class="tag-control--bulk tag-control--bulk__add glyphicon glyphicon-plus"></span>
             <span class="tag-control--bulk tag-control--bulk__remove glyphicon glyphicon-minus"></span>
@@ -72,7 +79,7 @@
                         </td>
                         <td style="width: 20%; text-align: center;">
                             <span class="variable-controls" style="display: flex; justify-content: space-around;">
-                                <span name="{{ variable.id }}" class="copy-variable">Replicate</span>
+                                <span name="{{ variable.id }}" class="copy-variable">Copy</span>
                                 <span name="{{ variable.id }}" class="edit-variable">Edit</span>
                                 <span
                                     name="{{ variable.id }}"
@@ -120,9 +127,23 @@
         let variableIds = [];
         let tagIds = [];
         let projectIds = [];
+        let keywords = [];
 
         const filterContainer = $('.filter--container__variable');
         const variableTable = $('.variable--table');
+
+        $('#button--add__keyword').click(e => {
+            e.preventDefault();
+            let keywordValue = $('#by_keyword').val();
+
+            console.log(keywordValue);
+            if ( $.inArray( keywordValue, keywords ) < 0 ) {
+                keywords.push(keywordValue);
+            };
+
+            ajaxVariableFilter();
+            $('#by_keyword').val('');
+        });
 
         $('.select-all').click(e => {
             e.preventDefault();
@@ -136,6 +157,7 @@
                 const node = $(e.currentTarget);
                 const nodeId = $(node).parent().attr('name');
                 const nodeType = $(node).prev().attr('name');
+                const nodeValue = $(node).val();
 
                 let itemIndex;
                 switch (nodeType) {
@@ -148,8 +170,8 @@
                         projectIds.splice(itemIndex, 1);
                         break;
                     case 'variable':
-                        itemIndex = $.inArray(nodeId, variableIds);
-                        variableIds.splice(itemIndex, 1);
+                        itemIndex = $.inArray(nodeValue, keywords);
+                        keywords.splice(itemIndex, 1);
                         break;
                 }
 
@@ -223,7 +245,7 @@
         function addCopyHandler() {
             $('.copy-variable').click(e => {
                 e.preventDefault();
-
+                console.log('hit copy')
                 let variableId = $(e.currentTarget).attr('name');
 
                 $.ajax({
@@ -345,34 +367,18 @@
           minLength: 2
         });
 
-        $('#by_name').autocomplete({
-          source: '/coder_project/get_variable_names',
-          select: function (event, ui) {
-            let variableId;
-            if ($.inArray(ui.item.id, variableIds) < 0) {
-                variableId = ui.item.id;
-                variableIds.push(variableId);
-            }
-
-            ajaxVariableFilter();
-            $('#by_name').val('');
-            return false;
-          },
-          minLength: 2
-        });
-
         function ajaxVariableFilter() {
             $.ajax({
                 url: '/coder_project/filter_variables',
                 type: 'POST',
                 data: {
-                    'variable_ids': JSON.stringify(variableIds),
+                    'variable_keywords': JSON.stringify(keywords),
                     'project_ids': JSON.stringify(projectIds),
                     'tag_ids': JSON.stringify(tagIds),
                     'variable_action': 'filter_variables'
                 },
                 success: function (json) {
-                  let filters = [json.tag_data, json.project_data, json.variable_data];
+                  let filters = [json.tag_data, json.project_data, json.keyword_data];
                   renderFilterContainer(filters, filterContainer, 'multiFilterVariable');
                   renderFilterContainer(json.filtered_variable_data, variableTable, 'variableTable')
                 },
@@ -396,7 +402,7 @@
                             } else if (filterNode.type == 'project') {
                                 spanNode = $('<span style="background-color: orange;" name="project">PROJECT ||</span>');
                             } else if (filterNode.type == 'variable') {
-                                spanNode = $('<span style="background-color: green;" name="variable">VARIABLE ||</span>');
+                                spanNode = $('<span style="background-color: green; color: white;" name="variable">VARIABLE ||</span>');
                             }
                             let variableNode =
                                 $(`<span name='${filterNode.id}'>${filterNode.name}<span class='badge filter-remove__variable'>X</span><br/></span>`);
@@ -405,7 +411,7 @@
                         });
                     });
 
-                            addRemoveVariableFilterHandler();
+                    addRemoveVariableFilterHandler();
 
                     break;
 
@@ -415,12 +421,15 @@
                             $(`
                                 <tr>
                                     <td>
-                                        <input style="margin-right: 1%; float: left;" class='variable-checkbox' type="checkbox" name="variable-names[]" value="{{ variable.id }}" />
+                                        <input
+                                            style="margin-right: 1%; float: left;"
+                                            class='variable-checkbox'
+                                            type="checkbox" name="variable-names[]" value="${ itemData.id }" />
                                         <span class="variable-name">${ itemData.name }</span>
                                     </td>
                                     <td style="width: 20%; text-align: center;">
                                         <span class="variable-controls" style="display: flex; justify-content: space-around;">
-                                            <span name="${ itemData.id }class="copy-variable">Replicate</span>
+                                            <span name="${ itemData.id }" class="copy-variable">Replicate</span>
                                             <span name="${ itemData.id }" class="edit-variable">Edit</span>
                                             <span
                                                 name="${ itemData.id }"

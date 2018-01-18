@@ -1,18 +1,19 @@
 {% extends "coder_app/base.html" %}
 
 {% block content %}
-    {% include 'coder_app/home_tab.html' %}
+    {% include 'coder_app/nav_tabs.html' %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
 
     <h3>Edit Variable "{{ variable_data.name }}"</h3>
 
-    <form action={% url 'coder_app:edit_variable' variable_id=variable_data.id %} class="input-group" method="post">
+    <form action={% url 'coder_app:edit_variable' variable_id=variable_data.id %} method="post">
         {% csrf_token %}
         <input class='btn btn-primary' type="submit" name="submit_variable" value="Submit Variable"/><br />
         <input style="display:none;" name="variable_id" value="{{ variable_data.id }}" />
         <input style="display:none;" name="project_id" value="{{ project_id }}" />
 
         <div class="row">
+        <div class="col-md-12">
                 <div class="col-md-4">
         <label for="project-name">Variable Name</label>
         <input class="form-control" type="input" name="variable-name" value='{{ variable_data.name }}' /> <br />
@@ -71,6 +72,7 @@
                 </div>
         </div>
         </div>
+        </div>
 
 
     {% load static %}
@@ -100,6 +102,7 @@
                         'tag_id': tagId
                     },
                     success: function(json) {
+                        tagsArray = [];
                         let tagData = json.tag_data;
 
                         $(tagData).each((index, tag) => {
@@ -111,7 +114,7 @@
                             tagsArray.push(tagInfo);
                         });
 
-
+                        console.log(tagsArray)
                         renderFilterContainer(tagsArray, tagContainer, 'tag');
 
                         $('#by_tag').val('');

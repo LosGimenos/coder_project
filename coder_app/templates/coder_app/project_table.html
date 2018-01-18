@@ -3,7 +3,7 @@
 {% block content %}
 
 {% include 'coder_app/nav_tabs.html' %}
-<h3>Your Projects</h3>
+{#<h3>Your Projects</h3>#}
 
 <form action={% url 'coder_app:submit_new_project' %}>
     <input class="btn btn-primary" type="submit" value="Add Project"/>
@@ -15,10 +15,11 @@
             <th class="header">Project Name</th>
             <th class="header">Project Rate</th>
             <th class="header">Dataset</th>
-            <th class="header">Contains Adverse Events</th>
+            <th class="header">Has AEs</th>
             <th class="header">Pause Project</th>
-            <th class="header"></th>
-            <th class="header"></th>
+            <th class="header">Edit Project</th>
+            <th class="header">Copy Project</th>
+            <th class="header">Delete Project</th>
         </tr>
         </thead>
         {% if project_data %}
@@ -26,11 +27,17 @@
                     {% for project in project_data %}
                     <tr>
                         <td>{{ project.name }}</td>
-                        <td>{{ project.rate }}</td>
+                        <td>${{ project.rate }} per mention</td>
                         <td>{{ project.dataset_name }}</td>
-                        <td>{{ project.contains_adverse_events }}</td>
                         <td style="text-align: center;">
-                            <form  method='post'>
+                            {% if project.contains_ae_data %}
+                                <a href="{{ project.MEDIA_URL }}{{ project.file_path }}"><button class="btn btn-xs btn-success">Download</button></a>
+                            {% else %}
+                                <span>None</span>
+                            {% endif %}
+                        </td>
+                        <td style="text-align: center;">
+                            <form action="{% url 'coder_app:view_projects' %}" method='post'>
                                 {% csrf_token %}
                                 <input
                                         type="submit"
@@ -50,13 +57,26 @@
                             <a href={% url 'coder_app:edit_project' project_id=project.id %}><span>Edit</span></a>
                         </td>
                         <td>
-                            <form action={% url 'coder_app:homepage' %} method='post'>
+{#                            <a href="{% url 'coder_app:replicate_project' project.id %}"><span>Copy</span></a>#}
+                            <form action="{% url 'coder_app:view_projects' %}" method="post">
+                                {% csrf_token %}
+                                <input
+                                    type="submit"
+                                    name="replicate_project"
+                                    class="btn btn-default btn-xs"
+                                    value="Copy"
+                                />
+                                <input style="display:none;" name="project_id" value={{ project.id }} />
+                            </form>
+                        </td>
+                        <td>
+                            <form action={% url 'coder_app:view_projects' %} method='post'>
                                 {% csrf_token %}
                                 <input
                                         type="submit"
                                         class="btn btn-danger btn-xs"
                                         name="delete_project_button"
-                                        value='X' />
+                                        value='x' />
                                 <input style="display:none;" name="project_id" value={{ project.id }} />
                             </form>
                         </td>

@@ -2,10 +2,17 @@
 {% url 'coder_app:view_projects' as view_projects %}
 {% url 'coder_app:add_coder' as add_coder %}
 {% url 'coder_app:edit_tags' as edit_tags %}
+{% url 'coder_app:homepage' as homepage %}
 
     <ul class="nav nav-tabs" role="tablist">
-      <li class='nav-home' role="presentation">
-          <a href="#home" aria-controls="home" role="tab" data-toggle="tab">Home</a></li>
+      <li
+          {% if request.path == homepage %}
+            class="nav-home active"
+          {% else %}
+            class="nav-home"
+          {% endif %}
+            role="presentation">
+          <a href="{{ homepage }}" aria-controls="home" role="tab">Home</a></li>
       <li
                {% if request.path == view_projects %}
                    class="nav-project active"

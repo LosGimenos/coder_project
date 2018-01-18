@@ -1,0 +1,255 @@
+{% extends 'coder_app/base.html' %}
+
+{% block content %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
+
+    {% include 'coder_app/nav_tabs.html' %}
+    <h3>Copy Project "{{ project_data.name }}"</h3>
+
+   <form action="{% url 'coder_app:replicate_project' project_data.id %}" method="POST">
+   {% csrf_token %}
+   <div class="row">
+        <div class="col-md-12">
+            <div class="col-md-4">
+                <label for="dataset-name">Link a Dataset</label>
+                <select name="dataset-name" class="form-control">
+                    {% for dataset in dataset_data %}
+                        <option value="{{ dataset.id }}"><span>{{ dataset.dataset_ID }}</span></option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+   <div class="row" style="margin-top: 2%;">
+       <div class="col-md-12">
+            <div class="col-md-4">
+                <div class="ui-widget">
+                    <label for="tag_filter">Add Project Tags (minimum of 1)</label>
+                    <input id='by_tag' class="form-control" type="text" name="tag_filter" placeholder="...tagname" />
+                </div>
+            </div>
+            <div class="col-md-2"></div>
+            <div class="col-md-4">
+                <label for="filter--container">Selected Tags</label>
+{#                <div class="col-md-12 filter--container tag--container" name="filter--container">#}
+{#                </div>#}
+                <select multiple class="form-control add-tag" name="tags-to-add[]" style="width: 100%; border: 1px solid grey; height: 15vh; overflow: scroll;">
+                </select>
+            </div>
+       </div>
+    </div>
+   <br />
+   <input class="btn btn-primary" type="submit" name="replicate-project" value="COPY" />
+   </form>
+
+    {% load static %}
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script src="{% static 'token_injector.js' %}"></script>
+    <script>
+        const tagContainer = $('.tag--container');
+        const tagSelect = $('.add-tag');
+        let tagIds = [];
+
+        $('#by_tag').autocomplete({
+            source: "/coder_project/get_tag_names",
+            select: function(event, ui) {
+                let tagId = ui.item.id;
+
+                if ( $.inArray( tagId, tagIds) < 0 ) {
+                    tagIds.unshift(tagId);
+                };
+
+                $.ajax({
+                    url: '/coder_project/filter_tags',
+                    type: 'POST',
+                    data: {
+                        'tag_action': 'filter_tag',
+                        'tag_list': JSON.stringify(tagIds)
+                    },
+                    success: function(json) {
+                        let tagData = json.tag_data;
+
+                        renderFilterContainer(tagData, tagSelect, 'tagOption');
+                    },
+                    error: function(xhr,errmsg,err) {
+                        console.log(err);
+                    }
+                })
+
+                $('#by_tag').val('');
+                return false;
+            },
+            minLength: 2
+        });
+
+        function addTagRemoveHandler() {
+            $('.tag-remove').click(e => {
+                e.preventDefault();
+                let nodeValue = $(e.target.parentNode).attr('name');
+                $(tagIds).each((index, tag) => {
+                    if (tag == nodeValue) {
+                        tagIds.splice(index, 1)
+                    }
+                });
+
+                $.ajax({
+                    url: '/coder_project/filter_tags',
+                    type: 'POST',
+                    data: {
+                        'tag_action': 'filter_tag',
+                        'tag_list': JSON.stringify(tagIds)
+                    },
+                    success: function(json) {
+                        let tagData = json.tag_data;
+
+                        renderFilterContainer(tagData, tagSelect, 'tagOption');
+
+                    },
+                    error: function(xhr,errmsg,err) {
+                        console.log(err);
+                    }
+                })
+            });
+        }
+
+        function renderFilterContainer(array, container, type) {
+            $(container).empty();
+
+            switch (type) {
+                case 'multiFilterVariable':
+                    array.forEach(filterArray => {
+                        filterArray.forEach(filterNode => {
+                            let spanNode;
+
+                            if (filterNode.type == 'tag') {
+                                spanNode = $('<span style="background-color: pink;" name="tag">TAG ||</span>');
+                            } else if (filterNode.type == 'project') {
+                                spanNode = $('<span style="background-color: orange;" name="project">PROJECT ||</span>');
+                            } else if (filterNode.type == 'variable') {
+                                spanNode = $('<span style="background-color: green; color: white;" name="variable">VARIABLE ||</span>');
+                            }
+                            let variableNode =
+                                $(`<span name='${filterNode.id}'>${filterNode.name}<span class='badge filter-remove__variable'>X</span><br/></span>`);
+                            $(variableNode).prepend(spanNode);
+                            $(container).append(variableNode);
+                        });
+                    });
+
+                            addRemoveVariableFilterHandler();
+
+                    break;
+
+                case 'variableTable':
+                    array.forEach(itemData => {
+                        let variableNode =
+                            $(`
+                                <tr>
+                                    <td>
+                                        <input
+                                            style="margin-right: 1%; float: left;"
+                                            class='variable-checkbox'
+                                            type="checkbox" name="variable-names[]" value="${ itemData.id }" />
+                                        <span class="variable-name">${ itemData.name }</span>
+                                    </td>
+                                    <td style="width: 20%; text-align: center;">
+                                        <span class="variable-controls" style="display: flex; justify-content: space-around;">
+                                            <span name="${ itemData.id }class="copy-variable">Replicate</span>
+                                            <span name="${ itemData.id }" class="edit-variable">Edit</span>
+                                            <span
+                                                name="${ itemData.id }"
+                                                class="glyphicon glyphicon-th-list variable-list--redirect"></span>
+                                            <span name="${ itemData.id }" class="glyphicon glyphicon-trash variable-delete"></span>
+                                        </span>
+                                    </td>
+                                </tr>
+                            `)
+                        $(container).append(variableNode);
+                    });
+                    addEditHandler();
+                    addCopyHandler();
+                    addDeleteHandler();
+                    addVariableListRedirect();
+
+                    break;
+
+                case 'tagTable':
+                    array.forEach(itemData => {
+                        let variableNode =
+                            $(`
+                                <tr>
+                                    <td>
+                                        <input
+                                                style="margin-right: 1%; float: left;"
+                                                class="checkbox"
+                                                type="checkbox"
+                                                name="tag-names[]"
+                                                value="${ itemData.id }" />
+                                        <span name="${ itemData.id }" class="tag-name">${ itemData.name }</span>
+                                    </td>
+                                    <td style="width: 15%; text-align: center;">
+                                        <span
+                                            class="tag-controls" style="display: flex; justify-content: space-around;">
+                                            <span
+                                                name="${ itemData.id }" class="rename-tag">Rename</span>
+                                            <span
+                                                name="${ itemData.id }"
+                                                class="glyphicon glyphicon-th-list tag-list--redirect"></span>
+                                            <span name="${ itemData.id }" class="glyphicon glyphicon-trash tag-delete"></span>
+                                        </span>
+                                    </td>
+                                </tr>
+                            `)
+                        $(container).append(variableNode);
+                    });
+                    addDeleteHandler();
+                    addTagListHandler();
+                    addInputHandler();
+                    break;
+
+                case 'keyword':
+                    array.forEach(itemData => {
+                    let variableNode =
+                        $(`<span name='${itemData.name}'>${itemData.name}<span class='badge keyword-remove'>X</span><br/></span>`);
+                        $(container).append(variableNode);
+                    });
+                    addKeywordHandler();
+                    break;
+
+                case 'tag':
+                    array.forEach(itemData => {
+                        let variableNode =
+                        $(`<span name='${itemData.id}'>${itemData.name}<span class='badge tag-remove'>X</span><br/></span>`);
+                        $(container).append(variableNode);
+                    });
+                    addTagRemoveHandler();
+                    break;
+
+                case 'variable':
+                    array.forEach(itemData => {
+                        let variableNode = $(`<span name='${itemData.id}'>${itemData.name}<br/></span>`);
+                        $(container).append(variableNode);
+                    });
+                    addVariableHandler();
+                    break;
+
+                case 'project':
+                    array.forEach(itemData => {
+                        let variableNode = $(`<span name='${itemData.id}'>${itemData.name}<br/></span>`);
+                        $(container).append(variableNode);
+                    });
+                    addProjectVariablesHandler();
+                    break;
+
+                case 'tagOption':
+                    array.forEach(itemData => {
+                        let variableNode = $(`<option value=${itemData.id} selected>${itemData.name}</option>`);
+                        $(container).append(variableNode);
+                    });
+                    addTagRemoveHandler();
+                    break;
+            }
+        }
+    </script>
+{% endblock %}
+

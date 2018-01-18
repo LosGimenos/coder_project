@@ -3,13 +3,13 @@
 {% block content %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
 
-    {% include 'coder_app/home_tab.html' %}
-    <h3>Attach Variables to Project "{{ project_data.name }}"</h3>
+    {% include 'coder_app/nav_tabs.html' %}
+    <h3>Add Variables from Library</h3>
 
     <div class="row">
         <div class="col-md-12">
             <div class="col-md-5">
-                <label for="variable_name_filter">Add Keyword</label>
+                <label for="variable_name_filter">Search by Keyword</label>
                 <div class="input-group">
                     <input id='by_name' class='form-control' type="text" name="variable_name_filter"  /><br/>
                     <span class="input-group-btn">
@@ -17,7 +17,7 @@
                     </span>
                 </div>
                 <div class="ui-widget">
-                    <label for="tag_filter">Add Tags</label>
+                    <label for="tag_filter">Search by Tag</label>
                     <input id='by_tag' class="form-control" type="text" name="tag_filter" placeholder="...tagname" />
                 </div>
             </div>

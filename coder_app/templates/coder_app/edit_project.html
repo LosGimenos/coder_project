@@ -5,7 +5,7 @@
 
     {% url 'coder_app:submit_new_variable' as variable_url %}
     {% url 'coder_app:add_coder' as coder_url %}
-{% include 'coder_app/home_tab.html' %}
+{% include 'coder_app/nav_tabs.html' %}
 <h3>Edit Project Details</h3>
 
     <div class="row">
@@ -33,13 +33,19 @@
             </div>
         </div>
         <div class="col-md-4">
+                <form action="{% url 'coder_app:edit_project' project_data.id %}" method="POST">
+                {% csrf_token %}
                 <label for="tags-to-remove[]">Current Project Tags</label>
-                <select class='form-control' multiple name="tags-to-remove[]" style="width: 100%; border: 1px solid grey; height: 20vh; overflow: scroll;">
+                <select
+                        class='form-control'
+                        multiple name="tags-to-remove[]"
+                        style="width: 100%; border: 1px solid grey; height: 20vh; overflow: scroll; margin-bottom: 2%;">
                     {% for tag in tag_data %}
                         <option value="{{ tag.id }}"><span>{{ tag.name }}</span>
                     {% endfor %}
                 </select>
-                <input class="btn btn-danger" name="remove-variable-tags" type="submit" value="Remove Selected"/>
+                <input class="btn btn-danger" name="remove-project-tags" type="submit" value="Remove Selected"/>
+                </form>
         </div>
         </div>
     </div>
@@ -50,7 +56,7 @@
             <li>
                 <form action={% url 'coder_app:edit_project' project_id=id %} method="post">
                     {% csrf_token %}
-                    <input type="submit" name="select-variable-view-button" value="Variables" />
+                    <input type="submit" name="select-variable-view-button" value="Assigned Variables" />
                     <input style="display: none;" name="variable_view" value="{{ variable.id }}" />
                 </form>
             </li>
@@ -64,8 +70,15 @@
             <li>
                 <form action={% url 'coder_app:edit_project' project_id=id %} method="post">
                     {% csrf_token %}
-                    <input type="submit" name="assigned-coder-view-button" value="Avail.Coders" />
+                    <input type="submit" name="assigned-coder-view-button" value="Your Coders" />
                     <input style="display: none;" name="available_coder_view" value="{{ variable.id }}" />
+                </form>
+            </li>
+            <li>
+                <form action={% url 'coder_app:edit_project' project_id=id %} method="post">
+                    {% csrf_token %}
+                    <input type="submit" name="cambrian-coder-view-button" value="Cambrian Coders" />
+                    <input style="display: none;" name="cambrian_coder_view" value="{{ variable.id }}" />
                 </form>
             </li>
             <li>

@@ -20,6 +20,7 @@ urlpatterns = [
     url(r'^projects', views.view_projects, name='view_projects'),
     url(r'^variables', views.submit_new_variable, name='submit_new_variable'),
     url(r'^add_project', views.submit_new_project, name='submit_new_project'),
+    url(r'^(?P<project_id>[0-9]+)/replicate_project/$', views.replicate_project, name='replicate_project'),
     url(r'^(?P<project_id>[0-9]+)/edit_project/$', views.edit_project, name='edit_project'),
     url(r'edit_variable/(?P<variable_id>[0-9]+)/$', views.edit_variable, name='edit_variable'),
     url(r'^add_coder', views.submit_new_coder, name='add_coder'),
@@ -45,7 +46,7 @@ urlpatterns = [
 
     # AUTH URLS
     # url(r'^$', RedirectView.as_view(url=reverse_lazy('collect_homepage',urlconf='coder_app.urls')), name='homepage'),
-    # url(r'^login/$', auth_pangea_common_views.pangea_login, name='login'),
+    url(r'^login/$', auth_pangea_common_views.pangea_login, name='login'),
     # url(r'^logout/$', auth_views.logout, {'next_page': reverse_lazy('login', urlconf='coder_app.urls')}, name='logout'),
     # url(r'^password_reset/$', auth_views.password_reset, {'template_name': 'common/auth/password_reset.html',
     #                                                      'post_reset_redirect': reverse_lazy('password_reset_done',urlconf='coder_app.urls'),

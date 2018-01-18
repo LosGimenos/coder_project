@@ -31,18 +31,18 @@
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-md-12">
-                <div class="col-md-4">
-                    <label for="dataset-name">Link a Dataset</label>
-                    <select name="dataset-name" class="form-control">
-                        {% for dataset in dataset_data %}
-                            <option value="{{ dataset.id }}"><span>{{ dataset.dataset_ID }}</span></option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
-        </div>
+{#        <div class="row">#}
+{#            <div class="col-md-12">#}
+{#                <div class="col-md-4">#}
+{#                    <label for="dataset-name">Link a Dataset</label>#}
+{#                    <select name="dataset-name" class="form-control">#}
+{#                        {% for dataset in dataset_data %}#}
+{#                            <option value="{{ dataset.id }}"><span>{{ dataset.dataset_ID }}</span></option>#}
+{#                        {% endfor %}#}
+{#                    </select>#}
+{#                </div>#}
+{#            </div>#}
+{#        </div>#}
         <div class="row" style="margin-top: 2%;">
             <div class="col-md-12">
                 <div class="col-md-5 input-group">
@@ -58,6 +58,14 @@
         </div>
 
     </form>
+    <style>
+    .tag--container {
+        border: 1px solid grey;
+        height: 15vh;
+        overflow: scroll;
+    }
+
+    </style>
 
     {% load static %}
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>

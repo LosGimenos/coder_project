@@ -371,6 +371,7 @@ def project_answering(request, coder_id, project_id, row_id, column_id):
         if 'variable-adverse-events' in request.POST:
             row_data.contains_adverse_events = True
             row_data.adverse_event_datetime_submitted = datetime.datetime.now().replace(tzinfo=pytz.UTC)
+            project_data.contains_adverse_events = True
 
 
         # advance row curr_col_index count
