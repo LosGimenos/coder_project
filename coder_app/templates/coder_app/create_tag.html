@@ -3,13 +3,13 @@
 {% block content %}
     {% include 'coder_app/nav_tabs.html' %}
 
-    <h3>Create Tag</h3>
+    <h3 style="margin-left: 1%;">Create Tag</h3>
 
     <form action="{% url 'coder_app:create_tag' %}" method="POST">
         {% csrf_token %}
         <div class="col-md-4">
-            <input name="create-tag" class="form-control" type="text" />
-            <input type="submit" name="create-tag-submit" class="btn btn-primary" />
+            <input name="create-tag" class="form-control" type="text" /><br />
+            <input type="submit" name="create-tag-submit" class="btn btn-success" />
         </div>
     </form>
 

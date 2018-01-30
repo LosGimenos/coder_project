@@ -4,144 +4,96 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
 
     {% include 'coder_app/nav_tabs.html' %}
+    {% include 'coder_app/breadcrumb_projects.html' %}
     <h3>Add Variables from Library</h3>
 
-    <div class="row">
-        <div class="col-md-12">
-            <div class="col-md-5">
-                <label for="variable_name_filter">Search by Keyword</label>
+    <div style="margin-left: 1.5%;">
+        <div class="row" style="margin-top: 2%; margin-bottom: 2%;">
+            <div class="col-md-4">
+                <label for="variable_name_filter">Search Keyword</label>
                 <div class="input-group">
-                    <input id='by_name' class='form-control' type="text" name="variable_name_filter"  /><br/>
+                    <input id='by_keyword' class='form-control' type="text" name="variable_name_filter"  /><br/>
                     <span class="input-group-btn">
                         <button id='button--add__keyword' class="btn btn-default" type="button">Add</button>
                     </span>
                 </div>
-                <div class="ui-widget">
+                <div class="ui-widget" style="margin-bottom: 1%;">
                     <label for="tag_filter">Search by Tag</label>
-                    <input id='by_tag' class="form-control" type="text" name="tag_filter" placeholder="...tagname" />
+                    <input id="by_tag_name" class="form-control" type="text" name="tag_filter" placeholder="...tagname" />
+                </div>
+                <div class="ui-widget" style="margin-bottom: 1%;">
+                    <label for="project_filter">Search by Project</label>
+                    <input id='by_project' class="form-control" type="text" name="project_filter" placeholder="...project name" />
                 </div>
             </div>
-            <div class="col-md-1">
-            </div>
-            <div class="col-md-5">
-                <h4 style="text-align: center;">Keywords</h4>
-                <div id="keyword-container" class="col-md-12 filter--container">
+            <div class="col-md-2"></div>
+            <div class="col-md-4">
+                <label for="filter--container">Selected Filters</label>
+                <div class="col-md-12 filter--container filter--container__variable" name="filter--container">
                 </div>
             </div>
         </div>
+            <div class="row" style="margin-top: 1%;">
+                <div class="col-md-3">
+                    <button style="float: left;" class="btn btn-default select-all">Select All</button>
+
+                    <form action="{% url 'coder_app:variable_library' %}" method="post">
+                        {% csrf_token %}
+                        <input
+                                type="submit"
+                                style="margin-left: 1%;"
+                                class="btn btn-success bulk-add"
+                                name="add_variables"
+                                value="Add to Project"/>
+                </div>
+            </div>
     </div>
 
-    <div class="row">
-    <div class="col-md-12">
-        <div class="col-md-5"></div>
-        <div class="col-md-1"></div>
-        <div class="col-md-5">
-            <h4 style="text-align: center;">Selected Tags</h4>
-            <div class="col-md-12 filter--container tag--container"></div>
-        </div>
-    </div>
-    </div>
-
-    <div class="row">
-    <div class="col-md-5 variable--container__title"><h3>Filtered Variables</h3></div>
-        <div class="col-md-1"></div>
-        <div class="col-md-5 variable--container__title"><h3 class="variable--container__title-choice">{{ project_data.name }}</h3></div>
-    </div>
-    <div class="row">
-    <div class="col-md-12">
-        <div class="col-md-5 variable--container variable--container__filtered">
-            {% if variable_data %}
-                {% for variable in variable_data %}
-                    <span name="{{ variable.id }}">{{ variable.name }}<br/></span>
-                {% endfor %}
-            {% endif %}
-        </div>
-        <div class="col-md-1 control--container">
-            <div class="action--button action--button-library">
-                <div class="glyphicon glyphicon-arrow-right">
-                </div>
-            </div>
-            <div class="action--button action--button-back">
-                <div class="glyphicon glyphicon-arrow-left">
-                </div>
-            </div>
-            <div class="action--button action--button-library__all">
-                <div class="glyphicon glyphicon-forward">
-                </div>
-            </div>
-            <div class="action--button action--button-back__all">
-                <div class="glyphicon glyphicon-backward">
-                </div>
-            </div>
-        </div>
-        <div class="col-md-5 variable--container variable--container__to-project">
-        </div>
-    </div>
-    </div>
-    <div class="row" style="margin-top: 1%;">
-        <div class="col-md-5">
-        </div>
-        <div class="col-md-1" style="text-align: center;">
-            <button class="btn btn-success variable--container__submit">Confirm</button>
-            <input class="project-id" type="hidden" name="project_id" value="{{ project_data.id }}"/>
-        </div>
-        <div class="col-md-5">
-        </div>
-    </div>
+    <div class="table-responsive" style="margin-top: 1%;">
+    <table class="table table-bordered table-hovered table-striped tablesorter">
+        <thead>
+        <tr>
+            <th class="header">Variable Name</th>
+        </tr>
+        </thead>
+        {% if variable_data %}
+                <tbody class="variable--table">
+                    {% for variable in variable_data %}
+                    <tr>
+                        <td>
+                            <input style="margin-right: 1%; float: left;" class='variable-checkbox' type="checkbox" name="variable_ids[]" value="{{ variable.id }}" />
+                            <span class="variable-name">{{ variable.name }}</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+        {% else  %}
+            <tbody>
+                <tr>
+                    <td>There are no current Variables</td>
+                </tr>
+            </tbody>
+        {% endif %}
+    </table>
+        <input type="hidden" name="project_id" value="{{ project_data.id }}" />
+        </form>
+</div>
 
     <style>
+        .tag-control--bulk {
+            cursor: pointer;
+            margin-right: 3%;
+        }
 
-    .filter--container {
-        border: 1px solid black;
-        height: 15vh;
-        overflow: scroll;
-    }
+        .variable-controls span {
+            cursor: pointer;
+        }
 
-    .variable--container {
-        border: 1px solid black;
-        height: 30vh;
-        overflow: scroll;
-    }
-
-    .variable--container__title {
-        text-align: center;
-    }
-
-    .control--container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        border: 1px solid black;
-        height: 30vh;
-    }
-
-    .variable--container span:hover {
-        background-color: grey;
-        cursor: pointer;
-    }
-
-    .action--button {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        height: 25%;
-        text-align: center;
-        width: 100%;
-        cursor: pointer;
-    }
-
-    .action--button:hover {
-        background-color: grey;
-    }
-
-    .selected {
-        background-color: aquamarine;
-    }
-
-    .project-selected {
-        background-color: cadetblue;
-    }
-
+        .filter--container {
+            border: 1px solid black;
+            height: 15vh;
+            overflow: scroll;
+        }
     </style>
 
     {% load static %}
@@ -150,42 +102,364 @@
     <script src="{% static 'token_injector.js' %}"></script>
 
     <script>
-        let variablesToMove = [];
-        let variablesToReset = [];
-        const variablesToProjectContainer = $('.variable--container__to-project');
-        const filteredVariablesContainer = $('.variable--container__filtered');
-        const tagContainer = $('.tag--container');
-        const keywordContainer = $('#keyword-container');
+        let variableIds = [];
+        let tagIds = [];
+        let projectIds = [];
+        let keywords = [];
 
-        const tagsArray = [];
-        let keywordArray = [];
-        let filteredVariablesArray = [];
-        let variablesToProjectArray = [];
+        const filterContainer = $('.filter--container__variable');
+        const variableTable = $('.variable--table');
 
-        const globalVariableIds = [];
-        const globalTagIds = [];
-        const globalKeywords = [];
+        $('#button--add__keyword').click(e => {
+            e.preventDefault();
+            let keywordValue = $('#by_keyword').val();
 
-        const projectId = $('.project-id').val();
+            console.log(keywordValue);
+            if ( $.inArray( keywordValue, keywords ) < 0 ) {
+                keywords.push(keywordValue);
+            };
 
-        function loadFilteredVariables() {
-            const allVariables = $('.variable--container__filtered span');
-            $(allVariables).each((index, variable) => {
-                let id = $(variable).attr('name');
-                let name = $(variable).text();
-                filteredVariablesArray.push({
-                    id,
-                    name
-                })
+            ajaxVariableFilter();
+            $('#by_keyword').val('');
+        });
+
+        $('.select-all').click(e => {
+            e.preventDefault();
+            $('.variable-checkbox').prop('checked', true);
+        });
+
+        function addRemoveVariableFilterHandler() {
+            $('.filter-remove__variable').click(e => {
+                e.preventDefault();
+
+                const node = $(e.currentTarget);
+                const nodeId = $(node).parent().attr('name');
+                const nodeType = $(node).prev().attr('name');
+                const nodeValue = $(node).val();
+
+                let itemIndex;
+                switch (nodeType) {
+                    case 'tag':
+                        itemIndex = $.inArray(nodeId, tagIds);
+                        tagIds.splice(itemIndex, 1);
+                        break;
+                    case 'project':
+                        itemIndex = $.inArray(nodeId, projectIds);
+                        projectIds.splice(itemIndex, 1);
+                        break;
+                    case 'variable':
+                        itemIndex = $.inArray(nodeValue, keywords);
+                        keywords.splice(itemIndex, 1);
+                        break;
+                }
+
+                ajaxVariableFilter();
             });
         }
 
-        loadFilteredVariables();
+        function addVariableListRedirect() {
+            $('.variable-list--redirect').click(e => {
+                e.preventDefault();
+                const variableId = $(e.currentTarget).attr('name');
+                console.log(variableId)
+
+                $.ajax({
+                    url: '/coder_project/edit_variables',
+                    type: 'POST',
+                    data: {
+                        'variable_action': 'redirect',
+                        'variable_id': variableId
+                    },
+                    success: function(json) {
+                        window.location.href = json.redirect_url;
+                    },
+                    error: function() {}
+                });
+            });
+        }
+
+        function addDeleteHandler() {
+            $('.variable-delete').click(e => {
+                e.preventDefault();
+                let variableId = $(e.currentTarget).attr('name');
+
+                $.ajax({
+                    url: '/coder_project/edit_variables',
+                    type: 'POST',
+                    data: {
+                        'variable_action': 'delete_single_variable',
+                        'variable_id': variableId
+                    },
+                    success: function(json) {
+                        window.location.href = json.redirect_url;
+                    },
+                    error: function() {},
+
+                });
+            });
+        }
+
+        function addEditHandler() {
+            $('.edit-variable').click(e => {
+                e.preventDefault();
+                let variableId = $(e.currentTarget).attr('name');
+                console.log('edit', variableId);
+
+                $.ajax({
+                    url: '/coder_project/edit_variables',
+                    type: 'POST',
+                    data: {
+                        'variable_action': 'edit_variable',
+                        'variable_id': variableId
+                    },
+                    success: function(json) {
+                        window.location.href = json.redirect_url;
+                    },
+                    error: function() {}
+                });
+            });
+        }
+
+        function addCopyHandler() {
+            $('.copy-variable').click(e => {
+                e.preventDefault();
+                console.log('hit copy')
+                let variableId = $(e.currentTarget).attr('name');
+
+                $.ajax({
+                    url: '/coder_project/edit_variables',
+                    type: 'POST',
+                    data: {
+                        'variable_action': 'copy_variable',
+                        'variable_id': variableId
+                    },
+                    success: function(json) {
+                        window.location.href = json.redirect_url
+                    },
+                    error: function() {}
+                });
+            });
+        }
+
+        function addBulkAddHandler() {
+            $('.tag-control--bulk__add').click(e => {
+                e.preventDefault();
+
+                let variablesToAdd = getSelectedVariables();
+                let tagName = $('#bulk-tag').val();
+
+                console.log(variablesToAdd, 'this is the vars to add')
+
+                $.ajax({
+                    url: '/coder_project/edit_variables/',
+                    type: 'POST',
+                    data: {
+                        'variable_ids': JSON.stringify(variablesToAdd),
+                        'tag_name': tagName,
+                        'variable_action': 'bulk_add'
+                    },
+                    success: function(json) {
+                        window.location.href = json.redirect_url
+                    },
+                    error: function() {}
+                });
+            });
+
+        }
+
+        function addBulkRemoveHandler() {
+            $('.tag-control--bulk__remove').click(e => {
+                e.preventDefault();
+
+                let tagName = $('#bulk-tag').val();
+                let variablesToRemove = getSelectedVariables();
+
+                $.ajax({
+                    url: '/coder_project/edit_variables/',
+                    type: 'POST',
+                    data: {
+                        'variable_ids': JSON.stringify(variablesToRemove),
+                        'tag_name': tagName,
+                        'variable_action': 'bulk_remove'
+                    },
+                    success: function(json) {
+                        window.location.href = json.redirect_url;
+                    },
+                    error: function() {}
+                });
+            });
+        }
+
+        function getSelectedVariables() {
+            let variablesToAdd = [];
+            $('.variable-checkbox').each((index, box) => {
+                if ($(box).prop('checked')) {
+                    let variableId = $(box).val();
+                    variablesToAdd.push(variableId);
+                }
+            });
+            return variablesToAdd;
+        }
+
+        addEditHandler();
+        addCopyHandler();
+        addBulkAddHandler();
+        addBulkRemoveHandler();
+        addDeleteHandler();
+        addVariableListRedirect();
+
+        $('#bulk-tag').autocomplete({
+            source: "/coder_project/get_tag_names",
+            minLength: 2
+        });
+
+        $('#by_project').autocomplete({
+           source: "/coder_project/get_project_names",
+           select: function (event, ui) {
+              let projectId;
+              if ($.inArray(ui.item.id, projectIds) < 0) {
+                  projectId = ui.item.id;
+                  projectIds.push(projectId);
+              }
+              ajaxVariableFilter();
+
+              $('#by_project').val('');
+              return false;
+           },
+           minLength: 2
+        });
+
+        $('#by_tag_name').autocomplete({
+          source: "/coder_project/get_tag_names",
+          select: function (event, ui) {
+              let tagId;
+              if ($.inArray(ui.item.id, tagIds) < 0) {
+                  tagId = ui.item.id;
+                  tagIds.push(tagId);
+              }
+
+              ajaxVariableFilter();
+              $('#by_tag_name').val('');
+              return false;
+          },
+          minLength: 2
+        });
+
+        function ajaxVariableFilter() {
+            $.ajax({
+                url: '/coder_project/filter_variables',
+                type: 'POST',
+                data: {
+                    'variable_keywords': JSON.stringify(keywords),
+                    'project_ids': JSON.stringify(projectIds),
+                    'tag_ids': JSON.stringify(tagIds),
+                    'variable_action': 'filter_variables'
+                },
+                success: function (json) {
+                  let filters = [json.tag_data, json.project_data, json.keyword_data];
+                  renderFilterContainer(filters, filterContainer, 'multiFilterVariable');
+                  renderFilterContainer(json.filtered_variable_data, variableTable, 'variableTable')
+                },
+                error: function() {
+
+                }
+            });
+        }
 
         function renderFilterContainer(array, container, type) {
             $(container).empty();
 
             switch (type) {
+                case 'multiFilterVariable':
+                    array.forEach(filterArray => {
+                        filterArray.forEach(filterNode => {
+                            let spanNode;
+
+                            if (filterNode.type == 'tag') {
+                                spanNode = $('<span style="background-color: pink;" name="tag">TAG ||</span>');
+                            } else if (filterNode.type == 'project') {
+                                spanNode = $('<span style="background-color: orange;" name="project">PROJECT ||</span>');
+                            } else if (filterNode.type == 'variable') {
+                                spanNode = $('<span style="background-color: green; color: white;" name="variable">VARIABLE ||</span>');
+                            }
+                            let variableNode =
+                                $(`<span name='${filterNode.id}'>${filterNode.name}<span class='badge filter-remove__variable'>X</span><br/></span>`);
+                            $(variableNode).prepend(spanNode);
+                            $(container).append(variableNode);
+                        });
+                    });
+
+                    addRemoveVariableFilterHandler();
+
+                    break;
+
+                case 'variableTable':
+                    array.forEach(itemData => {
+                        let variableNode =
+                            $(`
+                                <tr>
+                                    <td>
+                                        <input
+                                            style="margin-right: 1%; float: left;"
+                                            class='variable-checkbox'
+                                            type="checkbox" name="variable-names[]" value="${ itemData.id }" />
+                                        <span class="variable-name">${ itemData.name }</span>
+                                    </td>
+{#                                    <td style="width: 20%; text-align: center;">#}
+{#                                        <span class="variable-controls" style="display: flex; justify-content: space-around;">#}
+{#                                            <span name="${ itemData.id }" class="copy-variable">Replicate</span>#}
+{#                                            <span name="${ itemData.id }" class="edit-variable">Edit</span>#}
+{#                                            <span#}
+{#                                                name="${ itemData.id }"#}
+{#                                                class="glyphicon glyphicon-th-list variable-list--redirect"></span>#}
+{#                                            <span name="${ itemData.id }" class="glyphicon glyphicon-trash variable-delete"></span>#}
+{#                                        </span>#}
+{#                                    </td>#}
+                                </tr>
+                            `)
+                        $(container).append(variableNode);
+                    });
+                    addEditHandler();
+                    addCopyHandler();
+                    addDeleteHandler();
+                    addVariableListRedirect();
+
+                    break;
+
+                case 'tagTable':
+                    array.forEach(itemData => {
+                        let variableNode =
+                            $(`
+                                <tr>
+                                    <td>
+                                        <input
+                                                style="margin-right: 1%; float: left;"
+                                                class="checkbox"
+                                                type="checkbox"
+                                                name="tag-names[]"
+                                                value="${ itemData.id }" />
+                                        <span name="${ itemData.id }" class="tag-name">${ itemData.name }</span>
+                                    </td>
+                                    <td style="width: 15%; text-align: center;">
+                                        <span
+                                            class="tag-controls" style="display: flex; justify-content: space-around;">
+                                            <span
+                                                name="${ itemData.id }" class="rename-tag">Rename</span>
+                                            <span
+                                                name="${ itemData.id }"
+                                                class="glyphicon glyphicon-th-list tag-list--redirect"></span>
+                                            <span name="${ itemData.id }" class="glyphicon glyphicon-trash tag-delete"></span>
+                                        </span>
+                                    </td>
+                                </tr>
+                            `)
+                        $(container).append(variableNode);
+                    });
+                    addDeleteHandler();
+                    addTagListHandler();
+                    addInputHandler();
+                    break;
+
                 case 'keyword':
                     array.forEach(itemData => {
                     let variableNode =
@@ -201,7 +475,7 @@
                         $(`<span name='${itemData.id}'>${itemData.name}<span class='badge tag-remove'>X</span><br/></span>`);
                         $(container).append(variableNode);
                     });
-                    addTagHandler();
+                    addTagRemoveHandler();
                     break;
 
                 case 'variable':
@@ -220,317 +494,9 @@
                     addProjectVariablesHandler();
                     break;
             }
-        }
+}
 
-        function addVariableHandler() {
-            $('.variable--container__filtered span').click(e => {
-                e.preventDefault();
-                const variableNode = $(e.currentTarget);
-                const variableNodeId = variableNode.attr('name');
-
-                $(variableNode).toggleClass('selected');
-
-                let isInVariablesToMove = false;
-                let indexToRemove;
-
-                variablesToMove.forEach((variable, index) => {
-                    if (variableNodeId == variable) {
-                        isInVariablesToMove = true;
-                        indexToRemove = index;
-                    }
-                });
-
-                if (isInVariablesToMove) {
-                    variablesToMove.splice(indexToRemove, 1);
-                } else if (!isInVariablesToMove || variablesToMove.length == 0) {
-                    variablesToMove.push(variableNodeId);
-                }
-            });
-        }
-
-        function addProjectVariablesHandler() {
-            $('.variable--container__to-project span').click(e => {
-                e.preventDefault();
-                const variableNode = $(e.currentTarget);
-                const variableNodeId = variableNode.attr('name');
-
-                $(variableNode).toggleClass('selected');
-
-                let isInVariablesToReset = false;
-                let indexToRemove;
-
-                variablesToReset.forEach((variable, index) => {
-                    if (variableNodeId == variable) {
-                        isInVariablesToReset = true;
-                        indexToRemove = index;
-                    }
-                });
-
-                if (isInVariablesToReset) {
-                    variablesToReset.splice(indexToRemove, 1);
-                } else if (!isInVariablesToReset || variablesToReset.length == 0) {
-                    variablesToReset.push(variableNodeId);
-                }
-            })
-        }
-
-        function addKeywordHandler() {
-            $('.keyword-remove').click(e => {
-                e.preventDefault();
-                let nodeValue = $(e.target.parentNode).attr('name');
-                $(keywordArray).each((index, keyword) => {
-                    if (keyword.name == nodeValue) {
-                        keywordArray.splice(index, 1)
-                    }
-                });
-
-                let indexOfValue = $.inArray(nodeValue, globalKeywords);
-                if (indexOfValue >= 0) {
-                    globalKeywords.splice(indexOfValue, 1);
-                }
-
-                $.ajax({
-                    url: '/coder_project/get_variable_names',
-                    type: 'POST',
-                    data: {
-                        'get_variables': true,
-                        'global_tag_ids': JSON.stringify(globalTagIds),
-                        'keywords': JSON.stringify(globalKeywords)
-                    },
-                    success: function(json) {
-                        let variableData = JSON.parse(json.variable_data);
-
-                        filteredVariablesArray = [];
-
-                        $(variableData).each((index, variable) => {
-                            let variableInfo = {
-                                'name': variable.fields.name,
-                                'id': variable.pk
-                            };
-                            filteredVariablesArray.unshift(variableInfo);
-                        });
-
-                        renderFilterContainer(filteredVariablesArray, filteredVariablesContainer, 'variable');
-                        $('#by_name').val('');
-                    },
-                    error: function(xhr,errmsg,err) {
-                        console.log(err);
-                    }
-                })
-                renderFilterContainer(keywordArray, keywordContainer, 'keyword');
-            });
-        }
-
-        function addTagHandler() {
-            $('.tag-remove').click(e => {
-                e.preventDefault();
-                let nodeValue = $(e.target.parentNode).attr('name');
-                $(tagsArray).each((index, tag) => {
-                    if (tag.id == nodeValue) {
-                        tagsArray.splice(index, 1)
-                    }
-                });
-
-                let indexOfValue = $.inArray(parseInt(nodeValue), globalTagIds);
-                if (indexOfValue >= 0) {
-                    globalTagIds.splice(indexOfValue, 1);
-                }
-
-                $.ajax({
-                    url: '/coder_project/get_variable_names',
-                    type: 'POST',
-                    data: {
-                        'get_variables': true,
-                        'global_tag_ids': JSON.stringify(globalTagIds),
-                        'keywords': JSON.stringify(globalKeywords)
-                    },
-                    success: function(json) {
-                        let variableData = JSON.parse(json.variable_data);
-
-                        filteredVariablesArray = [];
-
-                        $(variableData).each((index, variable) => {
-                            let variableInfo = {
-                                'name': variable.fields.name,
-                                'id': variable.pk
-                            };
-                            filteredVariablesArray.unshift(variableInfo);
-                        });
-
-                        renderFilterContainer(filteredVariablesArray, filteredVariablesContainer, 'variable');
-                        $('#by_name').val('');
-                    },
-                    error: function(xhr,errmsg,err) {
-                        console.log(err);
-                    }
-                })
-                renderFilterContainer(tagsArray, tagContainer, 'tag');
-            });
-        }
-        addVariableHandler();
-
-        $('.action--button-library').click(e => {
-           e.preventDefault();
-           variablesToMove.forEach(variableId => {
-               let variable = filteredVariablesArray.find(item => item.id == variableId);
-               let variableIndex = $.inArray(variable, filteredVariablesArray);
-               filteredVariablesArray.splice(variableIndex, 1);
-               variablesToProjectArray.push(variable);
-           });
-            variablesToMove = [];
-            renderFilterContainer(filteredVariablesArray, filteredVariablesContainer, 'variable');
-            renderFilterContainer(variablesToProjectArray, variablesToProjectContainer, 'project');
-        });
-
-        $('.action--button-back').click(e => {
-            e.preventDefault();
-            variablesToReset.forEach(variableId => {
-                let variable = variablesToProjectArray.find(item => item.id == variableId);
-                let variableIndex = $.inArray(variable, variablesToProjectArray);
-                variablesToProjectArray.splice(variableIndex, 1);
-                filteredVariablesArray.push(variable);
-            });
-            variablesToReset = [];
-            renderFilterContainer(filteredVariablesArray, filteredVariablesContainer, 'variable');
-            renderFilterContainer(variablesToProjectArray, variablesToProjectContainer, 'project');
-        });
-
-        $('.action--button-library__all').click(e => {
-            e.preventDefault();
-            let concatArray = $.unique(variablesToProjectArray.concat(filteredVariablesArray));
-            variablesToProjectArray = concatArray;
-            filteredVariablesArray = [];
-            renderFilterContainer(filteredVariablesArray, filteredVariablesContainer, 'variable');
-            renderFilterContainer(variablesToProjectArray, variablesToProjectContainer, 'project');
-        });
-
-        $('.action--button-back__all').click(e => {
-            e.preventDefault();
-            let concatArray = $.unique(filteredVariablesArray.concat(variablesToProjectArray));
-            filteredVariablesArray = concatArray;
-            variablesToProjectArray = [];
-            renderFilterContainer(filteredVariablesArray, filteredVariablesContainer, 'variable');
-            renderFilterContainer(variablesToProjectArray, variablesToProjectContainer, 'project');
-        });
-
-        $('.variable--container__submit').click(e => {
-            e.preventDefault();
-            $.ajax({
-                url: '/coder_project/variable_library',
-                type: 'POST',
-                data: {
-                    'variables_to_add': JSON.stringify(variablesToProjectArray),
-                    'project_id': projectId,
-                    'add_variables': true
-                },
-
-                success: function(json) {
-                    window.location.href = json.redirect_url;
-                },
-                error: function(xhr,errmsg,err) {
-                    console.log(xhr,errmsg,err);
-                }
-            });
-        });
-
-        $('#by_tag').autocomplete({
-           source: "/coder_project/get_tag_names",
-            select: function (event, ui) {
-               let tagId;
-               if ($.inArray(ui.item.id, globalTagIds) < 0) {
-                   tagId = ui.item.id;
-                   globalTagIds.push(tagId);
-               }
-
-                $.ajax({
-                    url: '/coder_project/get_tag_names',
-                    type: 'POST',
-                    data: {
-                        'add_to_filter': 'add_tag',
-                        'tag_id_to_add': tagId,
-                        'global_tag_ids': JSON.stringify(globalTagIds),
-                        'keywords': JSON.stringify(globalKeywords)
-                    },
-                    success: function(json) {
-                        let tagData = json.tag_data;
-                        let variableData = json.variable_data;
-
-                        let tag = {
-                            'name': tagData.name,
-                            'id': tagData.id
-                        };
-
-                        tagsArray.push(tag);
-
-                        renderFilterContainer(tagsArray, tagContainer, 'tag');
-                        filteredVariablesArray = [];
-
-                        $(variableData).each((index, variable) => {
-                            let variableInfo = {
-                                'name': variable.name,
-                                'id': variable.id
-                            };
-                            filteredVariablesArray.unshift(variableInfo);
-                        });
-
-                        renderFilterContainer(filteredVariablesArray, filteredVariablesContainer, 'variable');
-                        $('#by_tag').val('');
-                    },
-                    error: function(xhr,errmsg,err) {
-                        console.log(err);
-                    }
-                })
-            },
-           minLength: 2
-        });
-
-        $('#button--add__keyword').click(e => {
-            e.preventDefault();
-
-            let keywordValue = $('#by_name').val();
-
-            if ($.inArray(keywordValue, globalKeywords) < 0) {
-                let keyword = {
-                    'id': keywordArray.length + 1,
-                    'name': keywordValue
-                };
-
-                globalKeywords.push(keywordValue);
-                keywordArray.unshift(keyword);
-            };
-
-            $('#by_name').val('');
-            renderFilterContainer(keywordArray, keywordContainer, 'keyword');
-
-            $.ajax({
-                url: '/coder_project/get_tag_names',
-                type: 'POST',
-                data: {
-                    'add_to_filter': 'add_keyword',
-                    'global_tag_ids': JSON.stringify(globalTagIds),
-                    'keywords': JSON.stringify(globalKeywords)
-                },
-                success: function(json) {
-                    let variableData = JSON.parse(json.variable_data);
-
-                    filteredVariablesArray = [];
-
-                    $(variableData).each((index, variable) => {
-                        let variableInfo = {
-                            'name': variable.fields.name,
-                            'id': variable.pk
-                        };
-                        filteredVariablesArray.unshift(variableInfo);
-                    });
-
-                    renderFilterContainer(filteredVariablesArray, filteredVariablesContainer, 'variable');
-                },
-                error: function(xhr,errmsg,err) {
-                    console.log(err);
-                }
-            })
-
-        });
 
     </script>
+
 {% endblock %}

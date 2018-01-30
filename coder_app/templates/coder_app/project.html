@@ -3,6 +3,11 @@
 {% block content %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
     {% include 'coder_app/nav_tabs.html' %}
+
+    <ol class="breadcrumb breadcrumb-top-left" style="margin-top: 2%;">
+        <li><a href="#">Projects</a></li>
+        <li><a href="#">Add New Project</a></li>
+    </ol>
     <h3>Add New Project</h3>
 
     <form action={% url 'coder_app:submit_new_project' %} method="post">
@@ -11,22 +16,32 @@
             <div class="col-md-12">
                 <div class="col-md-4">
                     <label for="project-name">Project Name</label>
-                    <input class="form-control" type="input" name="project-name" /> <br />
+                    <input class="form-control input__project-name" type="input" name="project-name" /> <br />
                     <label for="project-rate">Rate</label>
                     <input class="form-control" type="input" name="project-rate" /> <br />
+                    <label>Project Introduction</label>
+                    <textarea style="height: 20vh;" name='project-introduction' class="form-control">Introduction for Coders</textarea>
                 </div>
-                <div class="col-md-1"></div>
-                <div class="col-md-3">
+                <div class="col-md-2"></div>
+                <div class="col-md-4">
                     <div class="ui-widget">
-                        <label for="tag_filter">Add Project Tags (minimum of 1)</label>
-                        <input id='by_tag' class="form-control" type="text" name="tag_filter" placeholder="...tagname" />
+                        <label for="tag_filter">Add Project Tags</label>
+                        <input id='by_tag' class="form-control" type="text" name="tag_filter" />
                     </div>
-                </div>
-                <div class="col-md-3">
+                    <div style="text-align: center; margin-top: 5%; margin-bottom: 3%;">
+                        <span class="glyphicon glyphicon-arrow-down"></span>
+                    </div>
                     <label for="filter--container">Tags to Add</label>
-                    <div class="filter--container tag--container col-md-12"></div>
                     <select style="display: none;" class="tag--container__hidden" multiple name="tags_to_add[]">
                     </select>
+                    <input class="input__project-tag--hidden" type="hidden" name="hidden_project_tag_value" value="" />
+                    <select
+                            style="height: 15vh; margin-bottom: 2%; overflow: scroll;"
+                            class="tag--container col-md-12" multiple>
+                        <option class="new-project-tag"></option>
+                    </select>
+                    <br />
+                    <button class="btn btn-danger tag-remove">Remove Selected Tags</button>
                 </div>
             </div>
         </div>
@@ -43,17 +58,11 @@
 {#                </div>#}
 {#            </div>#}
 {#        </div>#}
-        <div class="row" style="margin-top: 2%;">
-            <div class="col-md-12">
-                <div class="col-md-5 input-group">
-                    <label>Project Introduction</label>
-                    <textarea name='project-introduction' class="form-control">Introduction for Coders</textarea>
+        <div style="margin-left: 1.5%;">
+            <div class="row" style="margin-top: 2%;">
+                <div class="col-md-2">
+                    <input class='btn btn-success btn__submit-new' name="submit_new_project" type="submit" value="Add"/>
                 </div>
-            </div>
-        </div>
-        <div class="row" style="margin-top: 2%;">
-            <div class="col-md-2">
-                <input class='btn btn-primary' type="submit" value="Submit"/>
             </div>
         </div>
 
@@ -77,6 +86,7 @@
     const globalTagIds = [];
     const hiddenTagContainer = $('.tag--container__hidden');
     const tagContainer = $('.tag--container');
+    const hiddenProjectTagInput = $('.input__project-tag--hidden');
 
     function renderFilterContainer(array, container, type) {
             $(container).empty();
@@ -97,7 +107,6 @@
                         $(`<span name='${itemData.id}'>${itemData.name}<span class='badge tag-remove'>X</span><br/></span>`);
                         $(container).append(variableNode);
                     });
-                    addTagHandler();
                     break;
 
                 case 'variable':
@@ -116,36 +125,59 @@
                     addProjectVariablesHandler();
                     break;
 
-                case 'hidden':
+                case 'select':
                     array.forEach(itemData => {
                         let variableNode =
-                            $(`<option selected='selected' value='${itemData.id}'><span>${itemData.name}</span></option>`);
+                            $(`<option class="tag-option" value='${itemData.id}'><span>${itemData.name}</span></option>`);
                         $(container).append(variableNode);
                     });
+                    break;
+
+                case 'hidden':
+                array.forEach(itemData => {
+                    let variableNode =
+                        $(`<option class="hidden-option" selected='selected' value='${itemData.id}'><span>${itemData.name}</span></option>`);
+                    $(container).append(variableNode);
+                });
+                break;
             }
         }
 
-        function addTagHandler() {
-            $('.tag-remove').click(e => {
-                e.preventDefault();
-                let nodeValue = $(e.target.parentNode).attr('name');
-                $(tagsArray).each((index, tag) => {
-                    if (tag.id == nodeValue) {
-                        tagsArray.splice(index, 1)
-                    }
-                });
+        function renderNewProjectTag(container) {
+            let newProjectTagValue = $('.input__project-name').val().replace(/[\W]+/g, '');
+            newProjectTagValue = newProjectTagValue.split('').join('');
 
-                let indexOfValue = $.inArray(parseInt(nodeValue), globalTagIds);
-                if (indexOfValue >= 0) {
-                    globalTagIds.splice(indexOfValue, 1);
-                }
-
-                renderFilterContainer(tagsArray, tagContainer, 'tag');
-                renderFilterContainer(tagsArray, hiddenTagContainer, 'hidden');
-            });
+            const tagNodeString = '<option class="new-project-tag">' + newProjectTagValue + '</option>';
+            const newProjectTagNode = $(tagNodeString);
+            $(container).prepend(newProjectTagNode);
         }
 
-    $('#by_tag').autocomplete({
+        $('.tag-remove').click(e => {
+            e.preventDefault();
+            const tagOption = $('.tag-option');
+            $(tagOption).each((index, tag) => {
+                if ($(tag).css('color') == 'rgb(0, 0, 0)') {
+                    const nodeValue = $(tag).attr('value');
+                    $(tagsArray).each((index, tag) => {
+                        if (tag.id == nodeValue) {
+                            tagsArray.splice(index, 1);
+                        }
+                    });
+
+                    let indexOfValue = $.inArray(parseInt(nodeValue), globalTagIds);
+                    if (indexOfValue >= 0) {
+                        globalTagIds.splice(indexOfValue, 1);
+                    }
+
+                };
+            });
+            renderFilterContainer(tagsArray, hiddenTagContainer, 'hidden');
+            renderFilterContainer(tagsArray, tagContainer, 'select');
+            renderNewProjectTag(tagContainer);
+        });
+
+
+        $('#by_tag').autocomplete({
            source: "/coder_project/get_tag_names",
             select: function (event, ui) {
                let tagId;
@@ -157,8 +189,9 @@
                    }
                    globalTagIds.push(tagId);
                    tagsArray.unshift(tagData);
-                   renderFilterContainer(tagsArray, tagContainer, 'tag')
                    renderFilterContainer(tagsArray, hiddenTagContainer, 'hidden');
+                   renderFilterContainer(tagsArray, tagContainer, 'select');
+                   renderNewProjectTag(tagContainer);
                };
 
                $('#by_tag').val('');
@@ -166,6 +199,44 @@
             },
            minLength: 2
         })
+
+        $('.input__project-name').keyup(() => {
+            const addProjectButton = $('.btn__submit-new');
+            const inputValue = $('.input__project-name').val();
+            const warningColor = 'rgb(217, 83, 79)';
+            const blankButtonColor = '#7f8c8d';
+
+            $.ajax({
+                url: '/coder_project/add_project',
+                type: 'post',
+                data: {
+                    'project_name_value': inputValue
+                },
+                success: function(json) {
+                    console.log(json.project_name_check_unique);
+                    const isNameUnique = json.project_name_check_unique;
+                    if (!isNameUnique) {
+                        $('.input__project-name').css('background-color', warningColor);
+                        $(addProjectButton).css('pointer-events', 'none');
+                        $(addProjectButton).css('background-color', blankButtonColor);
+                    } else if ($('.input__project-name').css('background-color') == warningColor) {
+                        $('.input__project-name').css('background-color', 'white');
+                        $(addProjectButton).css('pointer-events', 'auto');
+                        $(addProjectButton).css('background-color', '#5cb85c');
+                    };
+
+                    let newProjectTagValue = inputValue.replace(/[\W]+/g, '');
+                    newProjectTagValue = newProjectTagValue.split('').join('');
+
+                    if ( $('.new-project-tag') ) {
+                        $('.new-project-tag').text(newProjectTagValue);
+                    }
+
+                    $(hiddenProjectTagInput).val(newProjectTagValue);
+                },
+                error: {}
+            });
+        });
 
     </script>
 

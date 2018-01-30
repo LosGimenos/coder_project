@@ -1,18 +1,33 @@
 {% extends "coder_app/base.html" %}
 
 {% block content %}
-    {% include 'coder_app/nav_tabs.html' %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
+    {% include 'coder_app/nav_tabs.html' %}
+
+    <ol class="breadcrumb breadcrumb-top-left" style="margin-top: 2%;">
+        {% if source == 'project' %}
+        <li><a href="#">Projects</a></li>
+        <li><a href="#">Assigned Variables</a></li>
+        {% elif source == 'variable_library' %}
+        <li><a href="#">Variable Library</a></li>
+        {% endif %}
+        <li><a href="#">Edit Variable</a></li>
+    </ol>
 
     <h3>Edit Variable "{{ variable_data.name }}"</h3>
 
     <form action={% url 'coder_app:edit_variable' variable_id=variable_data.id %} method="post">
         {% csrf_token %}
-        <input class='btn btn-primary' type="submit" name="submit_variable" value="Submit Variable"/><br />
+        <input class='btn btn-success' type="submit" name="submit_variable" value="Save Variable"/><br />
         <input style="display:none;" name="variable_id" value="{{ variable_data.id }}" />
-        <input style="display:none;" name="project_id" value="{{ project_id }}" />
+        <input
+                style="display:none;"
+                name="project_id"
+                {% if project_data %}
+                value="{{ project_data.id }}"
+                {% endif %} />
 
-        <div class="row">
+        <div class="row" style="margin-top: 1%;">
         <div class="col-md-12">
                 <div class="col-md-4">
         <label for="project-name">Variable Name</label>
@@ -36,93 +51,165 @@
                 <input type="radio" name="variable_answer_option" value="freeform">Freeform</label> <br />
 
             <div class="input-group options-wrapper">
-{#                <button>Add Choice</button> <br />#}
                 {% for choice in choice_data %}
-                    <label>Choice {{ choice.index }}</label> <br/>
-                    <input
+                    <div class="choice-input-wrapper">
+                        <span class="glyphicon glyphicon-minus remove-choice"></span>
+                        <input
+                            style="float: left;"
+                            class="form-control input__answer-style"
+                            type="text"
                             value="{{ choice.value }}"
                             name="{{ choice.choice_name }}"
-                    /> <br/>
+                        />
+                    </div>
                 {% endfor %}
+                <div class="choice-input-wrapper">
+                    <span class="glyphicon glyphicon-plus add-choice"></span>
+                </div>
             </div>
         {% endif %}
             </div>
-            </form>
-    <div class="col-md-1"></div>
-        <div class="col-md-3">
+        <div class="col-md-1"></div>
+        <div class="col-md-4">
             <div class="ui-widget">
-                <label for="variable-tag">Load or Create Tag</label>
+                <label for="variable-tag">Add Variable Tag</label>
                 <input id='by_tag' class="form-control" type="input" name="variable-tag" />
             </div>
-            <div>
-                <button id='create-tag' class="btn btn-default">Create Tag</button>
+{#            <div>#}
+{#                <button id='create-tag' class="btn btn-default">Create Tag</button>#}
+{#            </div>#}
+            <div style="text-align: center; margin-top: 5%; margin-bottom: 2%;">
+                <span class="glyphicon glyphicon-arrow-down"></span>
             </div>
+            <label for="tags-to-remove[]">Current Variable Tags</label>
+            <select
+                    multiple
+                    class="tag-container form-control"
+                    style="border: 1px solid grey; height: 20vh; overflow: scroll;">
+                {% for project_tag in project_tags %}
+                    <option
+                        class="project-tag"
+                        style="pointer-events: none; background-color: #74b9ff; color: black;">
+                        {{ project_tag.name }}
+                    </option>
+                {% endfor %}
+                {% for tag in tag_data %}
+                    <option class="tag-option" value="{{ tag.id }}">{{ tag.name }}</option>
+                {% endfor %}
+            </select>
+            <select class="hidden-tag-container" style="display: none;" multiple name="variable-tags[]"></select>
+            <br />
+            <button class="btn btn-danger btn__remove-tag">Remove Selected Tags</button>
         </div>
-        <div class="col-md-4 input-group">
-                <label for="tags-to-remove[]">Current Removable Tags</label>
-                <div class='form-control tag-container' name="tags-to-remove[]" style="width: 100%; border: 1px solid grey; height: 20vh; overflow: scroll;">
-                    {% for tag in tag_data %}
-                        <span class="tag--id" name="{{ tag.id }}">
-                            {{ tag.name }}
-                            <span class='badge tag-remove'>
-                                <span class="glyphicon glyphicon-remove"></span>
-                            </span><br/>
-                        </span>
-                    {% endfor %}
-                </div>
-        </div>
-        </div>
-        </div>
+            </div>
+    </div>
+                </form>
+
+    <style>
+        .remove-choice {
+            color: red;
+            font-size:1.5em;
+        }
+
+        .add-choice {
+            color: #5cb85c;
+            font-size:1.1em;
+            margin-left: 4.5px;
+        }
+
+        .options-wrapper {
+            padding-top: 3%;
+            width: 50%;
+            height: 35vh;
+        }
+
+        .choice-input-wrapper {
+            display: flex;
+            margin-bottom: 2%;
+        }
+    </style>
 
 
     {% load static %}
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="{% static 'token_injector.js' %}"></script>
-    <script src="{%  static 'freeformToggle.js' %}"></script>
+    <script src="{%  static 'freeformToggleGlyphicons.js' %}"></script>
 
     <script>
+        let tagIds = [];
         let tagsArray = [];
+        let projectTagsArray = [];
+        let projectTagIds = [];
         let variableId = $('input[name="variable_id"]').val();
         let url = '/coder_project/tag_to_variable/' + variableId;
 
         const tagContainer = $('.tag-container');
+        const hiddenTagContainer = $('.hidden-tag-container');
         const createTagButton = $('#create-tag');
+
+        function getTags() {
+            $('.tag-option').each((index, tag) => {
+                const tagNodeId = parseInt($(tag).attr('value'));
+                const tagNodeName = $(tag).text();
+
+                if ( $.inArray(tagNodeId, tagIds) < 0 ) {
+                    const tagData = {
+                        'id': tagNodeId,
+                        'name': tagNodeName
+                    }
+
+                    tagIds.push(tagNodeId);
+                    tagsArray.unshift(tagData);
+                }
+            });
+        }
+
+        function getProjectTags() {
+            $('.project-tag').each((index, tag) => {
+                const tagNodeId = parseInt( $( tag ).attr('value') );
+                const tagNodeName = $( tag ).text();
+
+                if ( $.inArray(tagNodeId, projectTagIds) < 0 ) {
+                    const tagData = {
+                        'id': tagNodeId,
+                        'name': tagNodeName
+                    }
+
+                    projectTagIds.push(tagNodeId);
+                    projectTagsArray.push(tagData);
+                }
+            });
+        }
+
+        function renderProjectTags(array, container) {
+            array.forEach(itemData => {
+                let tagNode =
+                    $(`<option style="pointer-events: none; background-color: #74b9ff; color: black;" value='${itemData.id}' class="project-tag"><span>${itemData.name}</span></option>`);
+                $(container).prepend(tagNode);
+            });
+    }
 
         $('#by_tag').autocomplete({
            source: "/coder_project/get_tag_names",
             select: function (event, ui) {
-               let tagId = ui.item.id;
+               let tagId;
 
-                $.ajax({
-                    url: url,
-                    type: 'POST',
-                    data: {
-                        'tag_action': 'add_to_variable',
-                        'tag_id': tagId
-                    },
-                    success: function(json) {
-                        tagsArray = [];
-                        let tagData = json.tag_data;
+               if ($.inArray(ui.item.id, tagIds) < 0) {
+                   tagId = ui.item.id;
+                   const tagData = {
+                       'id': tagId,
+                       'name': ui.item.label
+                   }
+                   tagIds.push(tagId);
+                   tagsArray.unshift(tagData);
+                   renderFilterContainer(tagsArray, tagContainer, 'select');
+                   renderFilterContainer(tagsArray, hiddenTagContainer, 'hidden');
+                   renderProjectTags(projectTagsArray, tagContainer);
+               };
 
-                        $(tagData).each((index, tag) => {
-                            let tagInfo = {
-                                'name': tag.name,
-                                'id': tag.id
-                            };
-
-                            tagsArray.push(tagInfo);
-                        });
-
-                        console.log(tagsArray)
-                        renderFilterContainer(tagsArray, tagContainer, 'tag');
-
-                        $('#by_tag').val('');
-                    },
-                    error: function(xhr,errmsg,err) {
-                        console.log(err);
-                    }
-                })
+               $('#by_tag').val('');
+               return false;
             },
            minLength: 2
         });
@@ -166,35 +253,49 @@
                     });
                     addProjectVariablesHandler();
                     break;
+
+                case 'select':
+                array.forEach(itemData => {
+                    let variableNode =
+                        $(`<option class="tag-option" value='${itemData.id}'><span>${itemData.name}</span></option>`);
+                    $(container).append(variableNode);
+                });
+                break;
+
+                case 'hidden':
+                array.forEach(itemData => {
+                    let variableNode =
+                        $(`<option class="tag-option-hidden" selected='selected' value='${itemData.id}'><span>${itemData.name}</span></option>`);
+                    $(container).append(variableNode);
+                });
+                break;
             }
         }
 
-        function addTagHandler() {
-            $('.tag-remove').click(e => {
+        function removeTagHandler() {
+            $('.btn__remove-tag').click(e => {
                 e.preventDefault();
-                let tagId = $(e.currentTarget).parent().attr('name');
+                const tagOption = $('.tag-option');
+                $(tagOption).each((index, tag) => {
+                    if ( $(tag).css('color') == 'rgb(0, 0, 0)' ) {
+                        const nodeValue = $(tag).attr('value');
 
-                $.ajax({
-                    url: url,
-                    type: 'POST',
-                    data: {
-                        'tag_id': tagId,
-                        'tag_action': 'remove_tag'
-                    },
-                    success: function(json) {
-                        tagsArray = [];
-                        let tagData = json.tag_data;
-                        $(tagData).each((index, tag) => {
-                            let tagInfo = {
-                                'id': tag.id,
-                                'name': tag.name
+                        $(tagsArray).each((index, tag) => {
+                            if (tag.id == nodeValue) {
+                                tagsArray.splice(index, 1);
                             }
-                            tagsArray.push(tagInfo);
                         });
-                        renderFilterContainer(tagsArray, tagContainer, 'tag');
-                    },
-                    error: function() {}
+
+                        let indexOfValue = $.inArray(parseInt(nodeValue), tagIds);
+                        if (indexOfValue >= 0) {
+                            tagIds.splice(indexOfValue, 1);
+                        }
+
+                    };
                 });
+                renderFilterContainer(tagsArray, hiddenTagContainer, 'hidden');
+                renderFilterContainer(tagsArray, tagContainer, 'select');
+                renderProjectTags(projectTagsArray, tagContainer);
             });
         }
 
@@ -228,8 +329,17 @@
             });
         }
 
-        addTagHandler();
         addCreateTagButtonHandler();
+
+        function windowInit() {
+            getTags();
+            getProjectTags();
+            removeTagHandler();
+            addChoiceHandler();
+            removeChoiceHandler();
+        }
+
+        window.onload = windowInit();
     </script>
 
 {% endblock %}

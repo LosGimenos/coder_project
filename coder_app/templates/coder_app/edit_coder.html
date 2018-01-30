@@ -2,29 +2,31 @@
 
 {% block content %}
     {% include 'coder_app/nav_tabs.html' %}
-    <h2>Edit Coder Details</h2>
+    <div style="margin-left: 1.5%;">
     <div class="row">
         <div class="col-md-3">
+                    <h3>Edit Coder Details</h3>
+
         <form action="{% url 'coder_app:edit_coder' coder_id=coder.id %}" class="input-group" method="post">
             {% csrf_token %}
-            <input class='btn btn-primary' type="submit" name="edit_coder" value="Submit Changes"/><br />
             <label for="coder-first-name">First Name</label>
-            <input class="input-group" type="input" name="coder-first-name" value="{{ coder.first_name }}"/> <br />
+            <input class="form-control" type="input" name="coder-first-name" value="{{ coder.first_name }}"/> <br />
             <label for="coder-last-name">Last Name</label>
-            <input class="input-group" type="input" name="coder-last-name" value="{{ coder.last_name }}"/> <br />
+            <input class="form-control" type="input" name="coder-last-name" value="{{ coder.last_name }}"/> <br />
             <label for="coder-username">Username</label>
-            <input class="input-group" type="input" name="coder-username" value="{{ coder.username }}"/> <br />
+            <input class="form-control" type="input" name="coder-username" value="{{ coder.username }}"/> <br />
             <label for="coder-email">Email</label>
-            <input class="input-group" type="input" name="coder-email" value="{{ coder.email }}"/> <br />
+            <input class="form-control" type="input" name="coder-email" value="{{ coder.email }}"/> <br />
             <input class="text" style="display:none;" name="project_id" value="{{ project_id }}" />
+            <input style="margin-top: 5%;" class='btn btn-success' type="submit" name="edit_coder" value="Submit Changes"/><br />
         </form>
         </div>
+        <div class="col-md-1"></div>
         <div class="col-md-3" style="text-align: center;">
-            <h3>Rating for <br/>{{ coder.first_name }} {{ coder.last_name }}</h3>
+            <h3>Accuracy for <br/>{{ coder.first_name }} {{ coder.last_name }}</h3>
             <span><p style="font-size: 2em;">{{ coder.rating }}</p></span>
-        </div>
-        <div class="col-md-4">
             <h3>Attached to these Projects:</h3>
+            <div style="margin-left: -30.5%;">
             <ul style="list-style: none;">
                 {% if projects %}
                     {% for project in projects %}
@@ -36,8 +38,9 @@
                     <span>No Current Projects</span>
                 {% endif %}
             </ul>
+            </div>
         </div>
     </div>
-    <hr/>
+    </div>
 
 {% endblock %}

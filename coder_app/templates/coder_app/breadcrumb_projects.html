@@ -1,0 +1,21 @@
+{% url 'coder_app:edit_project_coders' project_data.id as edit_project_coders %}
+{% url 'coder_app:edit_project_mentions' project_data.id as edit_project_mentions %}
+{% url 'coder_app:edit_project_variables' project_data.id as edit_project_variables %}
+{% url 'coder_app:edit_project' project_data.id as edit_project %}
+{% url 'coder_app:variable_library' as variable_library %}
+
+<ol class="breadcrumb breadcrumb-top-left" style="margin-top: 2%;">
+    <li><a href="#">Projects</a></li>
+   {% if request.path == edit_project_coders %}
+    <li><a href="#">Coders</a></li>
+   {% elif request.path == edit_project_mentions %}
+    <li><a href="#">Mentions</a></li>
+   {% elif request.path == edit_project_variables %}
+    <li><a href="#">Assigned Variables</a></li>
+    {% elif request.path == edit_project %}
+    <li><a href="#">Project Details</a></li>
+    {% elif request.path == variable_library %}
+    <li><a href="#">Assigned Variables</a></li>
+    <li><a href="#">Add Variables from Library</a></li>
+   {% endif %}
+</ol>

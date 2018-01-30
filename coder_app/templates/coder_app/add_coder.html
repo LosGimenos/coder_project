@@ -9,7 +9,6 @@
                 <h4>New</h4>
                 <form action="{% url 'coder_app:add_coder' %}" class="input-group" method="post">
                     {% csrf_token %}
-                    <input class='btn btn-primary' type="submit" name="add_new_coder" value="Add Coder"/><br />
                     <label for="coder-first-name">First Name</label>
                     <input class="form-control" type="input" name="coder-first-name" /> <br />
                     <label for="coder-last-name">Last Name</label>
@@ -18,31 +17,42 @@
                     <input class="form-control" type="input" name="coder-username" /> <br />
                     <label for="coder-email">Email</label>
                     <input class="form-control" type="input" name="coder-email" /> <br />
-                </form>
             </div>
             <div class="col-md-2">
                 <h4>- or -</h4>
+                <div style="color: red">
+                    {% if error_message %}
+                        {{ error_message }}
+                    {% endif %}
+                </div>
             </div>
             <div class="col-md-3 input-group">
                 <h4>From Existing User</h4>
-                <form action="{% url 'coder_app:add_coder' %}" method="POST">
-                    {% csrf_token %}
-                    <select class="form-control" name="user-to-coder" style="margin-bottom: 2%;">
-                        {% for user in user_data %}
-                            <option value="{{ user.id }}">
-                                {% if user.first_name and user.last_name %}
-                                    {{ user.first_name }} {{ user.last_name }}
-                                {% else %}
-                                    {{ user.username }}
-                                {% endif %}
-                            </option>
-                        {% endfor %}
-                    </select><br />
-                    <input class="btn btn-primary" name="import-user-to-coder" type="submit" value="Import"/>
-                </form>
+                <select class="form-control" name="user-to-coder" style="margin-bottom: 2%;">
+                    <option value='None'>Select</option>
+                    {% for user in user_data %}
+                        <option value="{{ user.id }}">
+                            {% if user.first_name and user.last_name %}
+                                {{ user.first_name }} {{ user.last_name }}
+                            {% else %}
+                                {{ user.username }}
+                            {% endif %}
+                        </option>
+                    {% endfor %}
+                </select><br />
+{#                    <input class="btn btn-primary" name="import-user-to-coder" type="submit" value="Import"/>#}
             </div>
         </div>
     </div>
+    <br />
+    <div style="margin-left: 1.5%;">
+        <div class="row">
+            <div class="col-md-12">
+                <input class='btn btn-success' type="submit" name="add_new_coder" value="Add Coder"/><br />
+            </div>
+        </div>
+    </div>
+    </form>
 
     {% include 'coder_app/coder_table.html' %}
 {% endblock %}

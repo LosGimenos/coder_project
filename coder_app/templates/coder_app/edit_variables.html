@@ -9,55 +9,66 @@
 
     <form action="{%  url 'coder_app:submit_new_variable' %}" method="post">
         {% csrf_token %}
-        <input class="btn btn-primary" name="add_variable" type="submit" value="Create Variable" />
+        <input class="btn btn-success" name="add_variable" type="submit" value="Create Variable" />
     </form>
 
-    <div class="row" style="margin-top: 2%; margin-bottom: 2%;">
-        <div class="col-md-4">
-{#            <div class="ui-widget" style="margin-bottom: 1%;">#}
-{#                <label for="tag_filter">Filter by Variable Name</label>#}
-{#                <input id='by_name' class="form-control" type="text" name="name_filter" placeholder="...variable name" />#}
+    <div style="margin-left: 1.5%;">
+        <div class="row" style="margin-top: 2%; margin-bottom: 2%;">
+            <div class="col-md-4">
+    {#            <div class="ui-widget" style="margin-bottom: 1%;">#}
+    {#                <label for="tag_filter">Filter by Variable Name</label>#}
+    {#                <input id='by_name' class="form-control" type="text" name="name_filter" placeholder="...variable name" />#}
+    {#            </div>#}
+                <label for="variable_name_filter">Filter by Variable Keyword</label>
+                <div class="input-group">
+                    <input id='by_keyword' class='form-control' type="text" name="variable_name_filter"  /><br/>
+                    <span class="input-group-btn">
+                        <button id='button--add__keyword' class="btn btn-default" type="button">Add</button>
+                    </span>
+                </div>
+                <div class="ui-widget" style="margin-bottom: 1%;">
+                    <label for="tag_filter">Filter by Tag</label>
+                    <input id="by_tag_name" class="form-control" type="text" name="tag_filter" placeholder="...tagname" />
+                </div>
+                <div class="ui-widget" style="margin-bottom: 1%;">
+                    <label for="project_filter">Filter by Project</label>
+                    <input id='by_project' class="form-control" type="text" name="project_filter" placeholder="...project name" />
+                </div>
+            </div>
+            <div class="col-md-2"></div>
+            <div class="col-md-4">
+                <label for="filter--container">Selected Filters</label>
+                <div class="col-md-12 filter--container filter--container__variable" name="filter--container">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <button style="float: left;" class="btn btn-default select-all">Select All</button>
+
+                <form action="{% url 'coder_app:edit_variables' %}" method="post">
+                    {% csrf_token %}
+                <button class="btn btn-default bulk-delete" name="bulk-variable-delete">
+                    <span class="glyphicon glyphicon-trash"></span>
+                </button>
+            </div>
+            <div class="col-md-1"></div>
+{#            <div class="col-md-4 input-group">#}
+{#                <label style="margin-right: 2%;" for="tag-name-to-add">Bulk Add/Remove Tags</label>#}
+{#                <input id="bulk-tag" type="text" name="tag-name-to-add" style="margin-right: 2%;"/>#}
+{#                <span class="tag-control--bulk tag-control--bulk__add glyphicon glyphicon-plus"></span>#}
+{#                <span class="tag-control--bulk tag-control--bulk__remove glyphicon glyphicon-minus"></span>#}
 {#            </div>#}
-            <label for="variable_name_filter">Filter by Variable Keyword</label>
-            <div class="input-group">
-                <input id='by_keyword' class='form-control' type="text" name="variable_name_filter"  /><br/>
-                <span class="input-group-btn">
-                    <button id='button--add__keyword' class="btn btn-default" type="button">Add</button>
-                </span>
-            </div>
-            <div class="ui-widget" style="margin-bottom: 1%;">
-                <label for="tag_filter">Filter by Tag</label>
-                <input id="by_tag_name" class="form-control" type="text" name="tag_filter" placeholder="...tagname" />
-            </div>
-            <div class="ui-widget" style="margin-bottom: 1%;">
-                <label for="project_filter">Filter by Project</label>
-                <input id='by_project' class="form-control" type="text" name="project_filter" placeholder="...project name" />
+        </div>
+        <div style="margin-left: 1.5%; padding-top: 1.5%;">
+        <div class="row">
+            <div class="col-md-4 input-group">
+                <label style="margin-right: 2%;" for="tag-name-to-add">Add/Remove Tags for Selected</label><br/>
+                <input id="bulk-tag" type="text" name="tag-name-to-add" style="margin-right: 2%;"/>
+                <span class="tag-control--bulk tag-control--bulk__add glyphicon glyphicon-plus"></span>
+                <span class="tag-control--bulk tag-control--bulk__remove glyphicon glyphicon-minus"></span>
             </div>
         </div>
-        <div class="col-md-2"></div>
-        <div class="col-md-4">
-            <label for="filter--container">Selected Filters</label>
-            <div class="col-md-12 filter--container filter--container__variable" name="filter--container">
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-md-3">
-            <button style="float: left;" class="btn btn-default select-all">Select All</button>
-
-            <form action="{% url 'coder_app:edit_variables' %}" method="post">
-                {% csrf_token %}
-            <button class="btn btn-default bulk-delete" name="bulk-variable-delete">
-                <span class="glyphicon glyphicon-trash"></span>
-            </button>
-        </div>
-        <div class="col-md-1"></div>
-        <div class="col-md-4 input-group">
-            <label style="margin-right: 2%;" for="tag-name-to-add">Bulk Add/Remove Tags</label>
-            <input id="bulk-tag" type="text" name="tag-name-to-add" style="margin-right: 2%;"/>
-            <span class="tag-control--bulk tag-control--bulk__add glyphicon glyphicon-plus"></span>
-            <span class="tag-control--bulk tag-control--bulk__remove glyphicon glyphicon-minus"></span>
         </div>
     </div>
 

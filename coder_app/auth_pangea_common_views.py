@@ -15,7 +15,7 @@ def pangea_login(request):
         redirect_url = next_url
     else:
         url_suffix = ''
-        redirect_url = reverse_lazy('coder_app:homepage', urlconf='coder_app_project.urls')
+        redirect_url = reverse_lazy('coder_app:view_projects', urlconf='coder_app_project.urls')
 
     if request.method == 'POST':
 

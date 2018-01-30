@@ -1,71 +1,108 @@
-{% if assigned_or_available == 'assigned' %}
-    <h3>Coders Assigned to Project</h3>
-{% else %}
-    {% if not cambrian_coder_data %}
-        <h3>Your Coders</h3>
-    {% else %}
-        <h3>Cambrian Coders</h3>
-    {% endif %}
-{% endif %}
-        <div class="table-responsive">
-            <table class="table table-bordered table-hovered table-striped tablesorter">
-                <thead>
-                    <tr>
-                        <th class="header">Coder First Name</th>
-                        <th class="header">Coder Last Name</th>
-                        <th class="header">Coder Username</th>
-                        {% if not cambrian_coder_data %}
-                            <th class="header">Coder Email</th>
-                        {% endif %}
-                        <th class="header">Coder Rating</th>
-                        {% if project_edit_view == 'coder' and not assigned_or_available %}
-                            <th class="header">Invite To Project</th>
-                        {% elif project_edit_view == 'coder' %}
-                            <th class="header">Remove from Project</th>
-                            <th class="header"></th>
-                        {% else %}
-                            <th class="header"></th>
-                        {% endif %}
-                    </tr>
-                </thead>
-                <tbody>
-                    {% if coder_data %}
-                        {% for coder in coder_data %}
-                        <tr>
-                            <td>{{ coder.first_name }}</td>
-                            <td>{{ coder.last_name }}</td>
-                            <td>{{ coder.username }}</td>
-                            {% if not cambrian_coder_data %}
-                                <td>{{ coder.email }}</td>
-                            {% endif %}
-                            <td>{{ coder.rating }}</td>
-                            {% if project_edit_view == 'coder' and not assigned_or_available %}
-                                <td>
-                                    <input class='input-group' type="checkbox" name="add_to_project" value="{{ coder.id }}">
-                                </td>
-                                {% elif project_edit_view == 'coder' %}
-                                <td>
-                                    <input class='input-group' type="checkbox" name="remove_from_project" value="{{ coder.id }}">
-                                </td>
-                                <td>
-                                    <a href="{% url 'coder_app:edit_coder' coder_id=coder.id %}">
-                                        <span>Edit Coder Details</span>
-                                    </a>
-                                </td>
-                                {% else %}
-                                <td>
-                                    <a href="{% url 'coder_app:edit_coder' coder_id=coder.id %}">
-                                        <span>Edit Coder Details</span>
-                                    </a>
-                                </td>
-                            {% endif %}
-                        </tr>
-                        {% endfor %}
-                    {% else %}
-                        <tr>
-                            <td><p>No Available Coders</p></td>
-                        </tr>
+{% block content %}
+{% url 'coder_app:add_coder' as add_coder %}
+
+<input style="display: none;" name="project_id" value="{{ project_data.id }}" />
+
+<h3>{{ user_account_name }} Coders</h3>
+    <div class="table-responsive">
+        <table class="table table-bordered table-hovered table-striped tablesorter">
+            <thead>
+                <tr>
+                    <th class="header">First Name</th>
+                    <th class="header">Last Name</th>
+                    <th class="header">Username</th>
+                    <th class="header">Email</th>
+                    <th class="header">Accuracy</th>
+                    {% if request.path not in add_coder %}
+                        <th class="header">Add/Remove Coder</th>
                     {% endif %}
-                </tbody>
-            </table>
-        </div>
+                    <th class="header">Edit Coder Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if coder_data %}
+                    {% for coder in coder_data %}
+                    <tr>
+                        <td>{{ coder.first_name }}</td>
+                        <td>{{ coder.last_name }}</td>
+                        <td>{{ coder.username }}</td>
+                        <td>{{ coder.email }}</td>
+                        <td>{{ coder.rating }}</td>
+                        {% if request.path not in add_coder %}
+                            <td style="text-align: center;">
+                                <form action="{% url 'coder_app:edit_project_coders' project_data.id %}" method="post">
+                                {% csrf_token %}
+                                {% if coder.assigned %}
+                                    <input
+                                            name="remove_coder"
+                                            value="Remove"
+                                            type="submit"
+                                            class="btn btn-warning btn-xs" />
+                                {% else %}
+                                    <input
+                                            name="add_coder"
+                                            value="Add"
+                                            type="submit"
+                                            class="btn btn-success btn-xs" />
+                                {% endif %}
+                                <input type="hidden" name="coder_id" value="{{ coder.id }}"/>
+                                </form>
+                            </td>
+                        {% endif %}
+                        <td>
+                            <a href="{% url 'coder_app:edit_coder' coder_id=coder.id %}">
+                                <span>Edit</span>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td><p>No Available Coders</p></td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+{% if cambrian_coder_data and request.path not in add_coder %}
+<h3>Cambrian Coders</h3>
+<div class="table-responsive">
+    <table class="table table-bordered table-hovered table-striped tablesorter">
+        <thead>
+            <tr>
+                <th class="header">First Name</th>
+                <th class="header">Last Name</th>
+                <th class="header">Username</th>
+                <th class="header">Accuracy</th>
+                <th class="header">Add/Remove Coder</th>
+{#                <th class="header">Edit Coder Details</th>#}
+            </tr>
+        </thead>
+        <tbody>
+            {% for coder in cambrian_coder_data %}
+            <tr>
+                <td>{{ coder.first_name }}</td>
+                <td>{{ coder.last_name }}</td>
+                <td>{{ coder.username }}</td>
+                <td>{{ coder.rating }}</td>
+                <td style="text-align: center;">
+                    {% if coder.assigned %}
+                        <button class="btn btn-warning btn-xs">Remove</button>
+                    {% else %}
+                        <button class="btn btn-success btn-xs">Add</button>
+                    {% endif %}
+                </td>
+{#                <td>#}
+{#                    <a href="{% url 'coder_app:edit_coder' coder_id=coder.id %}">#}
+{#                        <span>Edit</span>#}
+{#                    </a>#}
+{#                </td>#}
+            </tr>
+                {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+{% endblock %}

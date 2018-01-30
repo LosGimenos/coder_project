@@ -7,34 +7,38 @@
     <h3>Tag Library</h3>
 
     <form action="{% url 'coder_app:create_tag' %}">
-        <input class="btn btn-primary" type="submit" value="Create Tag" />
+        <input class="btn btn-success" type="submit" value="Create Tag" />
     </form>
 
-    <div class="row" style="margin-top: 2%;">
-        <div class="col-md-4">
-            <div class="ui-widget">
-                <label for="tag_filter">Filter by Tag</label>
-                <input id='by_tag' class="form-control" type="text" name="tag_filter" placeholder="...tagname" />
+    <div style="margin-left: 1.5%;">
+        <div class="row" style="margin-top: 2%;">
+            <div class="col-md-4">
+                <div class="ui-widget">
+                    <label for="tag_filter">Filter by Tag</label>
+                    <input id='by_tag' class="form-control" type="text" name="tag_filter" placeholder="...tagname" />
+                </div>
             </div>
-        </div>
-        <div class="col-md-2"></div>
-        <div class="col-md-4">
-            <label for="filter--container">Selected Filters</label>
-            <div class="col-md-12 filter--container tag--container" name="filter--container">
+            <div class="col-md-2"></div>
+            <div class="col-md-4">
+                <label for="filter--container">Selected Filters</label>
+                <div class="col-md-12 filter--container tag--container" name="filter--container">
+                </div>
             </div>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-md-3">
-            <button style="float: left;" class="btn btn-default select-all">Select All</button>
+    <div style="margin-left: 1.5%;">
+        <div class="row">
+            <div class="col-md-3">
+                <button style="float: left;" class="btn btn-default select-all">Select All</button>
 
-            <form action="{% url 'coder_app:homepage' %}" method="post">
-                {% csrf_token %}
-                <button class="btn btn-default bulk-delete" name="bulk-tag-delete">
-                    <span class="glyphicon glyphicon-trash"></span>
-                </button>
+                <form action="{% url 'coder_app:edit_tags' %}" method="post">
+                    {% csrf_token %}
+                    <button class="btn btn-default bulk-delete" name="bulk-tag-delete">
+                        <span class="glyphicon glyphicon-trash"></span>
+                    </button>
 
+            </div>
         </div>
     </div>
 

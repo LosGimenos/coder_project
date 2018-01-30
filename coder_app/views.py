@@ -19,12 +19,6 @@ import pytz
 
 @login_required()
 def index(request):
-    if request.method == "POST" and 'bulk-tag-delete' in request.POST:
-        tags_to_delete = request.POST.getlist('tag-names[]')
-        for tag_to_delete in tags_to_delete:
-            tag = Tag.objects.get(id=tag_to_delete)
-            tag.delete()
-
 
     user_data = User.objects.get(username=request.user)
     return render(
@@ -384,13 +378,14 @@ def submit_new_variable(request):
 
 @login_required()
 def submit_new_project(request):
-    if request.method == 'POST':
-        user = User.objects.get(username=request.user)
-        user_account = user.accounts.all().first()
+    user = User.objects.get(username=request.user)
+    user_account = user.accounts.all().first()
 
+    if request.method == 'POST' and 'submit_new_project' in request.POST:
         project_name = request.POST.get('project-name')
         project_rate = request.POST.get('project-rate')
         project_tags = request.POST.getlist('tags_to_add[]')
+        unique_project_tag_name = request.POST.get('hidden_project_tag_value')
         project_introduction = request.POST.get('project-introduction')
 
         # Dataset and info derived from dataset
@@ -416,6 +411,9 @@ def submit_new_project(request):
             project_tag = Tag.objects.get(id=tag)
             project.tag_set.add(project_tag)
 
+        unique_project_tag, created = Tag.objects.get_or_create(name=unique_project_tag_name)
+        project.tag_set.add(unique_project_tag)
+
         # for row in project_rows:
         #     row_meta = RowMeta(
         #         row=row,
@@ -428,6 +426,27 @@ def submit_new_project(request):
         redirect_url = reverse('coder_app:view_projects')
 
         return redirect(redirect_url)
+
+    if request.is_ajax():
+        project_name = request.POST.get('project_name_value')
+        original_project_name = request.POST.get('original_project_name')
+
+        if not original_project_name:
+            projects_in_account = Project.objects.filter(account=user_account)
+        else:
+            projects_in_account = Project.objects.filter(account=user_account).exclude(name=original_project_name)
+        project_name_check_unique = True
+
+        if not project_name or project_name in [project.name for project in projects_in_account]:
+            project_name_check_unique = False
+
+        return HttpResponse(
+            json.dumps({
+                'project_name_check_unique': project_name_check_unique,
+                'result': 'successful!'
+            }),
+            content_type="application/json"
+        )
 
     # dataset_data = Dataset.objects.all()
 
@@ -442,6 +461,7 @@ def submit_new_project(request):
 def edit_project(request, project_id):
     p = Project.objects.get(id=project_id)
     project_data = p
+    variable_data = Variable.objects.filter(project=p)
     tag_data = p.tag_set.all()
     mention_data = RowMeta.objects.filter(project=p)
     mentions_count = mention_data.count()
@@ -449,46 +469,23 @@ def edit_project(request, project_id):
     projected_project_cost = mentions_count * rate_per_mention
     projected_project_cost = '${:,.2f}'.format(projected_project_cost)
 
-    project_edit_view = 'variable'
-    variables = Variable.objects.filter(project=p)
+    project_edit_view = 'project_details'
 
-    variable_data_list = [];
+    if request.is_ajax() and 'coder_action' == 'add':
+        coder_id = request.POST.get('coder_id')
+        coder = Coder.objects.get(id=coder_id)
 
-    for variable in variables:
-        if variable.is_freeform:
-            multiple_or_freeform = 'freeform'
-        elif variable.is_multiple_choice:
-            multiple_or_freeform = 'multiple'
-        else:
-            multiple_or_freeform = 'not assigned'
-
-        variable_data = {
-            'id': variable.id,
-            'name': variable.name,
-            'multiple_or_freeform': multiple_or_freeform,
-            'description': variable.description
-        }
-        variable_data_list.append(variable_data)
-
-    if request.method == 'POST' and 'delete_variable' in request.POST:
-        value = request.POST.get('delete_variable')
-        column_to_delete = Column.objects.get(id=value)
-        variable_to_delete = Variable.objects.get(id=value)
-
-        column_to_delete.delete()
-        variable_to_delete.delete()
-
-        # redirect_url = '/coder_project/' + str(project_id) + '/edit_project/'
-        redirect_url = reverse('coder_app:edit_project', args=[project_id])
-
-        return redirect(redirect_url)
+        coder.project_set.remove(project_data)
+        pass
 
     if request.method == 'POST' and 'available_coder_view' in request.POST:
-        project_edit_view = 'coder'
+        project_edit_view = 'available_coder'
         user = User.objects.get(username=request.user)
         user_account = user.accounts.all().first()
         user_account_coders = user_account.users.all()
-        coder_data = Coder.objects.filter(user__in=user_account_coders).exclude(project=project_data)
+        user_account_name = user_account.name
+        project_coders = project_data.coder.all()
+        coder_data = Coder.objects.filter(user__in=user_account_coders)
 
         for coder in coder_data:
             coder_as_user = coder.user
@@ -497,99 +494,64 @@ def edit_project(request, project_id):
             coder.username = coder_as_user.username
             coder.email = coder_as_user.email
 
-        return render(
-            request,
-            'coder_app/edit_project.html',
-            {
-                'variable_data': variable_data_list,
-                'id': project_id,
-                'project_data': project_data,
-                'project_edit_view': project_edit_view,
-                'coder_data': coder_data,
-                'tag_data': tag_data,
-                'projected_project_cost': projected_project_cost
-            }
-        )
+            if coder in project_coders:
+                coder.assigned = True
 
-    if request.method == 'POST' and 'cambrian_coder_view' in request.POST:
-        project_edit_view = 'coder'
-        user_account = Account.objects.get(name="Cambrian")
-        user_account_coders = user_account.users.all()
-        coder_data = Coder.objects.filter(user__in=user_account_coders).exclude(project=project_data)
+        cambrian_account = Account.objects.get(name="Cambrian")
+        cambrian_account_coders = cambrian_account.users.all()
+        cambrian_coder_data = Coder.objects.filter(user__in=cambrian_account_coders)
 
-        for coder in coder_data:
+        for coder in cambrian_coder_data:
             coder_as_user = coder.user
             coder.first_name = coder_as_user.first_name
             coder.last_name = coder_as_user.last_name
             coder.username = coder_as_user.username
             coder.email = coder_as_user.email
 
-        return render(
-            request,
-            'coder_app/edit_project.html',
-            {
-                'variable_data': variable_data_list,
-                'id': project_id,
-                'project_data': project_data,
-                'project_edit_view': project_edit_view,
-                'coder_data': coder_data,
-                'tag_data': tag_data,
-                'projected_project_cost': projected_project_cost,
-                'cambrian_coder_data': True
-            }
-        )
-
-    if request.method == 'POST' and 'assigned_coder_view' in request.POST:
-        project_edit_view = 'coder'
-        coder_data = Coder.objects.filter(project=project_id)
-
-        for coder in coder_data:
-            coder_as_user = coder.user
-            coder.first_name = coder_as_user.first_name
-            coder.last_name = coder_as_user.last_name
-            coder.username = coder_as_user.username
-            coder.email = coder_as_user.email
+            if coder in project_coders:
+                coder.assigned = True
 
         return render(
             request,
             'coder_app/edit_project.html',
             {
-                'variable_data': variable_data_list,
                 'id': project_id,
                 'project_data': project_data,
                 'project_edit_view': project_edit_view,
                 'coder_data': coder_data,
-                'assigned_or_available': 'assigned',
-                'tag_data': tag_data,
-                'projected_project_cost': projected_project_cost
+                'cambrian_coder_data': cambrian_coder_data,
+                'user_account_name': user_account_name
+                # 'tag_data': tag_data,
+                # 'projected_project_cost': projected_project_cost
             }
         )
 
     if request.method == 'POST' and 'variable_view' in request.POST:
         project_edit_view = 'variable'
 
-        return render(
-            request,
-            'coder_app/edit_project.html',
-            {
-                'variable_data': variable_data_list,
-                'id': project_id,
-                'project_data': project_data,
-                'project_edit_view': project_edit_view,
-                'tag_data': tag_data,
-                'projected_project_cost': projected_project_cost
+        variable_data_list = []
+
+        for variable in variable_data:
+            if variable.is_freeform:
+                multiple_or_freeform = 'freeform'
+            elif variable.is_multiple_choice:
+                multiple_or_freeform = 'multiple'
+            else:
+                multiple_or_freeform = 'not assigned'
+
+            variable_data = {
+                'id': variable.id,
+                'name': variable.name,
+                'multiple_or_freeform': multiple_or_freeform,
+                'description': variable.description
             }
-        )
-
-    if request.method == 'POST' and 'mentions_view' in request.POST:
-        project_edit_view = 'mention'
+            variable_data_list.append(variable_data)
 
         return render(
             request,
             'coder_app/edit_project.html',
             {
                 'variable_data': variable_data_list,
-                'mention_data': mention_data,
                 'id': project_id,
                 'project_data': project_data,
                 'project_edit_view': project_edit_view,
@@ -637,9 +599,7 @@ def edit_project(request, project_id):
         tag_id = request.POST.get('tag_id')
         tag_to_add = Tag.objects.get(id=tag_id)
         p.tag_set.add(tag_to_add)
-        p.save()
 
-        variable_data = Variable.objects.filter(project=p)
         for variable in variable_data:
             variable.tag_set.add(tag_to_add)
 
@@ -660,8 +620,9 @@ def edit_project(request, project_id):
             tag_to_remove = Tag.objects.get(id=tag_id)
             p.tag_set.remove(tag_to_remove)
 
-            for variable in variables:
-                variable.tag_set.remove(tag_to_remove)
+            if variable_data:
+                for variable in variable_data:
+                    variable.tag_set.remove(tag_to_remove)
 
         tag_data = p.tag_set.all()
 
@@ -669,7 +630,6 @@ def edit_project(request, project_id):
             request,
             'coder_app/edit_project.html',
             {
-                'variable_data': variable_data_list,
                 'id': project_id,
                 'project_data': project_data,
                 'project_edit_view': project_edit_view,
@@ -677,11 +637,29 @@ def edit_project(request, project_id):
                 'projected_project_cost': projected_project_cost
             })
 
+    if request.method == 'POST' and 'project_details_view' in request.POST:
+
+        return render(
+            request,
+            'coder_app/edit_project.html',
+            {
+                'id': project_id,
+                'project_data': project_data,
+                'project_edit_view': project_edit_view,
+                'tag_data': tag_data,
+                'projected_project_cost': projected_project_cost
+            }
+        )
+
     if request.method == 'POST':
         project_name = request.POST.get('project-name')
         project_rate = request.POST.get('project-rate')
         project_introduction = request.POST.get('project-introduction')
+        new_project_tag_ids = request.POST.getlist('project_tags[]')
+        edited_project_tag_name = request.POST.get('hidden_project_tag_value')
+        edited_project_tag_id = request.POST.get('hidden_project_tag_id')
 
+        print(new_project_tag_ids, edited_project_tag_name, edited_project_tag_id, 'the stuff')
 
         if project_name == '':
             project_name = p.name
@@ -698,6 +676,23 @@ def edit_project(request, project_id):
         # project_data['name'] = project_name
         # project_data['rate'] = project_rate
 
+        original_project_tags = project_data.tag_set.all()
+
+        for original_project_tag in original_project_tags:
+            if original_project_tag.id not in new_project_tag_ids:
+                project_data.tag_set.remove(original_project_tag)
+
+        for new_project_tag_id in new_project_tag_ids:
+            if new_project_tag_id not in [original_project_tag.id for original_project_tag in original_project_tags]:
+                project_tag_to_add = Tag.objects.get(id=new_project_tag_id)
+                project_data.tag_set.add(project_tag_to_add)
+
+        edited_project_tag = Tag.objects.get(id=edited_project_tag_id)
+
+        if edited_project_tag.name != edited_project_tag_name:
+            edited_project_tag.name = edited_project_tag_name
+            edited_project_tag.save()
+
         redirect_url = reverse('coder_app:view_projects')
 
         return redirect(redirect_url)
@@ -707,7 +702,6 @@ def edit_project(request, project_id):
         request,
         'coder_app/edit_project.html',
         {
-            'variable_data': variable_data_list,
             'id': project_id,
             'project_data': project_data,
             'project_edit_view': project_edit_view,
@@ -717,15 +711,126 @@ def edit_project(request, project_id):
     )
 
 @login_required()
+def edit_project_coders(request, project_id):
+    project_data = Project.objects.get(id=project_id)
+
+    if request.method == 'POST' and 'add_coder' in request.POST:
+        coder_id = request.POST.get('coder_id')
+        coder_to_add = Coder.objects.get(id=coder_id)
+
+        project_data.coder.add(coder_to_add)
+
+    if request.method == 'POST' and 'remove_coder' in request.POST:
+        coder_id = request.POST.get('coder_id')
+        coder_to_remove = Coder.objects.get(id=coder_id)
+
+        project_data.coder.remove(coder_to_remove)
+
+    project_edit_view = 'available_coder'
+    user = User.objects.get(username=request.user)
+    user_account = user.accounts.all().first()
+    user_account_coders = user_account.users.all()
+    user_account_name = user_account.name
+    project_coders = project_data.coder.all()
+    coder_data = Coder.objects.filter(user__in=user_account_coders)
+
+    for coder in coder_data:
+        coder_as_user = coder.user
+        coder.first_name = coder_as_user.first_name
+        coder.last_name = coder_as_user.last_name
+        coder.username = coder_as_user.username
+        coder.email = coder_as_user.email
+
+        if coder in project_coders:
+            coder.assigned = True
+
+    cambrian_account = Account.objects.get(name="Cambrian")
+    cambrian_account_coders = cambrian_account.users.all()
+    cambrian_coder_data = Coder.objects.filter(user__in=cambrian_account_coders)
+
+    for coder in cambrian_coder_data:
+        coder_as_user = coder.user
+        coder.first_name = coder_as_user.first_name
+        coder.last_name = coder_as_user.last_name
+        coder.username = coder_as_user.username
+        coder.email = coder_as_user.email
+
+        if coder in project_coders:
+            coder.assigned = True
+
+    return render(
+        request,
+        'coder_app/edit_project_coders.html',
+        {
+            'id': project_id,
+            'project_data': project_data,
+            'project_edit_view': project_edit_view,
+            'coder_data': coder_data,
+            'cambrian_coder_data': cambrian_coder_data,
+            'user_account_name': user_account_name
+        }
+    )
+
+@login_required()
+def edit_project_mentions(request, project_id):
+    project_data = Project.objects.get(id=project_id)
+    mention_data = RowMeta.objects.filter(project=project_data)
+
+    return render(
+        request,
+        'coder_app/edit_project_mentions.html',
+        {
+            'project_data': project_data,
+            'mention_data': mention_data
+        }
+    )
+
+@login_required()
+def edit_project_variables(request, project_id):
+    project_data = Project.objects.get(id=project_id)
+
+    if request.method == 'POST' and 'delete_variable' in request.POST:
+        value = request.POST.get('delete_variable')
+        variable_to_delete = Variable.objects.get(id=value)
+
+        column_meta_for_variable = ColumnMeta.objects.filter(project=project_data, variable=variable_to_delete).first()
+        column_for_column_meta = column_meta_for_variable.column
+
+        variable_to_delete.delete()
+        column_meta_for_variable.delete()
+        column_for_column_meta.delete()
+
+    variable_data = Variable.objects.filter(project=project_data)
+
+    for variable in variable_data:
+        if variable.is_freeform:
+            variable.multiple_or_freeform = 'Freeform'
+        elif variable.is_multiple_choice:
+            variable.multiple_or_freeform = 'Multiple Choice'
+        else:
+            variable.multiple_or_freeform = 'not assigned'
+
+    return render(
+        request,
+        'coder_app/edit_project_variables.html',
+        {
+            'project_data': project_data,
+            'variable_data': variable_data
+        }
+    )
+
+@login_required()
 def edit_variable(request, variable_id):
     v = Variable.objects.get(id=variable_id)
     project_data = v.project
+    source = request.GET.get('source')
 
     if request.method == 'POST':
         variable_name = request.POST.get('variable-name')
         variable_description = request.POST.get('variable-description')
         variable_instructions = request.POST.get('variable-instructions')
         multiple_or_freeform = request.POST.get('variable_answer_option')
+        new_variable_tag_ids = request.POST.getlist('variable-tags[]')
 
         if multiple_or_freeform == 'multiple_choice':
             v.is_freeform = False
@@ -754,9 +859,28 @@ def edit_variable(request, variable_id):
         v.description = variable_description
         v.instructions = variable_instructions
         v.save()
-        # redirect_url = '/coder_project/' + str(project_id) + '/edit_project/'
 
-        # return redirect('/coder_project/')
+        tag_data = v.tag_set.all()
+
+        if project_data:
+            project_tags = project_data.tag_set.all()
+            tag_data = tag_data.exclude(id__in=[project_tag.id for project_tag in project_tags])
+
+        for tag in tag_data:
+            if tag.id not in new_variable_tag_ids:
+                tag.variable.remove(v)
+
+        for tag_id in new_variable_tag_ids:
+            if tag_id not in [tag.id for tag in tag_data]:
+                tag_to_add = Tag.objects.get(id=tag_id)
+                tag_to_add.variable.add(v)
+
+        if project_data:
+           redirect_url = reverse('coder_app:edit_project_variables', args=[project_data.id])
+        else:
+            redirect_url = reverse('coder_app:edit_variables')
+
+        return redirect(redirect_url)
 
     variable_data = {
         'id': v.id,
@@ -795,6 +919,8 @@ def edit_variable(request, variable_id):
     if project_data:
         project_tags = project_data.tag_set.all()
         tag_data = tag_data.exclude(id__in=[project_tag.id for project_tag in project_tags])
+    else:
+        project_tags = None
 
     return render(
         request,
@@ -802,8 +928,10 @@ def edit_variable(request, variable_id):
         {
             'variable_data': variable_data,
             'tag_data': tag_data,
-            # 'project_id': project_id,
-            'choice_data': choice_data
+            'project_data': project_data,
+            'choice_data': choice_data,
+            'source': source,
+            'project_tags': project_tags
         })
 
 @login_required()
@@ -832,80 +960,83 @@ def submit_new_coder(request):
         coder.username = coder_as_user.username
         coder.email = coder_as_user.email
 
-    if request.method == 'POST' and 'import-user-to-coder' in request.POST:
-        user_id = request.POST.get('user-to-coder')
-        user = user_data.get(id=user_id)
-
-        new_coder = Coder(
-            user=user
-        )
-        new_coder.save()
-
-        send_add_coder_from_user_email(user)
-
-        user_data = current_user_account.users.all()
-
-        user_ids_with_coder_id = []
-        coder_ids_from_users = []
-
-        for user in user_data:
-            coder = Coder.objects.filter(user=user).first()
-
-            if coder:
-                user_ids_with_coder_id.append(user.id)
-                coder_ids_from_users.append(coder.id)
-
-        user_data = user_data.exclude(id__in=user_ids_with_coder_id)
-        coder_data = Coder.objects.filter(id__in=coder_ids_from_users)
-
-        for coder in coder_data:
-            coder_as_user = coder.user
-            coder.first_name = coder_as_user.first_name
-            coder.last_name = coder_as_user.last_name
-            coder.username = coder_as_user.username
-            coder.email = coder_as_user.email
-
-        return render(request, 'coder_app/add_coder.html', {'coder_data': coder_data, 'user_data': user_data})
-
     if request.method == 'POST' and 'add_new_coder' in request.POST:
-        first_name = request.POST.get('coder-first-name')
-        last_name = request.POST.get('coder-last-name')
+        user_id = request.POST.get('user-to-coder')
         email_value = request.POST.get('coder-email')
-        username = request.POST.get('coder-username')
-        password = first_name + '.' + last_name
+        error_message = None
 
-        user = User(
-            first_name=first_name,
-            last_name=last_name,
-            email=email_value,
-            username=username
-        )
-        user.set_password(password)
-        user.save()
+        if user_id != 'None':
+            user = user_data.get(id=user_id)
 
-        current_user_account.users.add(user)
+            if user.email in [coder.email for coder in coder_data]:
+                error_message = 'Email already exists.'
+            else:
+                new_coder = Coder(
+                    user=user
+                )
+                new_coder.save()
 
-        coder = Coder(
-            user=user
-        )
-        coder.save()
+                send_add_coder_from_user_email(user)
 
-        send_coder_intro_email(user)
+                user_data = current_user_account.users.all()
 
-        user_data = current_user_account.users.all()
+                user_ids_with_coder_id = []
+                coder_ids_from_users = []
 
-        user_ids_with_coder_id = []
-        coder_ids_from_users = []
+                for user in user_data:
+                    coder = Coder.objects.filter(user=user).first()
 
-        for user in user_data:
-            coder = Coder.objects.filter(user=user).first()
+                    if coder:
+                        user_ids_with_coder_id.append(user.id)
+                        coder_ids_from_users.append(coder.id)
 
-            if coder:
-                user_ids_with_coder_id.append(user.id)
-                coder_ids_from_users.append(coder.id)
+                user_data = user_data.exclude(id__in=user_ids_with_coder_id)
+                coder_data = Coder.objects.filter(id__in=coder_ids_from_users)
 
-        user_data = user_data.exclude(id__in=user_ids_with_coder_id)
-        coder_data = Coder.objects.filter(id__in=coder_ids_from_users)
+        elif user_id == 'None' and email_value:
+            if email_value in [coder.email for coder in coder_data]:
+                error_message = 'Email already exists.'
+            else:
+                first_name = request.POST.get('coder-first-name')
+                last_name = request.POST.get('coder-last-name')
+                username = request.POST.get('coder-username')
+                password = first_name + '.' + last_name
+
+                user = User(
+                    first_name=first_name,
+                    last_name=last_name,
+                    email=email_value,
+                    username=username
+                )
+                user.set_password(password)
+                user.save()
+
+                current_user_account.users.add(user)
+
+                coder = Coder(
+                    user=user
+                )
+                coder.save()
+
+                send_coder_intro_email(user)
+
+                user_data = current_user_account.users.all()
+
+                user_ids_with_coder_id = []
+                coder_ids_from_users = []
+
+                for user in user_data:
+                    coder = Coder.objects.filter(user=user).first()
+
+                    if coder:
+                        user_ids_with_coder_id.append(user.id)
+                        coder_ids_from_users.append(coder.id)
+
+                user_data = user_data.exclude(id__in=user_ids_with_coder_id)
+                coder_data = Coder.objects.filter(id__in=coder_ids_from_users)
+
+        elif user_id == 'None' and not email_value:
+            error_message = 'Please Add details or select from existing User.'
 
         for coder in coder_data:
             coder_as_user = coder.user
@@ -914,11 +1045,26 @@ def submit_new_coder(request):
             coder.username = coder_as_user.username
             coder.email = coder_as_user.email
 
+        return render(
+            request,
+            'coder_app/add_coder.html',
+            {
+                'coder_data': coder_data,
+                'user_data': user_data,
+                'user_account_name': current_user_account.name,
+                'error_message': error_message
+            }
+        )
 
-
-        return render(request, 'coder_app/add_coder.html', {'coder_data': coder_data, 'user_data': user_data})
-
-    return render(request, 'coder_app/add_coder.html', {'coder_data': coder_data, 'user_data': user_data})
+    return render(
+        request,
+        'coder_app/add_coder.html',
+        {
+            'coder_data': coder_data,
+            'user_data': user_data,
+            'user_account_name': current_user_account.name
+        }
+    )
 
 @login_required()
 def edit_coder(request, coder_id):
@@ -969,24 +1115,23 @@ def edit_variable_library(request):
             }
         )
 
-    if request.is_ajax() and json.loads(request.POST.get('add_variables')):
-        variables = json.loads(request.POST.get('variables_to_add'))
+    if request.method == 'POST' and 'add_variables' in request.POST:
+        variable_ids_to_add = request.POST.getlist('variable_ids[]')
         project_id = request.POST.get('project_id')
-
         project_data = Project.objects.get(id=project_id)
         dataset = Dataset.objects.get(project=project_data)
         project_tags = project_data.tag_set.all()
         variable_data = Variable.objects.filter(project=project_data)
         variable_ids_attached_to_project = variable_data.values('id')
 
-        for variable in variables:
+        for variable_id in variable_ids_to_add:
             attached_variable = \
-                next((item for item in variable_ids_attached_to_project if item['id'] == variable['id']), None)
+                next((item for item in variable_ids_attached_to_project if item['id'] == variable_id), None)
 
             if attached_variable:
                 continue
             else:
-                variable = Variable.objects.get(id=variable['id'])
+                variable = Variable.objects.get(id=variable_id)
                 variable_project_origin = variable.project
 
                 if variable_project_origin:
@@ -1031,14 +1176,8 @@ def edit_variable_library(request):
                 )
                 column_meta.save()
 
-        redirect_url = '/coder_project/' + project_id + '/edit_project/'
-        return HttpResponse(
-            json.dumps({
-                'redirect_url': redirect_url,
-                'result': 'successful!'
-            }),
-            content_type="application/json"
-        )
+        redirect_url = reverse('coder_app:edit_project_variables', args=[project_id])
+        return redirect(redirect_url)
 
 @login_required()
 def select_mention(request, coder_id, project_id):
@@ -1442,6 +1581,12 @@ def get_project_names(request):
 
 @login_required()
 def edit_tags(request):
+    if request.method == "POST" and 'bulk-tag-delete' in request.POST:
+        tags_to_delete = request.POST.getlist('tag-names[]')
+        for tag_to_delete in tags_to_delete:
+            tag = Tag.objects.get(id=tag_to_delete)
+            tag.delete()
+
     if request.is_ajax() and json.loads(request.POST.get('rename_tag')):
         tag_id = request.POST.get('tag_id')
         tag = Tag.objects.get(id=tag_id)
@@ -1607,7 +1752,8 @@ def edit_variables(request):
 
     if request.is_ajax() and request.POST.get('variable_action') == 'edit_variable':
         variable_id = request.POST.get('variable_id')
-        redirect_url = '/coder_project/edit_variable/' + str(variable_id)
+        source_query = '?source=variable_library'
+        redirect_url = '/coder_project/edit_variable/' + str(variable_id) + source_query
 
         return HttpResponse(
             json.dumps({

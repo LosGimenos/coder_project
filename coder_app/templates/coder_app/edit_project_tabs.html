@@ -1,0 +1,56 @@
+{% url 'coder_app:edit_project_coders' project_data.id as edit_project_coders %}
+{% url 'coder_app:edit_project_mentions' project_data.id as edit_project_mentions %}
+{% url 'coder_app:edit_project_variables' project_data.id as edit_project_variables %}
+
+<div class="collapse navbar-collapse" style="margin-top: 2%; margin-left: -1.5%;">
+    <ul class="nav navbar-nav nav__tabs--projects">
+        <li>
+            <form action={% url 'coder_app:edit_project' project_data.id %} method="post">
+                {% csrf_token %}
+                <input
+                        {% if project_edit_view == 'project_details' %}
+                            class="filter-toggle-selected"
+                        {% endif %}
+                        type="submit"
+                        name="project-details-view-button"
+                        value="Project Details" />
+                <input style="display: none;" name="project_details_view" value="{{ variable.id }}" />
+            </form>
+        </li>
+        <li>
+            <form action={% url 'coder_app:edit_project_variables' project_data.id %} method="post">
+                {% csrf_token %}
+                <input
+                        {% if request.path == edit_project_variables %}
+                            class="filter-toggle-selected"
+                        {% endif %}
+                        type="submit"
+                        name="select-variable-view-button"
+                        value="Assigned Variables" />
+            </form>
+        </li>
+        <li>
+            <form action={% url 'coder_app:edit_project_mentions' project_data.id %} method="post">
+                {% csrf_token %}
+                <input
+                        {% if request.path == edit_project_mentions  %}
+                            class="filter-toggle-selected"
+                        {% endif %}
+                        type="submit"
+                        name="select-mention-view-button"
+                        value="Mentions" />
+            </form>
+        </li>
+        <li>
+            <form action="{% url 'coder_app:edit_project_coders' project_data.id %}" method="post">
+                {% csrf_token %}
+                <input
+                        {% if request.path == edit_project_coders %}
+                            class="filter-toggle-selected"
+                        {% endif %}
+                        type="submit"
+                        value="Coders" />
+            </form>
+        </li>
+    </ul>
+</div>

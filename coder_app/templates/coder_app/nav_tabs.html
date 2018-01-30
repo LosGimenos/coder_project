@@ -3,18 +3,12 @@
 {% url 'coder_app:add_coder' as add_coder %}
 {% url 'coder_app:edit_tags' as edit_tags %}
 {% url 'coder_app:homepage' as homepage %}
+{% url 'coder_app:submit_new_project' as submit_new_project %}
+{% url 'coder_app:edit_project' project_id as edit_project %}
 
     <ul class="nav nav-tabs" role="tablist">
       <li
-          {% if request.path == homepage %}
-            class="nav-home active"
-          {% else %}
-            class="nav-home"
-          {% endif %}
-            role="presentation">
-          <a href="{{ homepage }}" aria-controls="home" role="tab">Home</a></li>
-      <li
-               {% if request.path == view_projects %}
+               {% if '/edit_project/' in request.path or '/projects' in request.path or 'add_project' in request.path %}
                    class="nav-project active"
                {% else %}
                    class='nav-project'

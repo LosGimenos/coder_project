@@ -5,10 +5,7 @@
 {% include 'coder_app/nav_tabs.html' %}
 {#<h3>Your Projects</h3>#}
 
-<form action={% url 'coder_app:submit_new_project' %}>
-    <input class="btn btn-primary" type="submit" value="Add Project"/>
-</form>
-<div class="table-responsive">
+<div class="table-responsive" style="margin-top: 5%;">
     <table class="table table-bordered table-hovered table-striped tablesorter">
         <thead>
         <tr>
@@ -92,5 +89,7 @@
         {% endif %}
     </table>
 </div>
-
+    <a href="{% url 'coder_app:submit_new_project' %}">
+        <input class="btn btn-success" type="submit" value="Add Project"/>
+    </a>
 {% endblock %}

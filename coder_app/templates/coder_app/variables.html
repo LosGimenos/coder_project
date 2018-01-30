@@ -4,35 +4,77 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
     {% load static %}
     {% include 'coder_app/nav_tabs.html' %}
-    <h2>Create New Variable</h2>
+    <ol class="breadcrumb breadcrumb-top-left" style="margin-top: 2%;">
+        {% if project_id %}
+            <li><a href="#">Projects</a></li>
+            <li><a href="#">Assigned Variables</a></li>
+        {% else %}
+            <li><a href="#">Variable Library</a></li>
+        {% endif %}
+            <li><a href="#">Create New Variable</a></li>
+    </ol>
+    <h3>Create New Variable</h3>
 
-    <form action={% url 'coder_app:submit_new_variable' %} class="input-group" method="post">
+    <form action={% url 'coder_app:submit_new_variable' %} method="post">
         {% csrf_token %}
-        <input class='btn btn-primary' type="submit" name="submit_variable" value="Submit Variable"/><br />
+        <input style="display:none;" name="project_id" value={{ project_id }} />
         <div class="row">
-            <input style="display:none;" name="project_id" value={{ project_id }} />
-            <div class="col-md-12 input-group">
-                <label for="variable-name">Variable Name</label>
-                <input class="form-control" type="input" name="variable-name" /> <br />
-                <label for="variable-description">Description</label>
-                <textarea class="form-control" name="variable-description"></textarea> <br />
-                <label for="variable-instructions">Instructions</label>
-                <textarea class="form-control" name="variable-instructions"></textarea> <br />
-                <label>Answer Style</label> <br />
-                <label class="radio-inline">
-                    <input type="radio" name="variable_answer_option" value="multiple_choice">Multiple Choice</label>
-                <label class="radio-inline">
-                    <input type="radio" name="variable_answer_option" value="freeform">Freeform</label> <br />
-                <div class="input-group options-wrapper">
+            <div class="col-md-12">
+                <div class="col-md-4">
+                    <label for="variable-name">Variable Name</label>
+                    <input class="form-control" type="input" name="variable-name" /> <br />
+                    <label for="variable-description">Description</label>
+                    <textarea class="form-control" name="variable-description"></textarea> <br />
+                    <label for="variable-instructions">Instructions</label>
+                    <textarea style="height: 15vh;" class="form-control" name="variable-instructions"></textarea> <br />
+                </div>
+                <div class="col-md-2"></div>
+                <div class="col-md-6">
+                    <label>Answer Style</label> <br />
+                    <label class="radio-inline">
+                        <input type="radio" name="variable_answer_option" value="multiple_choice">Multiple Choice</label>
+                    <label class="radio-inline">
+                        <input type="radio" name="variable_answer_option" value="freeform" checked>Freeform</label> <br />
+                    <div class="input-group options-wrapper col-md-3">
+                    </div>
                 </div>
             </div>
         </div>
+        <div class="row" style="margin-top: 1%; margin-left: .25%;">
+            <input class='btn btn-success' type="submit" name="submit_variable" value="Add"/><br />
+        </div>
     </form>
+
+    <style>
+    .remove-choice {
+        color: red;
+        font-size:1.5em;
+    }
+
+    .add-choice {
+        color: #5cb85c;
+        font-size:1.1em;
+        margin-left: 4.5px;
+    }
+
+    .options-wrapper {
+        padding-top: 3%;
+        width: 50%;
+        height: 35vh;
+    }
+
+    .choice-input-wrapper {
+        display: flex;
+        margin-bottom: 2%;
+    }
+    </style>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
     <script src="{% static 'token_injector.js' %}"></script>
-    <script src="{% static 'freeformToggle.js' %}"></script>
+    <script src="{% static 'freeformToggleGlyphicons.js' %}"></script>
+
+
 {#    <script>#}
 {##}
 {#        const tagsArray = [];#}
