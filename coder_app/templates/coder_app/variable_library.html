@@ -5,25 +5,30 @@
 
     {% include 'coder_app/nav_tabs.html' %}
     {% include 'coder_app/breadcrumb_projects.html' %}
+    {% include 'coder_app/edit_project_tabs.html' %}
     <h3>Add Variables from Library</h3>
 
     <div style="margin-left: 1.5%;">
         <div class="row" style="margin-top: 2%; margin-bottom: 2%;">
             <div class="col-md-4">
-                <label for="variable_name_filter">Search Keyword</label>
-                <div class="input-group">
-                    <input id='by_keyword' class='form-control' type="text" name="variable_name_filter"  /><br/>
-                    <span class="input-group-btn">
-                        <button id='button--add__keyword' class="btn btn-default" type="button">Add</button>
-                    </span>
+                <label for="variable_name_filter">Search by Keyword</label>
+                <div style="display: flex;">
+                    <input id='by_keyword' class='form-control input__tag' type="text" name="variable_name_filter"  /><br/>
+                    <button id='button--add__keyword' class="btn__keyword--add">Add</button>
                 </div>
                 <div class="ui-widget" style="margin-bottom: 1%;">
                     <label for="tag_filter">Search by Tag</label>
-                    <input id="by_tag_name" class="form-control" type="text" name="tag_filter" placeholder="...tagname" />
+                    <div style="display: flex;">
+                        <input id="by_tag" class="form-control input__tag" type="text" name="tag_filter" placeholder="...tagname" />
+                        <button class="btn__tag--add">Add</button>
+                    </div>
                 </div>
                 <div class="ui-widget" style="margin-bottom: 1%;">
                     <label for="project_filter">Search by Project</label>
-                    <input id='by_project' class="form-control" type="text" name="project_filter" placeholder="...project name" />
+                    <div style="display: flex;">
+                        <input id='by_project' class="form-control input__tag" type="text" name="project_filter" placeholder="...project name" />
+                        <button class="btn__project--add">Add</button>
+                    </div>
                 </div>
             </div>
             <div class="col-md-2"></div>
@@ -93,6 +98,20 @@
             border: 1px solid black;
             height: 15vh;
             overflow: scroll;
+        }
+        .input__tag {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .btn__tag--add, .btn__project--add, .btn__keyword--add {
+            border-radius: 4px;
+            border-bottom-left-radius: 0;
+            border-top-left-radius: 0;
+        }
+
+        .btn__tag--add:hover, .btn__project--add:hover, .btn__keyword--add:hover {
+            background-color: #e6e6e6;
         }
     </style>
 
@@ -308,10 +327,10 @@
         addDeleteHandler();
         addVariableListRedirect();
 
-        $('#bulk-tag').autocomplete({
-            source: "/coder_project/get_tag_names",
-            minLength: 2
-        });
+{#        $('#bulk-tag').autocomplete({#}
+{#            source: "/coder_project/get_tag_names",#}
+{#            minLength: 2#}
+{#        });#}
 
         $('#by_project').autocomplete({
            source: "/coder_project/get_project_names",
@@ -329,7 +348,7 @@
            minLength: 2
         });
 
-        $('#by_tag_name').autocomplete({
+        $('#by_tag').autocomplete({
           source: "/coder_project/get_tag_names",
           select: function (event, ui) {
               let tagId;
@@ -339,7 +358,7 @@
               }
 
               ajaxVariableFilter();
-              $('#by_tag_name').val('');
+              $('#by_tag').val('');
               return false;
           },
           minLength: 2
@@ -380,7 +399,7 @@
                             } else if (filterNode.type == 'project') {
                                 spanNode = $('<span style="background-color: orange;" name="project">PROJECT ||</span>');
                             } else if (filterNode.type == 'variable') {
-                                spanNode = $('<span style="background-color: green; color: white;" name="variable">VARIABLE ||</span>');
+                                spanNode = $('<span style="background-color: green; color: white;" name="variable">KEYWORD ||</span>');
                             }
                             let variableNode =
                                 $(`<span name='${filterNode.id}'>${filterNode.name}<span class='badge filter-remove__variable'>X</span><br/></span>`);
@@ -496,6 +515,64 @@
             }
 }
 
+        function addTagButtonHandler() {
+            $('.btn__tag--add').click(e => {
+                e.preventDefault();
+                const tagValue = $('#by_tag').val()
+
+                $.ajax({
+                    url: '/coder_project/get_tag_names',
+                    type: 'post',
+                    data: {
+                        'tag_action': 'by_add_button',
+                        'tag_name': tagValue
+                    },
+                    success: function(json) {
+                       let tagId;
+                       if ($.inArray(json.id, tagIds) < 0) {
+                           tagId = json.id;
+                           tagIds.push(tagId);
+
+                           ajaxVariableFilter();
+                       };
+
+                       $('#by_tag').val('');
+                    },
+                    error: function() {}
+                });
+            });
+        }
+
+        function addProjectButtonHandler() {
+            $('.btn__project--add').click(e => {
+                e.preventDefault();
+                const projectValue = $('#by_project').val()
+
+                $.ajax({
+                    url: '/coder_project/get_project_names',
+                    type: 'post',
+                    data: {
+                        'project_action': 'by_add_button',
+                        'project_name': projectValue
+                    },
+                    success: function(json) {
+                       let projectId;
+                       if ($.inArray(json.id, projectIds) < 0) {
+                           projectId = json.id;
+                           projectIds.push(projectId);
+
+                           ajaxVariableFilter();
+                       };
+
+                       $('#by_project').val('');
+                    },
+                    error: function() {}
+                });
+            });
+        }
+
+        addTagButtonHandler();
+        addProjectButtonHandler();
 
     </script>
 

@@ -2,6 +2,7 @@
 
 {% block content %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
+    {% include 'coder_app/back_button_project.html' %}
     {% include 'coder_app/nav_tabs.html' %}
 
     <ol class="breadcrumb breadcrumb-top-left" style="margin-top: 2%;">
@@ -26,7 +27,11 @@
                 <div class="col-md-4">
                     <div class="ui-widget">
                         <label for="tag_filter">Add Project Tags</label>
-                        <input id='by_tag' class="form-control" type="text" name="tag_filter" />
+
+                        <div style="display: flex;">
+                        <input id='by_tag' class="form-control input__tag" type="text" name="tag_filter" />
+                        <button class="btn__tag--add">Add</button>
+                        </div>
                     </div>
                     <div style="text-align: center; margin-top: 5%; margin-bottom: 3%;">
                         <span class="glyphicon glyphicon-arrow-down"></span>
@@ -72,6 +77,21 @@
         border: 1px solid grey;
         height: 15vh;
         overflow: scroll;
+    }
+
+    .input__tag {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+
+    .btn__tag--add {
+        border-radius: 4px;
+        border-bottom-left-radius: 0;
+        border-top-left-radius: 0;
+    }
+
+    .btn__tag--add:hover {
+        background-color: #e6e6e6;
     }
 
     </style>
@@ -237,6 +257,42 @@
                 error: {}
             });
         });
+
+    function addTagButtonHandler() {
+        $('.btn__tag--add').click(e => {
+            e.preventDefault();
+            const tagValue = $('#by_tag').val()
+
+            $.ajax({
+                url: '/coder_project/get_tag_names',
+                type: 'post',
+                data: {
+                    'tag_action': 'by_add_button',
+                    'tag_name': tagValue
+                },
+                success: function(json) {
+                   let tagId;
+                   if ($.inArray(json.id, globalTagIds) < 0) {
+                       tagId = json.id;
+                       const tagData = {
+                           'id': tagId,
+                           'name': json.name
+                       }
+                       globalTagIds.push(tagId);
+                       tagsArray.unshift(tagData);
+                       renderFilterContainer(tagsArray, hiddenTagContainer, 'hidden');
+                       renderFilterContainer(tagsArray, tagContainer, 'select');
+                       renderNewProjectTag(tagContainer);
+                   };
+
+                   $('#by_tag').val('');
+                },
+                error: function() {}
+            });
+        });
+    }
+
+    addTagButtonHandler();
 
     </script>
 

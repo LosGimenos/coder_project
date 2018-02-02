@@ -32,6 +32,7 @@ class Project(models.Model):
     is_completed = models.BooleanField(default=False)
     is_frozen = models.BooleanField(default=False)
     account = models.ForeignKey(Account, null=True)
+    is_active = models.BooleanField(default=False)
     class Meta:
         permissions = (
             ('is_coding_app_admin', 'Is admin for Coding App'),

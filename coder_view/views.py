@@ -22,6 +22,7 @@ def select_project(request, coder_id):
 
     if request.method == 'POST' and 'all_projects_view' in request.POST:
         project_ids_to_render = {}
+        filter_view = 'all'
 
         for project in projects:
             all_rows = RowMeta.objects.filter(project=project)
@@ -66,7 +67,7 @@ def select_project(request, coder_id):
                 project_data.append(single_project)
 
                 for completed_row in completed_rows:
-                    if completed_row.project_id not in [row.project_id for row in uncompleted_rows] :
+                    if completed_row.project_id not in [row.project_id for row in uncompleted_rows]:
                         total_answered_vars = DataMeta.objects.filter(coder=coder, project=project)
                         corrected_var_count = total_answered_vars.filter(coder=coder, project=project, corrected=True).count()
 
@@ -88,6 +89,10 @@ def select_project(request, coder_id):
                         project_data.append(single_project)
 
     elif request.method == 'POST' and 'completed_projects_view' in request.POST:
+        print('here')
+        filter_view = 'completed'
+        print(filter_view)
+
         for project in projects:
             all_rows = RowMeta.objects.filter(project=project)
             num_variables_in_project = project.variable_set.all().count()
@@ -119,6 +124,7 @@ def select_project(request, coder_id):
                 project_data.append(single_project)
 
     else:
+        filter_view = 'open'
         # pending projects default
         for project in projects:
             all_rows = RowMeta.objects.filter(project=project)
@@ -164,12 +170,113 @@ def select_project(request, coder_id):
 
                 project_data.append(single_project)
 
+    # check coder row progress
+    for project in project_data:
+        previous_coder_row = RowMeta.objects.filter(
+            project=project['id'],
+            coder=coder,
+            is_completed=False
+        )
+
+        if not previous_coder_row:
+            rows = RowMeta.objects.filter(
+                project=project['id'],
+                is_locked=False,
+                is_completed=False
+            )
+
+            if rows:
+                row = random.choice(rows)
+
+            row.is_locked = True
+            row.coder = coder
+            row.save()
+
+            row_data = row
+        else:
+            row_data = previous_coder_row[0]
+
+        row_id = row_data.id
+
+        # get current column with error handling if column_number does not match row curr_col_index
+
+        current_column_index = row_data.curr_col_index
+        next_column_index = current_column_index + 1
+        no_column_found = False
+        no_next_column_found = False
+
+        greatest_col_index = ColumnMeta.objects.filter(project_id=project['id']).aggregate(Max('column_number'))
+        greatest_col_index = greatest_col_index['column_number__max']
+
+        column_acquired = False
+
+        num_attempts = 0
+        while not column_acquired:
+            attempted_column = ColumnMeta.objects.filter(project_id=project['id'], is_variable=True,
+                                                         column_number=current_column_index)
+
+            try:
+                column = ColumnMeta.objects.filter(
+                    project_id=project['id'],
+                    is_variable=True,
+                    column_number=current_column_index
+                )[0]
+                column_acquired = True
+            except:
+                current_column_index = current_column_index + 1
+                num_attempts += 1
+                if num_attempts > 20:
+                    return
+
+        # load up next column information URL with error handling
+
+        next_column_acquired = False
+
+        while not next_column_acquired:
+            try:
+                next_column = ColumnMeta.objects.filter(
+                    project_id=project['id'],
+                    is_variable=True,
+                    column_number=next_column_index
+                )[0]
+                next_column_acquired = True
+            except:
+                if next_column_index > greatest_col_index:
+                    no_next_column_found = True
+                    break
+
+                if current_column_index > next_column_index:
+                    next_column_index = current_column_index + 1
+                else:
+                    next_column_index = next_column_index + 1
+
+        # get variable for render
+
+        variable_data = Variable.objects.get(id=column.variable_id)
+
+        if no_next_column_found:
+            next_variable_id = None
+        else:
+            next_variable_id = next_column.id
+
+        project['variable_data'] = variable_data
+        project['next_variable_id'] = next_variable_id
+        # project['row_id'] = row_id
+        project['column_data'] = column
+
+    print(filter_view)
+
     return render(
         request,
         'coder_view/select_project.html',
         {
             'coder_data': coder,
-            'project_data': project_data
+            'project_data': project_data,
+            # 'column_data': column,
+            # 'variable_data': variable_data,
+            # 'next_variable_id': next_variable_id,
+            # 'row_id': row_id,
+            'filter_view': filter_view
         })
 
 def project_overview(request, coder_id, project_id, row_id):
@@ -200,7 +307,8 @@ def project_overview(request, coder_id, project_id, row_id):
         if rows:
             row = random.choice(rows)
         else:
-            return redirect('/coder_view/' + str(coder_id) + '/project_select')
+            redirect_url = reverse('coder_view:project_select', args=[coder_id])
+            return redirect(redirect_url)
 
         row.is_locked = True
         row.coder = coder

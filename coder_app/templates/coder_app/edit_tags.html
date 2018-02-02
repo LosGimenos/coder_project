@@ -15,7 +15,15 @@
             <div class="col-md-4">
                 <div class="ui-widget">
                     <label for="tag_filter">Filter by Tag</label>
-                    <input id='by_tag' class="form-control" type="text" name="tag_filter" placeholder="...tagname" />
+                    <div style="display: flex;">
+                        <input
+                            id='by_tag'
+                            class="form-control input__tag"
+                            type="text"
+                            name="tag_filter"
+                            placeholder="...tagname" />
+                        <button class="btn__tag--add">Add</button>
+                    </div>
                 </div>
             </div>
             <div class="col-md-2"></div>
@@ -94,6 +102,21 @@
 
         .tag-controls span {
             cursor: pointer;
+        }
+
+        .input__tag {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .btn__tag--add {
+            border-radius: 4px;
+            border-bottom-left-radius: 0;
+            border-top-left-radius: 0;
+        }
+
+        .btn__tag--add:hover {
+            background-color: #93a1a1;
         }
 
     </style>
@@ -342,6 +365,55 @@
                     break;
             }
         }
+
+        function addTagButtonHandler() {
+            $('.btn__tag--add').click(e => {
+                e.preventDefault();
+                const tagValue = $('#by_tag').val()
+
+                $.ajax({
+                    url: '/coder_project/get_tag_names',
+                    type: 'post',
+                    data: {
+                        'tag_action': 'by_add_button',
+                        'tag_name': tagValue
+                    },
+                    success: function(json) {
+                       let tagId;
+                       if ($.inArray(json.id, globalTagIds) < 0) {
+                           tagId = json.id;
+                           globalTagIds.push(tagId);
+
+                           $.ajax({
+                                url: '/coder_project/filter_tags',
+                                type: 'POST',
+                                data: {
+                                    'tag_action': 'filter_tag',
+                                    'tag_list': JSON.stringify(globalTagIds)
+                                },
+                                success: function(json) {
+                                    let tagData = json.tag_data;
+                                    let filteredTagData = json.filtered_tag_data
+
+                                    renderFilterContainer(tagData, tagContainer, 'tag');
+                                    renderFilterContainer(filteredTagData, tagTable, 'tagTable');
+
+                                    $('#by_tag').val('');
+                                },
+                                error: function(xhr,errmsg,err) {
+                                    console.log(err);
+                                }
+                            })
+                       };
+
+                       $('#by_tag').val('');
+                    },
+                    error: function() {}
+                });
+            });
+        }
+
+        addTagButtonHandler();
 
     </script>
 

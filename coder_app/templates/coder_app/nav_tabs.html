@@ -5,10 +5,16 @@
 {% url 'coder_app:homepage' as homepage %}
 {% url 'coder_app:submit_new_project' as submit_new_project %}
 {% url 'coder_app:edit_project' project_id as edit_project %}
+{% url 'coder_app:create_tag' as create_tag %}
 
-    <ul class="nav nav-tabs" role="tablist">
+    <ul
+      {% if request.path != view_projects and request.path != add_coder and request.path != edit_tags and request.path != edit_variables %}
+          style="margin-top: 2.75%;"
+      {% endif %}
+      class="nav nav-tabs"
+      role="tablist">
       <li
-               {% if '/edit_project/' in request.path or '/projects' in request.path or 'add_project' in request.path %}
+               {% if '/edit_project/' in request.path or '/projects' in request.path or 'add_project' in request.path or source == 'project' %}
                    class="nav-project active"
                {% else %}
                    class='nav-project'
@@ -24,7 +30,7 @@
               role="presentation">
           <a href="{{ add_coder }}" aria-controls="coders" role="tab">Coders</a></li>
         <li
-                {% if request.path == edit_tags %}
+                {% if request.path == edit_tags or request.path == create_tag %}
                     class="nav-tags active"
                 {% else %}
                     class="nav-tags"
@@ -32,7 +38,7 @@
                 role="presentation">
             <a href="{{ edit_tags }}" aria-controls="tags" role="tab">Tags</a></li>
         <li
-            {% if request.path == edit_variables %}
+            {% if request.path == edit_variables or source == 'variable_library' %}
                 class='nav-variables active'
                 {% else %}
                 class='nav-variables'

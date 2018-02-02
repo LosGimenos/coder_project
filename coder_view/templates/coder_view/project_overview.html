@@ -1,8 +1,11 @@
 {% extends 'coder_app/base.html' %}
 
 {% block content %}
-    <h2>{{ project_data.name }}</h2>
-    <div class="row" style="height: 40vh;">
+
+    {% include 'coder_view/back_button_coder_view.html' %}
+
+    <h2 style="margin-top: 2.75%;">{{ project_data.name }}</h2>
+    <div class="row">
         <div class="col-sm-12">
 {#            <div class="col-sm-1"></div>#}
             <div class="col-sm-4">
@@ -15,11 +18,7 @@
 
     <form action="{% url 'coder_view:coder_project_answering' coder_id=coder_id project_id=project_data.id row_id=row_id column_id=column_data.id %}" method="post" class="input-group">
         {% csrf_token %}
-        <input class="btn btn-primary" type="submit" name='start-answer' value="Start">
+        <input class="btn btn-success" type="submit" name='start-answer' value="Start">
     </form>
-    <br/>
-    <a href="{% url 'coder_view:coder_splash' coder_id %}">
-        <button class="btn btn-primary"><-Back to Project Select</button>
-    </a>
 
 {% endblock %}

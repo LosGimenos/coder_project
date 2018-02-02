@@ -1,8 +1,12 @@
 {% extends 'coder_app/base.html' %}
 
 {% block content %}
+    <ul class="pager pager-top-left">
+        <li class="previous back-button-updates"><a href="{% url 'coder_app:edit_tags' %}"><span aria-hidden="true">&larr;</span> Back to Tag Library</a></li>
+    </ul>
+    <br/>
     {% include 'coder_app/nav_tabs.html' %}
-
+    {% include 'coder_app/breadcrumb_tags.html' %}
     <h3 style="margin-left: 1%;">Create Tag</h3>
 
     <form action="{% url 'coder_app:create_tag' %}" method="POST">

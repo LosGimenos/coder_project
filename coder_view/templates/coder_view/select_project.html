@@ -1,33 +1,46 @@
 {% extends 'coder_app/base.html' %}
 
 {% block content %}
-    <h2>Your Projects</h2>
+    <div class="row">
+        <h3>Your Projects</h3>
+    </div>
 
-    <div class="collapse navbar-collapse">
-        <ul class="nav navbar-nav">
-            <li>
-                <form action={% url 'coder_view:coder_splash' coder_data.id %} method="post">
-                    {% csrf_token %}
-                    <input type="submit" name="select-variable-view-button" value="Available" />
-                    <input style="display: none;" name="pending_projects_view" value="{{ coder_data.id }}" />
-                </form>
-            </li>
-            <li>
-                <form action={% url 'coder_view:coder_splash' coder_data.id %} method="post">
-                    {% csrf_token %}
-                    <input type="submit" name="assigned-coder-view-button" value="Previous" />
-                    <input style="display: none;" name="completed_projects_view" value="{{ coder_data.id }}" />
-                </form>
-            </li>
-            <li>
-                <form action={% url 'coder_view:coder_splash' coder_data.id %} method="post">
-                    {% csrf_token %}
-                    <input type="submit" name="select-coder-view-button" value="All" />
-                    <input style="display: none;" name="all_projects_view" value="{{ coder_data.id }}" />
-                </form>
-            </li>
-        </ul>
+    <div class="row" style="position: absolute; left: 10.5%;">
+        <div class="btn-group filter-toggle" style="display: flex;">
+            <form action={% url 'coder_view:coder_splash' coder_data.id %} method="post">
+                {% csrf_token %}
+                <input
+                    class="btn btn-default {% if filter_view == 'open' %} filter-toggle-selected {% endif %}"
+                    type="submit"
+                    name="select-variable-view-button"
+                    value="Open" />
+                <input style="display: none;" name="pending_projects_view" value="{{ coder_data.id }}" />
+            </form>
+            <form action={% url 'coder_view:coder_splash' coder_data.id %} method="post">
+                {% csrf_token %}
+                <input
+                    class="btn btn-default {% if filter_view == 'completed' %} filter-toggle-selected {% endif %}"
+                    type="submit"
+                    name="assigned-coder-view-button"
+                    value="Closed" />
+                <input style="display: none;" name="completed_projects_view" value="{{ coder_data.id }}" />
+            </form>
+            <form action={% url 'coder_view:coder_splash' coder_data.id %} method="post">
+                {% csrf_token %}
+                <input
+                    class="btn btn-default {% if filter_view == 'all' %} filter-toggle-selected {% endif %}"
+                    type="submit"
+                    name="select-coder-view-button"
+                    value="All" />
+                <input style="display: none;" name="all_projects_view" value="{{ coder_data.id }}" />
+            </form>
+        </div>
     </div>
     <br/>
-    {% include 'coder_view/cv_project_table.html' %}
+
+    <div class="row" style="margin-top: 5%;">
+        {% include 'coder_view/cv_project_table_test.html' %}
+    </div>
+
+
 {% endblock %}

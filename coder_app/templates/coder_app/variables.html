@@ -3,6 +3,11 @@
 {% block content %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
     {% load static %}
+    {% if source == 'project' %}
+        {% include 'coder_app/back_button_project.html' %}
+    {% elif source == 'variable_library' %}
+        {% include 'coder_app/back_button_variable_library.html' %}
+    {% endif %}
     {% include 'coder_app/nav_tabs.html' %}
     <ol class="breadcrumb breadcrumb-top-left" style="margin-top: 2%;">
         {% if project_id %}
@@ -13,6 +18,10 @@
         {% endif %}
             <li><a href="#">Create New Variable</a></li>
     </ol>
+
+    {% if source == 'project' %}
+        {% include 'coder_app/edit_project_tabs.html' %}
+    {% endif %}
     <h3>Create New Variable</h3>
 
     <form action={% url 'coder_app:submit_new_variable' %} method="post">

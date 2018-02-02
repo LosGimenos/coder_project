@@ -1,0 +1,8 @@
+<ul class="pager pager-top-left">
+    {% if  source == 'project' %}
+        <li class="previous back-button-updates"><a href="{% url 'coder_app:edit_project_variables' project_data.id %}"><span aria-hidden="true">&larr;</span> Back to Assigned Variables</a></li>
+    {% else %}
+        <li class="previous back-button-updates"><a href="{% url 'coder_app:view_projects' %}"><span aria-hidden="true">&larr;</span> Back to Projects</a></li>
+    {% endif %}
+</ul>
+<br/>

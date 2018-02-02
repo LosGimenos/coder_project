@@ -16,6 +16,7 @@ import json
 import requests
 import datetime
 import pytz
+import re
 
 @login_required()
 def index(request):
@@ -35,15 +36,20 @@ def view_projects(request):
     users = user_account.users.all()
 
     # pulling projects based on datasets. possibly set for production
-    # datasets = Dataset.objects.filter(owner__in=users)
-    # project_data = Project.objects.filter(dataset__in=datasets)
+    datasets = Dataset.objects.filter(owner__in=users)
+    project_data = Project.objects.filter(dataset__in=datasets).order_by('id')
 
     # get projects based on account. will possibly remove in production
-    project_data = Project.objects.filter(account=user_account)
+    # project_data = Project.objects.filter(account=user_account).order_by('id')
 
     if request.method == 'POST' and 'delete_project_button' in request.POST:
         project_id = request.POST.get('project_id')
         project_to_delete = project_data.get(id=project_id)
+        project_name = project_to_delete.name
+        project_name_as_tag = re.sub('[\W]+', '', project_name)
+        unique_project_tag = Tag.objects.filter(name=project_name_as_tag).first()
+
+        unique_project_tag.delete()
         project_to_delete.delete()
 
     if request.method == 'POST' and 'toggle_freeze_project' in request.POST:
@@ -84,16 +90,19 @@ def view_projects(request):
             variable.save()
 
             column = Column(
-                dataset=dataset
+                # dataset=dataset
             )
             column.save()
 
-            greatest_col_index = \
-                ColumnMeta.objects.filter(
-                    project=project_data
-                ).aggregate(Max('column_number'))
+            try:
+                greatest_col_index = \
+                    ColumnMeta.objects.filter(
+                        project=project_data
+                    ).aggregate(Max('column_number'))
+            except:
+                greatest_col_index = None
 
-            if not greatest_col_index['column_number__max']:
+            if not greatest_col_index or not greatest_col_index['column_number__max']:
                 greatest_col_index = 1
             else:
                 greatest_col_index = greatest_col_index['column_number__max'] + 1
@@ -106,50 +115,66 @@ def view_projects(request):
             )
             columnMeta.save()
 
-        project_data = Project.objects.filter(account=user_account)
+        # project_data = Project.objects.filter(account=user_account)
 
+        project_data = Project.objects.filter(dataset__in=datasets)
 
-    # project_data = Project.objects.filter(dataset__in=datasets)
-    # project_data = Project.objects.all()
+    completed_project_data = project_data.filter(is_completed=True)
+    active_project_data = project_data.filter(is_completed=False, is_active=True)
+    unconfigured_project_data = project_data.filter(is_active=False)
 
-    for project in project_data:
-        ae_data = []
+    def ae_check(filtered_project_data_list):
+        for filtered_project_data in filtered_project_data_list:
+            for project in filtered_project_data:
+                dataset = project.dataset
+                project.dataset_name = dataset.dataset_name
 
-        if project.contains_adverse_events:
-            mentions_containing_ae = RowMeta.objects.filter(contains_adverse_events=True,project=project)
+                ae_data = []
 
-            if mentions_containing_ae:
-                for mention in mentions_containing_ae:
+                if project.contains_adverse_events:
+                    mentions_containing_ae = RowMeta.objects.filter(contains_adverse_events=True,project=project)
 
-                    ae = {
-                        'project_name': project.name,
-                        'url': mention.media_url,
-                        'contents': mention.media_text,
-                        'date_posted': 'date posted',
-                        'author': 'author',
-                        'source': 'source',
-                        'date': datetime.datetime.strftime(mention.adverse_event_datetime_submitted, '%m/%d/%Y'),
-                        'time': datetime.datetime.strftime(mention.adverse_event_datetime_submitted, '%I:%M')
-                    }
-                    ae_data.append(ae)
-            else:
-                ae_data = None
+                    if mentions_containing_ae:
+                        for mention in mentions_containing_ae:
 
-            if ae_data:
-                contains_ae_data = True
-                file_path = process_ae_data(ae_data)
-                project.file_path = file_path
-                project.MEDIA_URL = MEDIA_URL
-            else:
-                contains_ae_data = False
+                            ae = {
+                                'project_name': project.name,
+                                'url': mention.media_url,
+                                'contents': mention.media_text,
+                                'date_posted': 'date posted',
+                                'author': 'author',
+                                'source': 'source',
+                                'date': datetime.datetime.strftime(mention.adverse_event_datetime_submitted, '%m/%d/%Y'),
+                                'time': datetime.datetime.strftime(mention.adverse_event_datetime_submitted, '%I:%M')
+                            }
+                            ae_data.append(ae)
+                    else:
+                        ae_data = None
 
-            project.contains_ae_data = contains_ae_data
+                    if ae_data:
+                        contains_ae_data = True
+                        file_path = process_ae_data(ae_data)
+                        project.file_path = file_path
+                        project.MEDIA_URL = MEDIA_URL
+                    else:
+                        contains_ae_data = False
+
+                    project.contains_ae_data = contains_ae_data
+
+    ae_check([completed_project_data, active_project_data])
+
+    for project in unconfigured_project_data:
+        dataset = project.dataset
+        project.dataset_name = dataset.dataset_name
 
     return render(
         request,
         'coder_app/project_table.html',
         {
-            'project_data': project_data
+            'project_data': project_data,
+            'completed_project_data': completed_project_data,
+            'active_project_data': active_project_data,
+            'unconfigured_project_data': unconfigured_project_data
         }
     )
 
@@ -228,6 +253,8 @@ def replicate_project(request, project_id):
 
 @login_required()
 def submit_new_variable(request):
+    source = request.GET.get('source')
+
     if request.method == 'POST' and 'submit_variable' in request.POST:
         variable_name = request.POST.get('variable-name')
         variable_description = request.POST.get('variable-description')
@@ -267,6 +294,7 @@ def submit_new_variable(request):
             variable.save()
 
             for project_tag in project_tags:
+                print(project_tag.name)
                 variable.tag_set.add(project_tag)
 
             column = Column(
@@ -283,8 +311,8 @@ def submit_new_variable(request):
                 project=project
             )
             column_meta.save()
-            # redirect_url = '/coder_project/' + str(project_id) + '/edit_project/'
-            redirect_url = reverse('coder_app:edit_project', args=[project_id])
+
+            redirect_url = reverse('coder_app:edit_project_variables', args=[project_id])
 
         if multiple_or_freeform == 'multiple_choice':
             variable.is_freeform = False
@@ -320,7 +348,52 @@ def submit_new_variable(request):
     elif request.method == 'POST' and 'add_variable' in request.POST:
         project_id = request.POST.get('project_for_variable')
 
-        return render(request, 'coder_app/variables.html', {'project_id': project_id})
+        if project_id:
+            project_data = Project.objects.get(id=project_id)
+            print(project_data.name, 'thing')
+
+            details_clear = False
+            variables_clear = False
+            mentions_clear = False
+            coders_clear = False
+
+            # check for values in project details
+            project_tag_count_ok = False
+
+            if project_data.tag_set.all().count() > 0:
+                project_tag_count_ok = True
+
+            if project_data.name and project_data.rate and project_data.metadata and project_tag_count_ok:
+                details_clear = True
+
+            # check for at least one assigned variable
+            project_variables = Variable.objects.filter(project=project_data)
+
+            if project_variables.count() > 0:
+                variables_clear = True
+
+            # check for at least one assigned coder
+            project_coders = project_data.coder.all()
+
+            if project_coders.count() > 0:
+                coders_clear = True
+
+            project_data.details_clear = details_clear
+            project_data.variables_clear = variables_clear
+            project_data.mentions_clear = mentions_clear
+            project_data.coders_clear = coders_clear
+        else:
+            project_data = None
+
+        return render(
+            request,
+            'coder_app/variables.html',
+            {
+                'project_id': project_id,
+                'project_data': project_data,
+                'source': source
+            }
+        )
 
     elif request.is_ajax() and json.loads(request.POST.get('add_tag')):
         tag_name = request.POST.get('tag_name')
@@ -369,12 +442,28 @@ def submit_new_variable(request):
     except:
         variable_id = request.POST.get('variable_id')
 
-    if request.POST.get('project_id') == None:
-        project_id = request.POST.get('project_for_variable')
-    else:
-        project_id = request.POST.get('project_id')
+    # if request.POST.get('project_id') == None:
+    #     project_id = request.POST.get('project_for_variable')
+    # else:
+    #     project_id = request.POST.get('project_id')
+    #
+    # if project_id:
+    #     project_data = Project.objects.get(id=project_id)
+    # else:
+    #     project_data = None
 
-    return render(request, 'coder_app/variables.html', {'variable_id': variable_id, 'project_id': project_id })
+    print(project_data)
+
+    return render(
+        request,
+        'coder_app/variables.html',
+        {
+            'variable_id': variable_id,
+            'project_id': project_id,
+            'project_data': project_data,
+            'source': source
+        }
+    )
 
 @login_required()
 def submit_new_project(request):
@@ -461,8 +550,13 @@ def submit_new_project(request):
 def edit_project(request, project_id):
     p = Project.objects.get(id=project_id)
     project_data = p
-    variable_data = Variable.objects.filter(project=p)
-    tag_data = p.tag_set.all()
+    # variable_data = Variable.objects.filter(project=p)
+
+    project_data_name = project_data.name
+    unique_project_tag_name = re.sub('[\W]+', '', project_data_name)
+    unique_project_tag = Tag.objects.filter(name=unique_project_tag_name).first()
+
+    tag_data = p.tag_set.exclude(id=unique_project_tag.id)
     mention_data = RowMeta.objects.filter(project=p)
     mentions_count = mention_data.count()
     rate_per_mention = p.rate
@@ -470,6 +564,38 @@ def edit_project(request, project_id):
     projected_project_cost = '${:,.2f}'.format(projected_project_cost)
 
     project_edit_view = 'project_details'
+
+    details_clear = False
+    variables_clear = False
+    mentions_clear = False
+    coders_clear = False
+
+    # check for values in project details
+    project_tag_count_ok = False
+
+    if project_data.tag_set.all().count() > 0:
+        project_tag_count_ok = True
+
+    if project_data.name and project_data.rate and project_data.metadata and project_tag_count_ok:
+        details_clear = True
+
+    print(project_data.name, project_data.rate, 'this')
+    # check for at least one assigned variable
+    project_variables = Variable.objects.filter(project=project_data)
+
+    if project_variables.count() > 0:
+        variables_clear = True
+
+    # check for at least one assigned coder
+    project_coders = project_data.coder.all()
+
+    if project_coders.count() > 0:
+        coders_clear = True
+
+    project_data.details_clear = details_clear
+    project_data.variables_clear = variables_clear
+    project_data.mentions_clear = mentions_clear
+    project_data.coders_clear = coders_clear
 
     if request.is_ajax() and 'coder_action' == 'add':
         coder_id = request.POST.get('coder_id')
@@ -526,39 +652,39 @@ def edit_project(request, project_id):
             }
         )
 
-    if request.method == 'POST' and 'variable_view' in request.POST:
-        project_edit_view = 'variable'
-
-        variable_data_list = []
-
-        for variable in variable_data:
-            if variable.is_freeform:
-                multiple_or_freeform = 'freeform'
-            elif variable.is_multiple_choice:
-                multiple_or_freeform = 'multiple'
-            else:
-                multiple_or_freeform = 'not assigned'
-
-            variable_data = {
-                'id': variable.id,
-                'name': variable.name,
-                'multiple_or_freeform': multiple_or_freeform,
-                'description': variable.description
-            }
-            variable_data_list.append(variable_data)
-
-        return render(
-            request,
-            'coder_app/edit_project.html',
-            {
-                'variable_data': variable_data_list,
-                'id': project_id,
-                'project_data': project_data,
-                'project_edit_view': project_edit_view,
-                'tag_data': tag_data,
-                'projected_project_cost': projected_project_cost
-            }
-        )
+    # if request.method == 'POST' and 'variable_view' in request.POST:
+    #     project_edit_view = 'variable'
+    #
+    #     variable_data_list = []
+    #
+    #     for variable in variable_data:
+    #         if variable.is_freeform:
+    #             multiple_or_freeform = 'freeform'
+    #         elif variable.is_multiple_choice:
+    #             multiple_or_freeform = 'multiple'
+    #         else:
+    #             multiple_or_freeform = 'not assigned'
+    #
+    #         variable_data = {
+    #             'id': variable.id,
+    #             'name': variable.name,
+    #             'multiple_or_freeform': multiple_or_freeform,
+    #             'description': variable.description
+    #         }
+    #         variable_data_list.append(variable_data)
+    #
+    #     return render(
+    #         request,
+    #         'coder_app/edit_project.html',
+    #         {
+    #             'variable_data': variable_data_list,
+    #             'id': project_id,
+    #             'project_data': project_data,
+    #             'project_edit_view': project_edit_view,
+    #             'tag_data': tag_data,
+    #             'projected_project_cost': projected_project_cost
+    #         }
+    #     )
 
     if request.method == 'POST' and 'add_to_project' in request.POST:
         project_id = request.POST.get('project_id')
@@ -595,47 +721,47 @@ def edit_project(request, project_id):
 
         return redirect(redirect_url)
 
-    if request.is_ajax() and json.loads(request.POST.get('add_tag_to_project')):
-        tag_id = request.POST.get('tag_id')
-        tag_to_add = Tag.objects.get(id=tag_id)
-        p.tag_set.add(tag_to_add)
-
-        for variable in variable_data:
-            variable.tag_set.add(tag_to_add)
-
-        redirect_url = '/coder_project/' + str(p.id) + '/edit_project/'
-
-        return HttpResponse(
-            json.dumps({
-                'result': 'successful!',
-                'redirect_url': redirect_url
-            }),
-            content_type="application/json"
-        )
-
-    if request.method == 'POST' and 'remove-project-tags' in request.POST:
-        tag_ids = request.POST.getlist('tags-to-remove[]')
-
-        for tag_id in tag_ids:
-            tag_to_remove = Tag.objects.get(id=tag_id)
-            p.tag_set.remove(tag_to_remove)
-
-            if variable_data:
-                for variable in variable_data:
-                    variable.tag_set.remove(tag_to_remove)
-
-        tag_data = p.tag_set.all()
-
-        return render(
-            request,
-            'coder_app/edit_project.html',
-            {
-                'id': project_id,
-                'project_data': project_data,
-                'project_edit_view': project_edit_view,
-                'tag_data': tag_data,
-                'projected_project_cost': projected_project_cost
-            })
+    # if request.is_ajax() and json.loads(request.POST.get('add_tag_to_project')):
+    #     tag_id = request.POST.get('tag_id')
+    #     tag_to_add = Tag.objects.get(id=tag_id)
+    #     p.tag_set.add(tag_to_add)
+    #
+    #     for variable in variable_data:
+    #         variable.tag_set.add(tag_to_add)
+    #
+    #     redirect_url = '/coder_project/' + str(p.id) + '/edit_project/'
+    #
+    #     return HttpResponse(
+    #         json.dumps({
+    #             'result': 'successful!',
+    #             'redirect_url': redirect_url
+    #         }),
+    #         content_type="application/json"
+    #     )
+    #
+    # if request.method == 'POST' and 'remove-project-tags' in request.POST:
+    #     tag_ids = request.POST.getlist('tags-to-remove[]')
+    #
+    #     for tag_id in tag_ids:
+    #         tag_to_remove = Tag.objects.get(id=tag_id)
+    #         p.tag_set.remove(tag_to_remove)
+    #
+    #         if variable_data:
+    #             for variable in variable_data:
+    #                 variable.tag_set.remove(tag_to_remove)
+    #
+    #     tag_data = p.tag_set.all()
+    #
+    #     return render(
+    #         request,
+    #         'coder_app/edit_project.html',
+    #         {
+    #             'id': project_id,
+    #             'project_data': project_data,
+    #             'project_edit_view': project_edit_view,
+    #             'tag_data': tag_data,
+    #             'projected_project_cost': projected_project_cost
+    #         })
 
     if request.method == 'POST' and 'project_details_view' in request.POST:
 
@@ -647,19 +773,18 @@ def edit_project(request, project_id):
                 'project_data': project_data,
                 'project_edit_view': project_edit_view,
                 'tag_data': tag_data,
-                'projected_project_cost': projected_project_cost
+                'projected_project_cost': projected_project_cost,
+                'unique_project_tag': unique_project_tag
             }
         )
 
-    if request.method == 'POST':
+    if request.method == 'POST' and 'save_project_changes' in request.POST:
         project_name = request.POST.get('project-name')
         project_rate = request.POST.get('project-rate')
         project_introduction = request.POST.get('project-introduction')
         new_project_tag_ids = request.POST.getlist('project_tags[]')
         edited_project_tag_name = request.POST.get('hidden_project_tag_value')
         edited_project_tag_id = request.POST.get('hidden_project_tag_id')
-
-        print(new_project_tag_ids, edited_project_tag_name, edited_project_tag_id, 'the stuff')
 
         if project_name == '':
             project_name = p.name
@@ -693,6 +818,8 @@ def edit_project(request, project_id):
             edited_project_tag.name = edited_project_tag_name
             edited_project_tag.save()
 
+        project_data.tag_set.add(edited_project_tag)
+
         redirect_url = reverse('coder_app:view_projects')
 
         return redirect(redirect_url)
@@ -706,13 +833,44 @@ def edit_project(request, project_id):
             'project_data': project_data,
             'project_edit_view': project_edit_view,
             'tag_data': tag_data,
-            'projected_project_cost': projected_project_cost
+            'projected_project_cost': projected_project_cost,
+            'unique_project_tag': unique_project_tag
         }
     )
 
 @login_required()
 def edit_project_coders(request, project_id):
     project_data = Project.objects.get(id=project_id)
+    details_clear = False
+    variables_clear = False
+    mentions_clear = False
+    coders_clear = False
+
+    # check for values in project details
+    project_tag_count_ok = False
+
+    if project_data.tag_set.all().count() > 0:
+        project_tag_count_ok = True
+
+    if project_data.name and project_data.rate and project_data.metadata and project_tag_count_ok:
+        details_clear = True
+
+    # check for at least one assigned variable
+    project_variables = Variable.objects.filter(project=project_data)
+
+    if project_variables.count() > 0:
+        variables_clear = True
+
+    # check for at least one assigned coder
+    project_coders = project_data.coder.all()
+
+    if project_coders.count() > 0:
+        coders_clear = True
+
+    project_data.details_clear = details_clear
+    project_data.variables_clear = variables_clear
+    project_data.mentions_clear = mentions_clear
+    project_data.coders_clear = coders_clear
 
     if request.method == 'POST' and 'add_coder' in request.POST:
         coder_id = request.POST.get('coder_id')
@@ -776,6 +934,37 @@ def edit_project_mentions(request, project_id):
     project_data = Project.objects.get(id=project_id)
     mention_data = RowMeta.objects.filter(project=project_data)
 
+    details_clear = False
+    variables_clear = False
+    mentions_clear = False
+    coders_clear = False
+
+    # check for values in project details
+    project_tag_count_ok = False
+
+    if project_data.tag_set.all().count() > 0:
+        project_tag_count_ok = True
+
+    if project_data.name and project_data.rate and project_data.metadata and project_tag_count_ok:
+        details_clear = True
+
+    # check for at least one assigned variable
+    project_variables = Variable.objects.filter(project=project_data)
+
+    if project_variables.count() > 0:
+        variables_clear = True
+
+    # check for at least one assigned coder
+    project_coders = project_data.coder.all()
+
+    if project_coders.count() > 0:
+        coders_clear = True
+
+    project_data.details_clear = details_clear
+    project_data.variables_clear = variables_clear
+    project_data.mentions_clear = mentions_clear
+    project_data.coders_clear = coders_clear
+
     return render(
         request,
         'coder_app/edit_project_mentions.html',
@@ -788,6 +977,37 @@ def edit_project_mentions(request, project_id):
 @login_required()
 def edit_project_variables(request, project_id):
     project_data = Project.objects.get(id=project_id)
+
+    details_clear = False
+    variables_clear = False
+    mentions_clear = False
+    coders_clear = False
+
+    # check for values in project details
+    project_tag_count_ok = False
+
+    if project_data.tag_set.all().count() > 0:
+        project_tag_count_ok = True
+
+    if project_data.name and project_data.rate and project_data.metadata and project_tag_count_ok:
+        details_clear = True
+
+    # check for at least one assigned variable
+    project_variables = Variable.objects.filter(project=project_data)
+
+    if project_variables.count() > 0:
+        variables_clear = True
+
+    # check for at least one assigned coder
+    project_coders = project_data.coder.all()
+
+    if project_coders.count() > 0:
+        coders_clear = True
+
+    project_data.details_clear = details_clear
+    project_data.variables_clear = variables_clear
+    project_data.mentions_clear = mentions_clear
+    project_data.coders_clear = coders_clear
 
     if request.method == 'POST' and 'delete_variable' in request.POST:
         value = request.POST.get('delete_variable')
@@ -824,6 +1044,38 @@ def edit_variable(request, variable_id):
     v = Variable.objects.get(id=variable_id)
     project_data = v.project
     source = request.GET.get('source')
+
+    if source == 'project':
+        details_clear = False
+        variables_clear = False
+        mentions_clear = False
+        coders_clear = False
+
+        # check for values in project details
+        project_tag_count_ok = False
+
+        if project_data.tag_set.all().count() > 0:
+            project_tag_count_ok = True
+
+        if project_data.name and project_data.rate and project_data.metadata and project_tag_count_ok:
+            details_clear = True
+
+        # check for at least one assigned variable
+        project_variables = Variable.objects.filter(project=project_data)
+
+        if project_variables.count() > 0:
+            variables_clear = True
+
+        # check for at least one assigned coder
+        project_coders = project_data.coder.all()
+
+        if project_coders.count() > 0:
+            coders_clear = True
+
+        project_data.details_clear = details_clear
+        project_data.variables_clear = variables_clear
+        project_data.mentions_clear = mentions_clear
+        project_data.coders_clear = coders_clear
 
     if request.method == 'POST':
         variable_name = request.POST.get('variable-name')
@@ -917,8 +1169,9 @@ def edit_variable(request, variable_id):
     tag_data = v.tag_set.all()
 
     if project_data:
-        project_tags = project_data.tag_set.all()
+        project_tags = project_data.tag_set.all().order_by('id')
         tag_data = tag_data.exclude(id__in=[project_tag.id for project_tag in project_tags])
+
     else:
         project_tags = None
 
@@ -1119,7 +1372,7 @@ def edit_variable_library(request):
         variable_ids_to_add = request.POST.getlist('variable_ids[]')
         project_id = request.POST.get('project_id')
         project_data = Project.objects.get(id=project_id)
-        dataset = Dataset.objects.get(project=project_data)
+        dataset = project_data.dataset
         project_tags = project_data.tag_set.all()
         variable_data = Variable.objects.filter(project=project_data)
         variable_ids_attached_to_project = variable_data.values('id')
@@ -1541,6 +1794,19 @@ def get_tag_names(request):
             content_type="application/json"
         )
 
+    elif request.is_ajax() and request.POST.get('tag_action') == 'by_add_button':
+        tag_value = request.POST.get('tag_name')
+        tag_name = re.sub('[\W]+', '', tag_value)
+        tag_to_add, created = Tag.objects.get_or_create(name=tag_name)
+        tag_json = {
+            'id': tag_to_add.id,
+            'name': tag_to_add.name
+        }
+        tag_data = json.dumps(tag_json)
+
+        mimetype = 'application/json'
+        return HttpResponse(tag_data, mimetype)
+
     elif request.is_ajax():
         query = request.GET.get('term', '')
         tags = Tag.objects.filter(name__icontains=query)
@@ -1561,6 +1827,18 @@ def get_tag_names(request):
 
 @login_required()
 def get_project_names(request):
+    if request.is_ajax() and request.POST.get('project_action') == 'by_add_button':
+        project_value = request.POST.get('project_name')
+        project_to_add = Project.objects.get(name=project_value)
+        project_json = {
+            'id': project_to_add.id,
+            'name': project_to_add.name
+        }
+        project_data = json.dumps(project_json)
+
+        mimetype = 'application/json'
+        return HttpResponse(project_data, mimetype)
+
     if request.is_ajax():
         query = request.GET.get('term', '')
         projects = Project.objects.filter(name__icontains=query)
@@ -1613,7 +1891,7 @@ def edit_tags(request):
 
         tag_data = serializers.serialize('json', Tag.objects.all())
 
-        redirect_url = '/coder_project/'
+        redirect_url = reverse('coder_app:edit_tags')
 
         return HttpResponse(
             json.dumps({
@@ -1626,8 +1904,9 @@ def edit_tags(request):
 
     if request.is_ajax() and json.loads(request.POST.get('tag_list_redirect')):
         tag_id = request.POST.get('tag_id')
-        base_url = '/coder_project/review_tag/'
-        url_redirect = base_url + str(tag_id)
+        # base_url = '/coder_project/review_tag/'
+        # url_redirect = base_url + str(tag_id)
+        url_redirect = reverse('coder_app:review_tag', args=[tag_id])
 
         return HttpResponse(
             json.dumps({

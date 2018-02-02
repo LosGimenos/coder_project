@@ -6,9 +6,11 @@
     {% url 'coder_app:submit_new_variable' as variable_url %}
     {% url 'coder_app:add_coder' as coder_url %}
 
+    {% include 'coder_app/back_button_project.html' %}
     {% include 'coder_app/nav_tabs.html' %}
     {% include 'coder_app/breadcrumb_projects.html' %}
     {% include 'coder_app/edit_project_tabs.html' %}
+
     <div class="row">
         <div class="col-md-12">
         <form action={% url 'coder_app:edit_project' project_id=id %} method="post">
@@ -25,13 +27,16 @@
                 <span name="projected-cost"><p>{{ projected_project_cost }}</p></span>
                 <label for="project-introduction">Project Introduction</label>
                 <textarea style="height: 30vh;" class="form-control" name="project-introduction">{{ project_data.metadata }}</textarea><br/>
-                <input class='btn btn-success btn__save-changes' type="submit" value="Save Changes"/>
+                <input class='btn btn-success btn__save-changes' type="submit" name="save_project_changes" value="Save Changes"/>
             </div>
         <div class="col-md-2"></div>
         <div class="col-md-4">
             <div class="ui-widget">
                 <label for="project-default-tags">Add Project Tags</label>
-                <input id="by_tag" type="text" class="form-control" name="project-default-tags"/>
+                <div style="display: flex;">
+                    <input id="by_tag" type="text" class="form-control input__tag" name="project-default-tags"/>
+                    <button class="btn__tag--add">Add</button>
+                </div>
             </div>
             <div style="text-align: center; margin-top: 5%; margin-bottom: 2%;">
                 <span class="glyphicon glyphicon-arrow-down"></span>
@@ -51,6 +56,15 @@
                     multiple
                     name="project_tags"
                     style="width: 100%; border: 1px solid grey; height: 20vh; overflow: scroll; margin-bottom: 2%;">
+                {% if unique_project_tag %}
+                    <option
+                        class="unique-project-tag"
+                        style="pointer-events: none; background-color: #74b9ff; color: black;"
+                        value="{{ unique_project_tag.id }}"
+                    >
+                        {{ unique_project_tag.name }}
+                    </option>
+                {% endif %}
                 {% for tag in tag_data %}
                     <option class="option__tag" value="{{ tag.id }}"><span>{{ tag.name }}</span></option>
                 {% endfor %}
@@ -66,6 +80,21 @@
 
         h3 {
             margin-left: 1%;
+        }
+
+        .input__tag {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+
+        .btn__tag--add {
+            border-radius: 4px;
+            border-bottom-left-radius: 0;
+            border-top-left-radius: 0;
+        }
+
+        .btn__tag--add:hover {
+            background-color: #e6e6e6;
         }
     </style>
 
@@ -84,7 +113,7 @@
         const saveProjectButton = $('.btn__save-changes');
 
         function getTags() {
-            $('.tag--container option').each((index, tag) => {
+            $('.option__tag').each((index, tag) => {
                 const tagNodeId = parseInt($(tag).attr('value'));
                 const tagNodeName = $(tag).text();
 
@@ -130,6 +159,17 @@
                 });
                 renderFilterContainer(tagsArray, hiddenTagContainer, 'hidden');
                 renderFilterContainer(tagsArray, tagContainer, 'select');
+
+                const uniqueProjectTagName = $('.input__project-tag--hidden').val();
+                renderProjectTags([{'id': uniqueProjectTagId, 'name': uniqueProjectTagName}], tagContainer);
+            });
+        }
+
+        function renderProjectTags(array, container) {
+            array.forEach(itemData => {
+                let tagNode =
+                    $(`<option style="pointer-events: none; background-color: #74b9ff; color: black;" value='${itemData.id}' class="unique-project-tag"><span>${itemData.name}</span></option>`);
+                $(container).prepend(tagNode);
             });
         }
 
@@ -209,6 +249,9 @@
 
                    renderFilterContainer(tagsArray, hiddenTagContainer, 'hidden');
                    renderFilterContainer(tagsArray, tagContainer, 'select');
+
+                   const uniqueProjectTagName = $('.input__project-tag--hidden').val();
+                   renderProjectTags([{'id': uniqueProjectTagId, 'name': uniqueProjectTagName}], tagContainer);
                };
 
                $('#by_tag').val('');
@@ -220,18 +263,19 @@
         function getUniqueProjectTag() {
             let projectNameValue = $(projectNameInput).val();
             projectNameOnInit = projectNameValue;
-            projectNameValue = projectNameValue.replace(/[\W]+/g, '');
-            const uniqueProjectTagNode = $(`.option__tag:contains(${projectNameValue})`);
-            uniqueProjectTagId = $(uniqueProjectTagNode).val();
+
+            uniqueProjectTagId = $('.unique-project-tag').val();
+            let uniqueProjectTagName = $('.unique-project-tag').text().replace(/[\W]+/g, '');
+
             $('.input__project-tag-id--hidden').val(uniqueProjectTagId);
-            $('.input__project-tag--hidden').val(projectNameValue);
+            $('.input__project-tag--hidden').val(uniqueProjectTagName);
         }
 
         $(projectNameInput).keyup(() => {
             const inputValue = $(projectNameInput).val();
             const warningColor = 'rgb(217, 83, 79)';
             const blankButtonColor = '#7f8c8d';
-            const uniqueProjectTagNode = $(`option[value=${uniqueProjectTagId}]`);
+            const uniqueProjectTagNode = $('.unique-project-tag');
 
             $.ajax({
                 url: '/coder_project/add_project',
@@ -256,16 +300,54 @@
                     let newProjectTagValue = inputValue.replace(/[\W]+/g, '');
 
                     $(uniqueProjectTagNode).text(newProjectTagValue);
-                    $('.input__project-tag--hidden').val(inputValue);
+                    $('.input__project-tag--hidden').val(newProjectTagValue);
                 },
                 error: {}
             });
         });
 
+        function addTagButtonHandler() {
+            $('.btn__tag--add').click(e => {
+                e.preventDefault();
+                const tagValue = $('#by_tag').val()
+
+                $.ajax({
+                    url: '/coder_project/get_tag_names',
+                    type: 'post',
+                    data: {
+                        'tag_action': 'by_add_button',
+                        'tag_name': tagValue
+                    },
+                    success: function(json) {
+                       let tagId;
+                       if ($.inArray(json.id, tagIds) < 0) {
+                           tagId = json.id;
+                           const tagData = {
+                               'id': tagId,
+                               'name': json.name
+                           }
+                           tagIds.push(tagId);
+                           tagsArray.unshift(tagData);
+
+                           renderFilterContainer(tagsArray, hiddenTagContainer, 'hidden');
+                           renderFilterContainer(tagsArray, tagContainer, 'select');
+
+                           const uniqueProjectTagName = $('.input__project-tag--hidden').val();
+                           renderProjectTags([{'id': uniqueProjectTagId, 'name': uniqueProjectTagName}], tagContainer);
+                       };
+
+                       $('#by_tag').val('');
+                    },
+                    error: function() {}
+                });
+            });
+        }
+
         function editVariableInit() {
             getUniqueProjectTag();
             getTags();
             removeTagHandler();
+            addTagButtonHandler();
         }
 
         window.onload = editVariableInit();

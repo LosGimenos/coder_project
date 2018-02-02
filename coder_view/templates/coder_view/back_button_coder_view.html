@@ -1,0 +1,9 @@
+{% url 'coder_view:coder_project_overview' as project_overview%}
+{% url 'coder_view:coder_splash' coder_id as project_select %}
+
+<ul class="pager pager-top-left">
+    {% if project_overview in request.path%}
+    <li class="previous back-button-updates"><a href="{{ project_select }}"><span aria-hidden="true">&larr;</span>Back to Project Select</a></li>
+    {% endif %}
+</ul>
+<br/>

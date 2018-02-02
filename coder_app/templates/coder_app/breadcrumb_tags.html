@@ -1,0 +1,8 @@
+{% url 'coder_app:create_tag' as create_tag%}
+
+<ol class="breadcrumb breadcrumb-top-left" style="margin-top: 2%;">
+    <li><a href="#">Tags</a></li>
+   {% if request.path == create_tag %}
+        <li><a href="#">Create Tag</a></li>
+   {% endif %}
+</ol>

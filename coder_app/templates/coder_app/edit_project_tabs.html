@@ -1,56 +1,138 @@
 {% url 'coder_app:edit_project_coders' project_data.id as edit_project_coders %}
 {% url 'coder_app:edit_project_mentions' project_data.id as edit_project_mentions %}
 {% url 'coder_app:edit_project_variables' project_data.id as edit_project_variables %}
+{% url 'coder_app:submit_new_variable' project_data.id as submit_new_variable %}
 
-<div class="collapse navbar-collapse" style="margin-top: 2%; margin-left: -1.5%;">
-    <ul class="nav navbar-nav nav__tabs--projects">
-        <li>
+{#<div class="collapse navbar-collapse" style="margin-top: 2%; margin-left: -1.5%;">#}
+{#    <ul class="nav navbar-nav nav__tabs--projects">#}
+{#        <li>#}
+{#            <form action={% url 'coder_app:edit_project' project_data.id %} method="post">#}
+{#                {% csrf_token %}#}
+{#                <input#}
+{#                        {% if project_edit_view == 'project_details' %}#}
+{#                            class="filter-toggle-selected"#}
+{#                        {% endif %}#}
+{#                        type="submit"#}
+{#                        name="project-details-view-button"#}
+{#                        value="Project Details" />#}
+{#                <input style="display: none;" name="project_details_view" value="{{ variable.id }}" />#}
+{#            </form>#}
+{#        </li>#}
+{#        <li>#}
+{#            <form action={% url 'coder_app:edit_project_variables' project_data.id %} method="post">#}
+{#                {% csrf_token %}#}
+{#                <input#}
+{#                        {% if request.path == edit_project_variables or 'variable' in request.path %}#}
+{#                            class="filter-toggle-selected"#}
+{#                        {% endif %}#}
+{#                        type="submit"#}
+{#                        name="select-variable-view-button"#}
+{#                        value="Assigned Variables" />#}
+{#            </form>#}
+{#        </li>#}
+{#        <li>#}
+{#            <form action={% url 'coder_app:edit_project_mentions' project_data.id %} method="post">#}
+{#                {% csrf_token %}#}
+{#                <input#}
+{#                        {% if request.path == edit_project_mentions  %}#}
+{#                            class="filter-toggle-selected"#}
+{#                        {% endif %}#}
+{#                        type="submit"#}
+{#                        name="select-mention-view-button"#}
+{#                        value="Mentions" />#}
+{#            </form>#}
+{#        </li>#}
+{#        <li>#}
+{#            <form action="{% url 'coder_app:edit_project_coders' project_data.id %}" method="post">#}
+{#                {% csrf_token %}#}
+{#                <input#}
+{#                        {% if request.path == edit_project_coders %}#}
+{#                            class="filter-toggle-selected"#}
+{#                        {% endif %}#}
+{#                        type="submit"#}
+{#                        value="Coders" />#}
+{#            </form>#}
+{#        </li>#}
+{#    </ul>#}
+{#</div>#}
+
+<div class="row" style="position: relative; left: -65%;">
+    <div class="btn-group filter-toggle" style="margin-left: -1.5%; display: flex;">
+        <div>
+            {% if not project_data.is_active and not project_data.details_clear %}
+                {% include 'coder_app/status_buttons/status_error.html' %}
+            {% elif not project_data.is_active and project_data.details_clear %}
+                {% include 'coder_app/status_buttons/status_good.html' %}
+            {% endif %}
             <form action={% url 'coder_app:edit_project' project_data.id %} method="post">
                 {% csrf_token %}
                 <input
-                        {% if project_edit_view == 'project_details' %}
-                            class="filter-toggle-selected"
-                        {% endif %}
-                        type="submit"
-                        name="project-details-view-button"
-                        value="Project Details" />
+                    class="btn btn-default
+                    {% if project_edit_view == 'project_details' %}
+                        filter-toggle-selected
+                    {% endif %}
+                    "
+                    type="submit"
+                    name="project-details-view-button"
+                    value="Project Details" />
                 <input style="display: none;" name="project_details_view" value="{{ variable.id }}" />
             </form>
-        </li>
-        <li>
+        </div>
+        <div>
+            {% if not project_data.is_active and not project_data.variables_clear %}
+                {% include 'coder_app/status_buttons/status_error.html' %}
+            {% elif not project_data.is_active and project_data.variables_clear %}
+                {% include 'coder_app/status_buttons/status_good.html' %}
+            {% endif %}
             <form action={% url 'coder_app:edit_project_variables' project_data.id %} method="post">
                 {% csrf_token %}
                 <input
-                        {% if request.path == edit_project_variables %}
-                            class="filter-toggle-selected"
-                        {% endif %}
-                        type="submit"
-                        name="select-variable-view-button"
-                        value="Assigned Variables" />
+                    class="btn btn-default
+                    {% if request.path == edit_project_variables or 'variable' in request.path %}
+                        filter-toggle-selected
+                    {% endif %}
+                    "
+                    type="submit"
+                    name="select-variable-view-button"
+                    value="Assigned Variables" />
             </form>
-        </li>
-        <li>
+        </div>
+        <div>
+            {% if not project_data.is_active and not project_data.mentions_clear %}
+                {% include 'coder_app/status_buttons/status_error.html' %}
+            {% elif not project_data.is_active and project_data.mentions_clear %}
+                {% include 'coder_app/status_buttons/status_good.html' %}
+            {% endif %}
             <form action={% url 'coder_app:edit_project_mentions' project_data.id %} method="post">
                 {% csrf_token %}
                 <input
-                        {% if request.path == edit_project_mentions  %}
-                            class="filter-toggle-selected"
-                        {% endif %}
-                        type="submit"
-                        name="select-mention-view-button"
-                        value="Mentions" />
+                    class="btn btn-default
+                    {% if request.path == edit_project_mentions  %}
+                        filter-toggle-selected
+                    {% endif %}
+                    "
+                    type="submit"
+                    name="select-mention-view-button"
+                    value="Mentions" />
             </form>
-        </li>
-        <li>
+        </div>
+        <div>
+            {% if not project_data.is_active and not project_data.coders_clear %}
+                {% include 'coder_app/status_buttons/status_error.html' %}
+            {% elif not project_data.is_active and project_data.coders_clear %}
+                {% include 'coder_app/status_buttons/status_good.html' %}
+            {% endif %}
             <form action="{% url 'coder_app:edit_project_coders' project_data.id %}" method="post">
                 {% csrf_token %}
                 <input
-                        {% if request.path == edit_project_coders %}
-                            class="filter-toggle-selected"
-                        {% endif %}
-                        type="submit"
-                        value="Coders" />
+                    class="btn btn-default
+                    {% if request.path == edit_project_coders %}
+                        filter-toggle-selected
+                    {% endif %}
+                    "
+                    type="submit"
+                    value="Coders" />
             </form>
-        </li>
-    </ul>
+        </div>
+    </div>
 </div>

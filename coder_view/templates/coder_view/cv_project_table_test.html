@@ -1,0 +1,61 @@
+<div class="table-responsive" style="margin-top: 2%;">
+    <table class="table table-bordered table-hovered table-striped tablesorter">
+        <thead>
+        <tr>
+            <th class="header">Project Name</th>
+            <th class="header">Rate per Mention</th>
+            <th class="header">Total Mentions in Project</th>
+            <th class="header">Mentions Uncompleted</th>
+            <th class="header">Mentions Completed by You</th>
+            <th class="header">Variables per Mention</th>
+            <th class="header">Start</th>
+            <th class="header">Info</th>
+        </tr>
+        </thead>
+            {% if filter_view == 'open' %}
+                {% for project in project_data %}
+                    <tbody>
+                        <tr>
+                            <td>{{ project.name }}</td>
+                            <td>${{ project.rate }}</td>
+                            <td>{{ project.all_rows_count }}</td>
+                            <td>mentions left</td>
+                            <td>{{ project.completed_rows_by_coder }}</td>
+                            <td>{{ project.num_variables_in_project }}</td>
+                            <td>
+                                <a href="{% url 'coder_view:coder_project_answering' coder_id=coder_data.id project_id=project.id row_id=project.row_id column_id=project.column_data.id %}">
+                                    <button class="btn btn-success btn-xs">Code</button>
+                                </a>
+                            </td>
+                            <td>
+                                <a href="{% url 'coder_view:coder_project_overview' coder_id=coder_data.id project_id=project.id row_id=project.row_id %}">
+                                    <button class="btn btn-info btn-xs">Info</button>
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                {% endfor %}
+            {% elif filter_view == 'completed' %}
+                 <tbody>
+                        <tr>
+                            <td>{{ project.name }}</td>
+                            <td>${{ project.rate }}</td>
+                            <td>{{ project.all_rows_count }}</td>
+                            <td>mentions left</td>
+                            <td>{{ project.completed_rows_by_coder }}</td>
+                            <td>{{ project.num_variables_in_project }}</td>
+                            <td>
+{#                                <a href="{% url 'coder_view:coder_project_answering' coder_id=coder_data.id project_id=project.id row_id=project.row_id column_id=project.column_data.id %}">#}
+{#                                    <button class="btn btn-success btn-xs">Code</button>#}
+{#                                </a>#}
+                            </td>
+                            <td>
+{#                                <a href="{% url 'coder_view:coder_project_overview' coder_id=coder_data.id project_id=project.id row_id=project.row_id %}">#}
+{#                                    <button class="btn btn-info btn-xs">Info</button>#}
+{#                                </a>#}
+                            </td>
+                        </tr>
+                    </tbody>
+            {% endif %}
+    </table>
+</div>
