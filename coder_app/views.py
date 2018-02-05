@@ -180,67 +180,170 @@ def view_projects(request):
 
 @login_required()
 def replicate_project(request, project_id):
-    user = User.objects.get(username=request.user)
-    user_account = user.accounts.all().first()
-
     project_data = Project.objects.get(id=project_id)
-    dataset_data = Dataset.objects.all()
+    dataset = project_data.dataset
+    project_id_to_replicate = request.POST.get('project_id_to_replicate')
+    project_to_replicate_data = Project.objects.get(id=project_id_to_replicate)
 
-    if request.method == 'POST' and 'replicate-project' in request.POST:
-        dataset_id = request.POST.get('dataset-name')
-        dataset = dataset_data.get(id=dataset_id)
-        tags_to_add = request.POST.getlist('tags-to-add[]')
-        tag_data = Tag.objects.filter(id__in=tags_to_add)
+    # clear configuration for current project
 
-        # set dataset to current user remove in production
-        dataset.owner = user
-        dataset.save()
+    # clear project tags
+    project_tags = project_data.tag_set.all()
 
-        coder_data = project_data.coder.all()
-        variable_data = Variable.objects.filter(project=project_data)
+    if project_tags:
+        for project_tag in project_tags:
+            project_data.tag_set.remove(project_tag)
 
-        project_data.pk = None
-        project_data.dataset = dataset
-        project_data.name = project_data.name + ' COPY'
-        project_data.save()
-        new_project_data = project_data
+    # get and delete unique project tag for current project
+    project_name = project_data.name
+    project_name_as_tag = re.sub('[\W]+', '', project_name)
+    unique_project_tag = Tag.objects.filter(name=project_name_as_tag).first()
+    unique_project_tag.delete()
 
-        for tag in tag_data:
-            new_project_data.tag_set.add(tag)
+    # clear project variables
+    project_variables = Variable.objects.filter(project=project_data)
 
-        for coder in coder_data:
-            coder.project_set.add(new_project_data)
+    if project_variables:
+        for project_variable in project_variables:
+            column_meta = ColumnMeta.objects.filter(variable=project_variable).first()
+            column = column_meta.column
+            project_variable.delete()
+            column_meta.delete()
+            column.delete()
 
-        for variable in variable_data:
-            variable.pk = None
-            variable.project = new_project_data
-            variable.save()
+    # clear assigned coders
+    project_coders = project_data.coder.all()
 
-            column = Column(
-                dataset=dataset
-            )
-            column.save()
+    if project_coders:
+        for project_coder in project_coders:
+            project_data.coder.remove(project_coder)
 
+    # clear Media Inputs for project from dataset
+    project_data.media_text_col_id = None
+    project_data.media_url_col_id = None
+
+    # match project details
+    project_data.name = project_to_replicate_data.name + " COPY"
+    project_data.rate = project_to_replicate_data.rate
+    project_data.metadata = project_to_replicate_data.metadata
+    project_data.save()
+
+    # get new unique project tag and assign
+    project_name = project_data.name
+    project_name_as_tag = re.sub('[\W]+', '', project_name)
+    unique_project_tag, created = Tag.objects.get_or_create(name=project_name_as_tag)
+    project_data.tag_set.add(unique_project_tag)
+
+    # get replicated project tags and assign if not unique tag
+    replicated_project_name = project_to_replicate_data.name
+    replicated_project_name_as_tag = re.sub('[\W]+', '', replicated_project_name)
+    replicated_project_tags = project_to_replicate_data.tag_set.all().exclude(name=replicated_project_name_as_tag)
+
+    for project_tag in replicated_project_tags:
+        project_data.tag_set.add(project_tag)
+
+    # get replicated project variables and create for project
+    replicated_project_variables = Variable.objects.filter(project=project_to_replicate_data)
+    for project_variable in replicated_project_variables:
+        column = Column(
+            dataset=dataset
+        )
+        column.save()
+
+        try:
             greatest_col_index = \
                 ColumnMeta.objects.filter(
-                    project=project_data
-                ).aggregate(Max('column_number'))
+                project=project_data
+            ).aggregate(Max('column_number'))
+        except:
+            greatest_col_index = None
 
-            if not greatest_col_index['column_number__max']:
-                greatest_col_index = 1
-            else:
-                greatest_col_index = greatest_col_index['column_number__max'] + 1
+        if not greatest_col_index or not greatest_col_index['column_number__max']:
+            greatest_col_index = 1
+        else:
+            greatest_col_index = greatest_col_index['column_number__max'] + 1
 
-            columnMeta = ColumnMeta(
-                column=column,
-                variable=variable,
-                project=project_data,
-                column_number=greatest_col_index
-            )
-            columnMeta.save()
+        column_meta = ColumnMeta(
+            column=column,
+            project=project_data,
+            variable=project_variable,
+            column_number=greatest_col_index
+        )
+        column_meta.save()
 
-        redirect_url = reverse('coder_app:view_projects')
+        # get and replicate tags on replicated variables
+        replicated_project_tags = project_to_replicate_data.tag_set.all()
+        variable_tags = project_variable.tag_set.all().exclude(id__in=[replicated_tag.id for replicated_tag in replicated_project_tags])
+
+        for variable_tag in variable_tags:
+            project_variable.tag_set.add(variable_tag)
+
+        redirect_url = reverse('coder_app:edit_project', args=[project_data.id])
         return redirect(redirect_url)
+
+
+
+    # user = User.objects.get(username=request.user)
+    # user_account = user.accounts.all().first()
+    #
+    # project_data = Project.objects.get(id=project_id)
+    # dataset_data = Dataset.objects.all()
+    #
+    # if request.method == 'POST' and 'replicate-project' in request.POST:
+    #     dataset_id = request.POST.get('dataset-name')
+    #     dataset = dataset_data.get(id=dataset_id)
+    #     tags_to_add = request.POST.getlist('tags-to-add[]')
+    #     tag_data = Tag.objects.filter(id__in=tags_to_add)
+    #
+    #     # set dataset to current user remove in production
+    #     dataset.owner = user
+    #     dataset.save()
+    #
+    #     coder_data = project_data.coder.all()
+    #     variable_data = Variable.objects.filter(project=project_data)
+    #
+    #     project_data.pk = None
+    #     project_data.dataset = dataset
+    #     project_data.name = project_data.name + ' COPY'
+    #     project_data.save()
+    #     new_project_data = project_data
+    #
+    #     for tag in tag_data:
+    #         new_project_data.tag_set.add(tag)
+    #
+    #     for coder in coder_data:
+    #         coder.project_set.add(new_project_data)
+    #
+    #     for variable in variable_data:
+    #         variable.pk = None
+    #         variable.project = new_project_data
+    #         variable.save()
+    #
+    #         column = Column(
+    #             dataset=dataset
+    #         )
+    #         column.save()
+    #
+    #         greatest_col_index = \
+    #             ColumnMeta.objects.filter(
+    #                 project=project_data
+    #             ).aggregate(Max('column_number'))
+    #
+    #         if not greatest_col_index['column_number__max']:
+    #             greatest_col_index = 1
+    #         else:
+    #             greatest_col_index = greatest_col_index['column_number__max'] + 1
+    #
+    #         columnMeta = ColumnMeta(
+    #             column=column,
+    #             variable=variable,
+    #             project=project_data,
+    #             column_number=greatest_col_index
+    #         )
+    #         columnMeta.save()
+    #
+    #     redirect_url = reverse('coder_app:view_projects')
+    #     return redirect(redirect_url)
 
     return render(
         request,
@@ -489,6 +592,7 @@ def submit_new_project(request):
             rate=project_rate,
             contains_adverse_events=False,
             is_completed=False,
+            is_frozen=True,
             # dataset=project_dataset,
             metadata=project_introduction,
             account=user_account
@@ -565,37 +669,50 @@ def edit_project(request, project_id):
 
     project_edit_view = 'project_details'
 
-    details_clear = False
-    variables_clear = False
-    mentions_clear = False
-    coders_clear = False
+    if not project_data.is_active:
+        details_clear = False
+        variables_clear = False
+        mentions_clear = False
+        coders_clear = False
 
-    # check for values in project details
-    project_tag_count_ok = False
+        # check for values in project details
+        project_tag_count_ok = False
 
-    if project_data.tag_set.all().count() > 0:
-        project_tag_count_ok = True
+        if project_data.tag_set.all().count() > 0:
+            project_tag_count_ok = True
 
-    if project_data.name and project_data.rate and project_data.metadata and project_tag_count_ok:
-        details_clear = True
+        if project_data.name and project_data.rate and project_data.metadata and project_tag_count_ok:
+            details_clear = True
 
-    print(project_data.name, project_data.rate, 'this')
-    # check for at least one assigned variable
-    project_variables = Variable.objects.filter(project=project_data)
+        # check for at least one assigned variable
+        project_variables = Variable.objects.filter(project=project_data)
 
-    if project_variables.count() > 0:
-        variables_clear = True
+        if project_variables.count() > 0:
+            variables_clear = True
 
-    # check for at least one assigned coder
-    project_coders = project_data.coder.all()
+        # check for at least one assigned coder
+        project_coders = project_data.coder.all()
 
-    if project_coders.count() > 0:
-        coders_clear = True
+        if project_coders.count() > 0:
+            coders_clear = True
 
-    project_data.details_clear = details_clear
-    project_data.variables_clear = variables_clear
-    project_data.mentions_clear = mentions_clear
-    project_data.coders_clear = coders_clear
+        # check for Media Inputs in mentions
+
+        if project_data.media_url_col_id or project_data.media_text_col_id:
+            mentions_clear = True
+
+        if details_clear and variables_clear and mentions_clear and coders_clear:
+            project_data.is_active = True
+            project_data.is_frozen = False
+            project_data.save()
+        else:
+            project_data.details_clear = details_clear
+            project_data.variables_clear = variables_clear
+            project_data.mentions_clear = mentions_clear
+            project_data.coders_clear = coders_clear
+
+        project_account = project_data.account
+        account_project_data = Project.objects.filter(account=project_account).exclude(id=project_data.id)
 
     if request.is_ajax() and 'coder_action' == 'add':
         coder_id = request.POST.get('coder_id')
@@ -834,43 +951,14 @@ def edit_project(request, project_id):
             'project_edit_view': project_edit_view,
             'tag_data': tag_data,
             'projected_project_cost': projected_project_cost,
-            'unique_project_tag': unique_project_tag
+            'unique_project_tag': unique_project_tag,
+            'existing_project_data': account_project_data
         }
     )
 
 @login_required()
 def edit_project_coders(request, project_id):
     project_data = Project.objects.get(id=project_id)
-    details_clear = False
-    variables_clear = False
-    mentions_clear = False
-    coders_clear = False
-
-    # check for values in project details
-    project_tag_count_ok = False
-
-    if project_data.tag_set.all().count() > 0:
-        project_tag_count_ok = True
-
-    if project_data.name and project_data.rate and project_data.metadata and project_tag_count_ok:
-        details_clear = True
-
-    # check for at least one assigned variable
-    project_variables = Variable.objects.filter(project=project_data)
-
-    if project_variables.count() > 0:
-        variables_clear = True
-
-    # check for at least one assigned coder
-    project_coders = project_data.coder.all()
-
-    if project_coders.count() > 0:
-        coders_clear = True
-
-    project_data.details_clear = details_clear
-    project_data.variables_clear = variables_clear
-    project_data.mentions_clear = mentions_clear
-    project_data.coders_clear = coders_clear
 
     if request.method == 'POST' and 'add_coder' in request.POST:
         coder_id = request.POST.get('coder_id')
@@ -916,6 +1004,48 @@ def edit_project_coders(request, project_id):
         if coder in project_coders:
             coder.assigned = True
 
+    if not project_data.is_active:
+        details_clear = False
+        variables_clear = False
+        mentions_clear = False
+        coders_clear = False
+
+        # check for values in project details
+        project_tag_count_ok = False
+
+        if project_data.tag_set.all().count() > 0:
+            project_tag_count_ok = True
+
+        if project_data.name and project_data.rate and project_data.metadata and project_tag_count_ok:
+            details_clear = True
+
+        # check for at least one assigned variable
+        project_variables = Variable.objects.filter(project=project_data)
+
+        if project_variables.count() > 0:
+            variables_clear = True
+
+        # check for at least one assigned coder
+        project_coders = project_data.coder.all()
+
+        if project_coders.count() > 0:
+            coders_clear = True
+
+        # check for Media Inputs in mentions
+
+        if project_data.media_url_col_id or project_data.media_text_col_id:
+            mentions_clear = True
+
+        if details_clear and variables_clear and mentions_clear and coders_clear:
+            project_data.is_active = True
+            project_data.is_frozen = False
+            project_data.save()
+        else:
+            project_data.details_clear = details_clear
+            project_data.variables_clear = variables_clear
+            project_data.mentions_clear = mentions_clear
+            project_data.coders_clear = coders_clear
+
     return render(
         request,
         'coder_app/edit_project_coders.html',
@@ -932,45 +1062,99 @@ def edit_project_coders(request, project_id):
 @login_required()
 def edit_project_mentions(request, project_id):
     project_data = Project.objects.get(id=project_id)
+    dataset = project_data.dataset
+    column_data = Column.objects.filter(dataset=dataset)
     mention_data = RowMeta.objects.filter(project=project_data)
 
-    details_clear = False
-    variables_clear = False
-    mentions_clear = False
-    coders_clear = False
+    if request.method == "POST" and "save_mention_media_location" in request.POST:
+        media_url_column_id = request.POST.get("media_url_select")
+        media_text_column_id = request.POST.get("media_text_select")
+        project_data.media_url_col_id = media_url_column_id
+        project_data.media_text_col_id = media_text_column_id
+        project_data.save()
 
-    # check for values in project details
-    project_tag_count_ok = False
+        row_data = Row.objects.filter(dataset=dataset)
 
-    if project_data.tag_set.all().count() > 0:
-        project_tag_count_ok = True
+        for row in row_data:
+            media_url_data = Data.objects.filter(row=row, column_id=media_url_column_id, dataset=dataset).first()
+            media_text_data = Data.objects.filter(row=row, column_id=media_text_column_id, dataset=dataset).first()
 
-    if project_data.name and project_data.rate and project_data.metadata and project_tag_count_ok:
-        details_clear = True
+            media_url = None
+            media_text = None
+            is_instagram = False
+            is_twitter = False
 
-    # check for at least one assigned variable
-    project_variables = Variable.objects.filter(project=project_data)
+            if media_url_data:
+                media_url = media_url_data.value
+                if "instagram" in media_url:
+                    is_instagram = True
+                if "twitter" in media_url:
+                    is_twitter = True
+            if media_text_data:
+                media_text = media_text_data.value
 
-    if project_variables.count() > 0:
-        variables_clear = True
+            row_meta = RowMeta(
+                project=project_data,
+                row=row,
+                row_name=row.row_name,
+                media_url=media_url,
+                media_text=media_text,
+                is_instagram=is_instagram,
+                is_twitter=is_twitter
+            )
+            row_meta.save()
 
-    # check for at least one assigned coder
-    project_coders = project_data.coder.all()
+        mention_data = RowMeta.objects.filter(project=project_data)
 
-    if project_coders.count() > 0:
-        coders_clear = True
+    if not project_data.is_active:
+        details_clear = False
+        variables_clear = False
+        mentions_clear = False
+        coders_clear = False
 
-    project_data.details_clear = details_clear
-    project_data.variables_clear = variables_clear
-    project_data.mentions_clear = mentions_clear
-    project_data.coders_clear = coders_clear
+        # check for values in project details
+        project_tag_count_ok = False
+
+        if project_data.tag_set.all().count() > 0:
+            project_tag_count_ok = True
+
+        if project_data.name and project_data.rate and project_data.metadata and project_tag_count_ok:
+            details_clear = True
+
+        # check for at least one assigned variable
+        project_variables = Variable.objects.filter(project=project_data)
+
+        if project_variables.count() > 0:
+            variables_clear = True
+
+        # check for at least one assigned coder
+        project_coders = project_data.coder.all()
+
+        if project_coders.count() > 0:
+            coders_clear = True
+
+        # check for Media Inputs in mentions
+
+        if project_data.media_url_col_id or project_data.media_text_col_id:
+            mentions_clear = True
+
+        if details_clear and variables_clear and mentions_clear and coders_clear:
+            project_data.is_active = True
+            project_data.is_frozen = False
+            project_data.save()
+        else:
+            project_data.details_clear = details_clear
+            project_data.variables_clear = variables_clear
+            project_data.mentions_clear = mentions_clear
+            project_data.coders_clear = coders_clear
 
     return render(
         request,
         'coder_app/edit_project_mentions.html',
         {
             'project_data': project_data,
-            'mention_data': mention_data
+            'mention_data': mention_data,
+            'column_data': column_data
         }
     )
 
@@ -978,36 +1162,46 @@ def edit_project_mentions(request, project_id):
 def edit_project_variables(request, project_id):
     project_data = Project.objects.get(id=project_id)
 
-    details_clear = False
-    variables_clear = False
-    mentions_clear = False
-    coders_clear = False
+    if not project_data.is_active:
+        details_clear = False
+        variables_clear = False
+        mentions_clear = False
+        coders_clear = False
 
-    # check for values in project details
-    project_tag_count_ok = False
+        # check for values in project details
+        project_tag_count_ok = False
 
-    if project_data.tag_set.all().count() > 0:
-        project_tag_count_ok = True
+        if project_data.tag_set.all().count() > 0:
+            project_tag_count_ok = True
 
-    if project_data.name and project_data.rate and project_data.metadata and project_tag_count_ok:
-        details_clear = True
+        if project_data.name and project_data.rate and project_data.metadata and project_tag_count_ok:
+            details_clear = True
 
-    # check for at least one assigned variable
-    project_variables = Variable.objects.filter(project=project_data)
+        # check for at least one assigned variable
+        project_variables = Variable.objects.filter(project=project_data)
 
-    if project_variables.count() > 0:
-        variables_clear = True
+        if project_variables.count() > 0:
+            variables_clear = True
 
-    # check for at least one assigned coder
-    project_coders = project_data.coder.all()
+        # check for at least one assigned coder
+        project_coders = project_data.coder.all()
 
-    if project_coders.count() > 0:
-        coders_clear = True
+        if project_coders.count() > 0:
+            coders_clear = True
 
-    project_data.details_clear = details_clear
-    project_data.variables_clear = variables_clear
-    project_data.mentions_clear = mentions_clear
-    project_data.coders_clear = coders_clear
+        # check for Media Inputs in mentions
+        if project_data.media_url_col_id or project_data.media_text_col_id:
+            mentions_clear = True
+
+        if details_clear and variables_clear and mentions_clear and coders_clear:
+            project_data.is_active = True
+            project_data.is_frozen = False
+            project_data.save()
+        else:
+            project_data.details_clear = details_clear
+            project_data.variables_clear = variables_clear
+            project_data.mentions_clear = mentions_clear
+            project_data.coders_clear = coders_clear
 
     if request.method == 'POST' and 'delete_variable' in request.POST:
         value = request.POST.get('delete_variable')
@@ -1046,36 +1240,46 @@ def edit_variable(request, variable_id):
     source = request.GET.get('source')
 
     if source == 'project':
-        details_clear = False
-        variables_clear = False
-        mentions_clear = False
-        coders_clear = False
+        if not project_data.is_active:
+            details_clear = False
+            variables_clear = False
+            mentions_clear = False
+            coders_clear = False
 
-        # check for values in project details
-        project_tag_count_ok = False
+            # check for values in project details
+            project_tag_count_ok = False
 
-        if project_data.tag_set.all().count() > 0:
-            project_tag_count_ok = True
+            if project_data.tag_set.all().count() > 0:
+                project_tag_count_ok = True
 
-        if project_data.name and project_data.rate and project_data.metadata and project_tag_count_ok:
-            details_clear = True
+            if project_data.name and project_data.rate and project_data.metadata and project_tag_count_ok:
+                details_clear = True
 
-        # check for at least one assigned variable
-        project_variables = Variable.objects.filter(project=project_data)
+            # check for at least one assigned variable
+            project_variables = Variable.objects.filter(project=project_data)
 
-        if project_variables.count() > 0:
-            variables_clear = True
+            if project_variables.count() > 0:
+                variables_clear = True
 
-        # check for at least one assigned coder
-        project_coders = project_data.coder.all()
+            # check for at least one assigned coder
+            project_coders = project_data.coder.all()
 
-        if project_coders.count() > 0:
-            coders_clear = True
+            if project_coders.count() > 0:
+                coders_clear = True
 
-        project_data.details_clear = details_clear
-        project_data.variables_clear = variables_clear
-        project_data.mentions_clear = mentions_clear
-        project_data.coders_clear = coders_clear
+            # check for Media Inputs in mentions
+            if project_data.media_url_col_id or project_data.media_text_col_id:
+                mentions_clear = True
+
+            if details_clear and variables_clear and mentions_clear and coders_clear:
+                project_data.is_active = True
+                project_data.is_frozen = False
+                project_data.save()
+            else:
+                project_data.details_clear = details_clear
+                project_data.variables_clear = variables_clear
+                project_data.mentions_clear = mentions_clear
+                project_data.coders_clear = coders_clear
 
     if request.method == 'POST':
         variable_name = request.POST.get('variable-name')

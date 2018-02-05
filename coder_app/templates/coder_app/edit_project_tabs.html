@@ -56,8 +56,13 @@
 {#    </ul>#}
 {#</div>#}
 
-<div class="row" style="position: relative; left: -65%;">
-    <div class="btn-group filter-toggle" style="margin-left: -1.5%; display: flex;">
+<div class="row"
+     style="position: relative; left: -65%;"
+>
+    <div
+            class="btn-group filter-toggle"
+            style="margin-left: -1.5%; display: flex;"
+    >
         <div>
             {% if not project_data.is_active and not project_data.details_clear %}
                 {% include 'coder_app/status_buttons/status_error.html' %}

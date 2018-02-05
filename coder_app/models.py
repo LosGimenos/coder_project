@@ -33,6 +33,8 @@ class Project(models.Model):
     is_frozen = models.BooleanField(default=False)
     account = models.ForeignKey(Account, null=True)
     is_active = models.BooleanField(default=False)
+    media_url_col_id = models.IntegerField(null=True)
+    media_text_col_id = models.IntegerField(null=True)
     class Meta:
         permissions = (
             ('is_coding_app_admin', 'Is admin for Coding App'),

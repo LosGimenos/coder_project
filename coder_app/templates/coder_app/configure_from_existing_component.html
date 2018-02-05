@@ -1,0 +1,13 @@
+<div class="col-md-4">
+    <form action="{% url 'coder_app:replicate_project' project_data.id %}" method="POST">
+        {% csrf_token %}
+        <select class="form-control" name="project_id_to_replicate">
+            <option>Select</option>
+            {% for project in existing_project_data %}
+                <option value="{{ project.id }}">{{ project.name }}</option>
+            {% endfor %}
+        </select>
+        <br />
+        <input class="btn btn-success" type="submit" value="Import"/>
+    </form>
+</div>

@@ -11,6 +11,15 @@
     {% include 'coder_app/breadcrumb_projects.html' %}
     {% include 'coder_app/edit_project_tabs.html' %}
 
+    {% if not project_data.is_active %}
+        <div class="row">
+            <h4 style="margin-left: 2.7%;">Copy Configuration from Existing Project</h4>
+            <div class="col-md-7">
+                {% include 'coder_app/configure_from_existing_component.html' %}
+            </div>
+        </div>
+    {% endif %}
+
     <div class="row">
         <div class="col-md-12">
         <form action={% url 'coder_app:edit_project' project_id=id %} method="post">

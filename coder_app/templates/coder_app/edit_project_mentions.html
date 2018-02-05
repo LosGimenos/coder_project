@@ -4,5 +4,43 @@
     {% include 'coder_app/nav_tabs.html' %}
     {% include 'coder_app/breadcrumb_projects.html' %}
     {% include 'coder_app/edit_project_tabs.html' %}
+
+    {% if not project_data.is_active %}
+            <form action="{% url 'coder_app:edit_project_mentions' project_data.id %}" method="POST">
+                {% csrf_token %}
+                <div class="col-md-4 input-group">
+                    <h3>Select Media Inputs</h3>
+                    <label for="media_url_select">Which Column Contains the Media URL?</label>
+                    <select class="form-control" name="media_url_select">
+                        <option>Select</option>
+                        {% for column in column_data %}
+                            {% if column.column_name %}
+                                <option
+                                    value="{{ column.id }}"
+                                    {% if column.id == project_data.media_url_col_id %}selected{% endif %}>
+                                    {{ column.column_name }}
+                                </option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                    <label for="media_text_select">Which Column Contains the Media Text?</label>
+                    <select class="form-control" name="media_text_select">
+                        <option>Select</option>
+                        {% for column in column_data %}
+                            {% if column.column_name %}
+                                <option
+                                    value="{{ column.id }}"
+                                    {% if column.id == project_data.media_text_col_id %}selected{% endif %}>
+                                    {{ column.column_name }}
+                                </option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <br/>
+                <input class="btn btn-success" name="save_mention_media_location" type="submit" value="Save"/>
+            </form>
+    {%  endif %}
+
     {% include 'coder_app/mention_table.html' %}
 {% endblock %}
