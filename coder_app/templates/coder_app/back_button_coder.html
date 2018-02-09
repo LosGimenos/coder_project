@@ -1,0 +1,17 @@
+{% url 'coder_app:edit_coder' coder_data.id as edit_coder %}
+{% url 'coder_app:select_mention' coder_data.id project_data.id  as select_mention %}
+{% url 'coder_app:select_variable' coder_data.id project_id as select_variable %}
+{% url "coder_app:review_variables" coder_data.id project_id as review_variables %}
+
+<ul class="pager pager-top-left">
+    {% if request.path == select_mention %}
+        <li class="previous back-button-updates">
+            <a href="{{ edit_coder }}"><span aria-hidden="true">&larr;</span> Back to Edit Coder</a></li>
+    {% elif request.path == select_variable or request.path == review_variables %}
+        <li class="previous back-button-updates">
+            <a href="{% url 'coder_app:select_mention' coder_data.id project_id %}">
+                <span aria-hidden="true">&larr;</span>Back to Select Mention</a>
+        </li>
+    {% endif %}
+</ul>
+<br/>

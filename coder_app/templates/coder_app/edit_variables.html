@@ -27,14 +27,14 @@
                 <div class="ui-widget" style="margin-bottom: 1%;">
                     <label for="tag_filter">Search by Tag</label>
                     <div style="display: flex;">
-                        <input id="by_tag" class="form-control input__tag" type="text" name="tag_filter" placeholder="...tagname" />
+                        <input id="by_tag" class="form-control input__tag" type="text" name="tag_filter" />
                         <button class="btn__tag--add">Add</button>
                     </div>
                 </div>
                 <div class="ui-widget" style="margin-bottom: 1%;">
                     <label for="project_filter">Search by Project</label>
                     <div style="display: flex;">
-                        <input id='by_project' class="form-control" type="text" name="project_filter" placeholder="...project name" />
+                        <input id='by_project' class="form-control" type="text" name="project_filter" />
                         <button class="btn__project--add">Add</button>
                     </div>
                 </div>
@@ -42,7 +42,9 @@
             <div class="col-md-2"></div>
             <div class="col-md-4">
                 <label for="filter--container">Selected Filters</label>
-                <div class="col-md-12 filter--container filter--container__variable" name="filter--container">
+                <div
+                    class="col-md-12 filter--container filter--container__variable"
+                    name="filter--container">
                 </div>
             </div>
         </div>
@@ -128,8 +130,9 @@
 
         .filter--container {
             border: 1px solid black;
-            height: 15vh;
+            height: 20vh;
             overflow: scroll;
+            padding-top: 3%;
         }
 
         .input__tag {
@@ -186,8 +189,9 @@
 
                 const node = $(e.currentTarget);
                 const nodeId = $(node).parent().attr('name');
-                const nodeType = $(node).prev().attr('name');
+                const nodeType = $(node).prev().prev().attr('name');
                 const nodeValue = $(node).val();
+                console.log(nodeId, 'node id', nodeType, 'ndoe type', nodeValue, 'all this stuff')
 
                 let itemIndex;
                 switch (nodeType) {
@@ -428,14 +432,14 @@
                             let spanNode;
 
                             if (filterNode.type == 'tag') {
-                                spanNode = $('<span style="background-color: pink;" name="tag">TAG ||</span>');
+                                spanNode = $('<span style="background-color: #fab1a0;" name="tag"> TAG </span>');
                             } else if (filterNode.type == 'project') {
-                                spanNode = $('<span style="background-color: orange;" name="project">PROJECT ||</span>');
+                                spanNode = $('<span style="background-color: #ffeaa7;" name="project"> PROJECT </span>');
                             } else if (filterNode.type == 'variable') {
-                                spanNode = $('<span style="background-color: green; color: white;" name="variable">KEYWORD ||</span>');
+                                spanNode = $('<span style="background-color: #81ecec;" name="variable">KEYWORD</span>');
                             }
                             let variableNode =
-                                $(`<span name='${filterNode.id}'>${filterNode.name}<span class='badge filter-remove__variable'>X</span><br/></span>`);
+                                $(`<span name='${filterNode.id}'><span style="padding-left: 5%;">${filterNode.name}</span><span style="margin-left: 10%; background-color: red;" class='badge filter-remove__variable'>X</span><br/></span>`);
                             $(variableNode).prepend(spanNode);
                             $(container).append(variableNode);
                         });

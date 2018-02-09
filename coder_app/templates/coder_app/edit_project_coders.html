@@ -3,6 +3,20 @@
     {% include 'coder_app/back_button_project.html' %}
     {% include 'coder_app/nav_tabs.html' %}
     {% include 'coder_app/breadcrumb_projects.html' %}
+    {% if not project_data.is_active %}
+        <div class="row" style="margin-left: -1.5%;">
+            <div class="col-md-12">
+                <div class="col-md-5">
+                    {% include 'coder_app/configuration_progress_component.html' %}
+                </div>
+                <div class="col-md-7" style="margin-top: -1%;">
+                    <h4 style="margin-left: 12.5%;">Copy Configuration from Existing Project</h4>
+                    {% include 'coder_app/configure_from_existing_component.html' %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    <hr />
     {% include 'coder_app/edit_project_tabs.html' %}
     {% include 'coder_app/coder_table.html' %}
 {% endblock %}

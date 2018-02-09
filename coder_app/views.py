@@ -12,6 +12,7 @@ from common.models import Account
 from django.contrib.auth.models import User
 from .pytoxl import process_ae_data
 from .email_operations import send_coder_intro_email, send_add_coder_from_user_email
+from random import shuffle
 import json
 import requests
 import datetime
@@ -41,6 +42,13 @@ def view_projects(request):
 
     # get projects based on account. will possibly remove in production
     # project_data = Project.objects.filter(account=user_account).order_by('id')
+
+    if request.method == 'POST' and 'activate_project' in request.POST:
+        project_id = request.POST.get('project_id')
+        project_to_activate = project_data.get(id=project_id)
+        project_to_activate.is_active = True
+        project_to_activate.is_frozen = False
+        project_to_activate.save()
 
     if request.method == 'POST' and 'delete_project_button' in request.POST:
         project_id = request.POST.get('project_id')
@@ -245,6 +253,18 @@ def replicate_project(request, project_id):
     # get replicated project variables and create for project
     replicated_project_variables = Variable.objects.filter(project=project_to_replicate_data)
     for project_variable in replicated_project_variables:
+
+        # get tags assigned replicated variables
+        replicated_project_tags = project_to_replicate_data.tag_set.all()
+        variable_tags = project_variable.tag_set.all().exclude(
+            id__in=[replicated_tag.id for replicated_tag in replicated_project_tags])
+
+        # replicate variable assign project
+        project_variable.pk = None
+        project_variable.project = project_data
+        project_variable.name = project_variable.name + " COPY"
+        project_variable.save()
+
         column = Column(
             dataset=dataset
         )
@@ -267,19 +287,27 @@ def replicate_project(request, project_id):
             column=column,
             project=project_data,
             variable=project_variable,
-            column_number=greatest_col_index
+            column_number=greatest_col_index,
+            is_variable=True
         )
         column_meta.save()
 
-        # get and replicate tags on replicated variables
-        replicated_project_tags = project_to_replicate_data.tag_set.all()
-        variable_tags = project_variable.tag_set.all().exclude(id__in=[replicated_tag.id for replicated_tag in replicated_project_tags])
-
+        # attach variable tags on new replicated variable
         for variable_tag in variable_tags:
             project_variable.tag_set.add(variable_tag)
 
-        redirect_url = reverse('coder_app:edit_project', args=[project_data.id])
-        return redirect(redirect_url)
+        # add copy tag to variable
+        copy_tag, created = Tag.objects.get_or_create(name='copy')
+        project_variable.tag_set.add(copy_tag)
+
+    # get coders from replicated project and assign to project
+    replicated_project_coders = project_to_replicate_data.coder.all()
+
+    for coder in replicated_project_coders:
+        project_data.coder.add(coder)
+
+    redirect_url = reverse('coder_app:edit_project', args=[project_data.id])
+    return redirect(redirect_url)
 
 
 
@@ -555,8 +583,6 @@ def submit_new_variable(request):
     # else:
     #     project_data = None
 
-    print(project_data)
-
     return render(
         request,
         'coder_app/variables.html',
@@ -654,6 +680,7 @@ def submit_new_project(request):
 def edit_project(request, project_id):
     p = Project.objects.get(id=project_id)
     project_data = p
+    account_project_data = None
     # variable_data = Variable.objects.filter(project=p)
 
     project_data_name = project_data.name
@@ -701,15 +728,25 @@ def edit_project(request, project_id):
         if project_data.media_url_col_id or project_data.media_text_col_id:
             mentions_clear = True
 
+        # calculate percentage done
+        percentage_complete = 0
+
+        configuration_categories = [details_clear, variables_clear, mentions_clear, coders_clear]
+
+        for category in configuration_categories:
+            if category:
+                percentage_complete += 25
+
         if details_clear and variables_clear and mentions_clear and coders_clear:
-            project_data.is_active = True
-            project_data.is_frozen = False
+            project_data.is_active_eligible = True
             project_data.save()
         else:
             project_data.details_clear = details_clear
             project_data.variables_clear = variables_clear
             project_data.mentions_clear = mentions_clear
             project_data.coders_clear = coders_clear
+            project_data.percentage_complete = percentage_complete
+
 
         project_account = project_data.account
         account_project_data = Project.objects.filter(account=project_account).exclude(id=project_data.id)
@@ -891,7 +928,8 @@ def edit_project(request, project_id):
                 'project_edit_view': project_edit_view,
                 'tag_data': tag_data,
                 'projected_project_cost': projected_project_cost,
-                'unique_project_tag': unique_project_tag
+                'unique_project_tag': unique_project_tag,
+                'existing_project_data': account_project_data
             }
         )
 
@@ -941,7 +979,6 @@ def edit_project(request, project_id):
 
         return redirect(redirect_url)
 
-
     return render(
         request,
         'coder_app/edit_project.html',
@@ -959,6 +996,7 @@ def edit_project(request, project_id):
 @login_required()
 def edit_project_coders(request, project_id):
     project_data = Project.objects.get(id=project_id)
+    account_project_data = None
 
     if request.method == 'POST' and 'add_coder' in request.POST:
         coder_id = request.POST.get('coder_id')
@@ -1036,15 +1074,27 @@ def edit_project_coders(request, project_id):
         if project_data.media_url_col_id or project_data.media_text_col_id:
             mentions_clear = True
 
+        # calculate percentage done
+        percentage_complete = 0
+
+        configuration_categories = [details_clear, variables_clear, mentions_clear, coders_clear]
+
+        for category in configuration_categories:
+            if category:
+                percentage_complete += 25
+
         if details_clear and variables_clear and mentions_clear and coders_clear:
-            project_data.is_active = True
-            project_data.is_frozen = False
+            project_data.is_active_eligible = True
             project_data.save()
         else:
             project_data.details_clear = details_clear
             project_data.variables_clear = variables_clear
             project_data.mentions_clear = mentions_clear
             project_data.coders_clear = coders_clear
+            project_data.percentage_complete = percentage_complete
+
+        project_account = project_data.account
+        account_project_data = Project.objects.filter(account=project_account).exclude(id=project_data.id)
 
     return render(
         request,
@@ -1055,7 +1105,8 @@ def edit_project_coders(request, project_id):
             'project_edit_view': project_edit_view,
             'coder_data': coder_data,
             'cambrian_coder_data': cambrian_coder_data,
-            'user_account_name': user_account_name
+            'user_account_name': user_account_name,
+            'existing_project_data': account_project_data
         }
     )
 
@@ -1065,6 +1116,7 @@ def edit_project_mentions(request, project_id):
     dataset = project_data.dataset
     column_data = Column.objects.filter(dataset=dataset)
     mention_data = RowMeta.objects.filter(project=project_data)
+    account_project_data = None
 
     if request.method == "POST" and "save_mention_media_location" in request.POST:
         media_url_column_id = request.POST.get("media_url_select")
@@ -1138,15 +1190,27 @@ def edit_project_mentions(request, project_id):
         if project_data.media_url_col_id or project_data.media_text_col_id:
             mentions_clear = True
 
+        # calculate percentage done
+        percentage_complete = 0
+
+        configuration_categories = [details_clear, variables_clear, mentions_clear, coders_clear]
+
+        for category in configuration_categories:
+            if category:
+                percentage_complete += 25
+
         if details_clear and variables_clear and mentions_clear and coders_clear:
-            project_data.is_active = True
-            project_data.is_frozen = False
+            project_data.is_active_eligible = True
             project_data.save()
         else:
             project_data.details_clear = details_clear
             project_data.variables_clear = variables_clear
             project_data.mentions_clear = mentions_clear
             project_data.coders_clear = coders_clear
+            project_data.percentage_complete = percentage_complete
+
+        project_account = project_data.account
+        account_project_data = Project.objects.filter(account=project_account).exclude(id=project_data.id)
 
     return render(
         request,
@@ -1154,13 +1218,15 @@ def edit_project_mentions(request, project_id):
         {
             'project_data': project_data,
             'mention_data': mention_data,
-            'column_data': column_data
+            'column_data': column_data,
+            'existing_project_data': account_project_data
         }
     )
 
 @login_required()
 def edit_project_variables(request, project_id):
     project_data = Project.objects.get(id=project_id)
+    account_project_data = None
 
     if not project_data.is_active:
         details_clear = False
@@ -1193,15 +1259,27 @@ def edit_project_variables(request, project_id):
         if project_data.media_url_col_id or project_data.media_text_col_id:
             mentions_clear = True
 
+        # calculate percentage done
+        percentage_complete = 0
+
+        configuration_categories = [details_clear, variables_clear, mentions_clear, coders_clear]
+
+        for category in configuration_categories:
+            if category:
+                percentage_complete += 25
+
         if details_clear and variables_clear and mentions_clear and coders_clear:
-            project_data.is_active = True
-            project_data.is_frozen = False
+            project_data.is_active_eligible = True
             project_data.save()
         else:
             project_data.details_clear = details_clear
             project_data.variables_clear = variables_clear
             project_data.mentions_clear = mentions_clear
             project_data.coders_clear = coders_clear
+            project_data.percentage_complete = percentage_complete
+
+        project_account = project_data.account
+        account_project_data = Project.objects.filter(account=project_account).exclude(id=project_data.id)
 
     if request.method == 'POST' and 'delete_variable' in request.POST:
         value = request.POST.get('delete_variable')
@@ -1214,7 +1292,7 @@ def edit_project_variables(request, project_id):
         column_meta_for_variable.delete()
         column_for_column_meta.delete()
 
-    variable_data = Variable.objects.filter(project=project_data)
+    variable_data = Variable.objects.filter(project=project_data).order_by('-id')
 
     for variable in variable_data:
         if variable.is_freeform:
@@ -1229,7 +1307,8 @@ def edit_project_variables(request, project_id):
         'coder_app/edit_project_variables.html',
         {
             'project_data': project_data,
-            'variable_data': variable_data
+            'variable_data': variable_data,
+            'existing_project_data': account_project_data
         }
     )
 
@@ -1272,8 +1351,7 @@ def edit_variable(request, variable_id):
                 mentions_clear = True
 
             if details_clear and variables_clear and mentions_clear and coders_clear:
-                project_data.is_active = True
-                project_data.is_frozen = False
+                project_data.is_active_eligible = True
                 project_data.save()
             else:
                 project_data.details_clear = details_clear
@@ -1526,7 +1604,12 @@ def submit_new_coder(request):
 @login_required()
 def edit_coder(request, coder_id):
     coder = Coder.objects.get(id=coder_id)
-    projects = coder.project_set.all()
+    projects = coder.project_set.all().order_by('-id')
+    source = request.GET.get('source')
+    project_id = None
+
+    if source == 'project':
+        project_id = request.GET.get('project_id')
 
     user = coder.user
 
@@ -1553,7 +1636,10 @@ def edit_coder(request, coder_id):
         'coder_app/edit_coder.html',
         {
             'coder': coder,
-            'projects': projects }
+            'projects': projects,
+            'source': source,
+            'project_id': project_id
+        }
     )
 
 @login_required()
@@ -1641,10 +1727,10 @@ def select_mention(request, coder_id, project_id):
     coder_data = Coder.objects.get(id=coder_id)
     user_data = coder_data.user
     coder_data.username = user_data.username
-
     project_data = Project.objects.get(id=project_id)
     mention_data = RowMeta.objects.filter(project=project_data)
     total_variable_count = Variable.objects.filter(project=project_data).count()
+    unreviewed_variable_ids_all = []
 
     for mention in mention_data:
         row = mention.row
@@ -1657,10 +1743,17 @@ def select_mention(request, coder_id, project_id):
             if index + 1 != answer_data.count():
                 answer_ids += ','
 
-        # row = RowMeta.objects.get(row=row)
-
         mention.completed_variables = answer_ids
         mention.completed_variables_count = answer_data.count()
+
+        # get unreviewed answer data
+        unreviewed_answer_data = answer_data.filter(reviewed=False)
+        unreviewed_variable_ids_per_mention = [unreviewed_answer.id for unreviewed_answer in unreviewed_answer_data]
+        unreviewed_variable_ids_all.append(unreviewed_variable_ids_per_mention)
+
+    shuffle(unreviewed_variable_ids_all)
+    flattened_unreviewed_variable_ids = [item for sublist in unreviewed_variable_ids_all for item in sublist]
+    unreviewed_variable_ids_string = ','.join(str(i) for i in flattened_unreviewed_variable_ids)
 
     return render(
         request,
@@ -1669,7 +1762,8 @@ def select_mention(request, coder_id, project_id):
             'coder_data': coder_data,
             'project_data': project_data,
             'mention_data': mention_data,
-            'total_variable_count': total_variable_count
+            'total_variable_count': total_variable_count,
+            'unreviewed_variables_all': unreviewed_variable_ids_string
         })
 
 @login_required()

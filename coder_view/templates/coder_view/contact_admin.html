@@ -1,0 +1,26 @@
+{% extends 'coder_app/base.html' %}
+
+{% block content %}
+    <div class="row">
+        {% include 'coder_view/back_button_coder_view.html' %}
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <h3>Contact Project Admin</h3>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-5">
+            <form>
+                {% csrf_token %}
+                <label for="contact_subject">Subject</label>
+                <input class="form-control" type="text" name="contact_subject" />
+                <label for="contact_message">Message</label>
+                <textarea class="form-control" style="height: 25vh;" name="contact_message"></textarea>
+                <br />
+                <input class="btn btn-success" type="submit" value="Send" name="submit_contact_admin" />
+            </form>
+        </div>
+    </div>
+
+{% endblock %}

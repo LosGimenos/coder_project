@@ -3,15 +3,29 @@
     {% include 'coder_app/back_button_project.html' %}
     {% include 'coder_app/nav_tabs.html' %}
     {% include 'coder_app/breadcrumb_projects.html' %}
+    {% if not project_data.is_active %}
+        <div class="row" style="margin-left: -1.5%;">
+            <div class="col-md-12">
+                <div class="col-md-5">
+                    {% include 'coder_app/configuration_progress_component.html' %}
+                </div>
+                <div class="col-md-7" style="margin-top: -1%;">
+                    <h4 style="margin-left: 12.5%;">Copy Configuration from Existing Project</h4>
+                    {% include 'coder_app/configure_from_existing_component.html' %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    <hr />
     {% include 'coder_app/edit_project_tabs.html' %}
 
     {% if not project_data.is_active %}
             <form action="{% url 'coder_app:edit_project_mentions' project_data.id %}" method="POST">
                 {% csrf_token %}
                 <div class="col-md-4 input-group">
-                    <h3>Select Media Inputs</h3>
-                    <label for="media_url_select">Which Column Contains the Media URL?</label>
-                    <select class="form-control" name="media_url_select">
+                    <h3>Configure Mention Data</h3>
+                    <label for="media_url_select">Which Column Contains the Mention URL?</label>
+                    <select style="margin-bottom: 5%;" class="form-control mention-select" name="media_url_select">
                         <option>Select</option>
                         {% for column in column_data %}
                             {% if column.column_name %}
@@ -23,8 +37,21 @@
                             {% endif %}
                         {% endfor %}
                     </select>
-                    <label for="media_text_select">Which Column Contains the Media Text?</label>
-                    <select class="form-control" name="media_text_select">
+                    <label for="media_text_select">Which Column Contains the Mention Text?</label>
+                    <select style="margin-bottom: 5%;" class="form-control mention-select" name="media_text_select">
+                        <option>Select</option>
+                        {% for column in column_data %}
+                            {% if column.column_name %}
+                                <option
+                                    value="{{ column.id }}"
+                                    {% if column.id == project_data.media_text_col_id %}selected{% endif %}>
+                                    {{ column.column_name }}
+                                </option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                    <label for="media_author_select">Which Column Contains the Mention Author?</label>
+                    <select class="form-control mention-select" name="media_author_select">
                         <option>Select</option>
                         {% for column in column_data %}
                             {% if column.column_name %}

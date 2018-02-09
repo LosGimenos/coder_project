@@ -1,55 +1,94 @@
 {% extends 'coder_app/base.html' %}
 
 {% block content %}
-    {% include 'coder_app/home_tab.html' %}
+    {% include 'coder_app/back_button_coder.html' %}
+    {% include 'coder_app/nav_tabs.html' %}
+    {% include 'coder_app/breadcrumb_coders.html' %}
     <h3>Select Mention to Review</h3>
-        <div class="row">
-            <ul style="list-style: none;">
-                {% for mention in mention_data %}
-                    {% if mention.completed_variables_count > 0 %}
-                <li class="col-sm-10" style="border: 1px solid black; margin-bottom: 1%;">
-                <form
-                    class="input-group"
-                    action="{% url 'coder_app:select_variable' coder_data.id project_data.id %}"
-                    method="POST"
-                >
-                {% csrf_token %}
-                <input type="hidden" name="completed_variables" value="{{ mention.completed_variables }}"/>
-                        {% if mention.media_url %}
-                        <h4>Mention URL</h4>
-                            <span>{{ mention.media_url }}</span>
-                        {% else %}
-                            <h4>Mention Text</h4>
-                            <span>{{ mention.media_text }}</span>
-                        {% endif %}
-                        <br/>
-                        <h4>Variables completed by {{ coder_data.username }}</h4>
-                        {% if mention.completed_variables_count > 0 %}
-                        {{ mention.completed_variables_count }} out of {{ total_variable_count }}
-                    <br/>
-                    <div clas="row">
-                        <input
-                                style="margin-right: 1%; float: left;"
-                                class="btn btn-primary" type="submit" name="submit_review" value="Review Single"/>
-                        </form>
-                        <form
-                            class="input-group"
-                            action="{% url 'coder_app:review_variables' coder_data.id project_data.id %}"
-                            method="POST">
-                            {% csrf_token %}
-                            <input type="hidden" name="completed_variables" value="{{ mention.completed_variables }}"/>
-                            <input
-                                    style="float: left;"
-                                    class="btn btn-primary" type="submit" name="submit_review_all" value="Review All"/>
-                    </div>
-                    </form>
-                    {% else %}
-                            <span><strong>No Completed Variables to Review</strong></span>
-                    {% endif %}
-                </li>
-                    {% endif %}
-                {% endfor %}
-            </ul>
-        </div>
-        <a href="{% url 'coder_app:edit_coder' coder_data.id %}"><button class="btn btn-primary">Back</button></a>
+
+    <form
+        action="{% url 'coder_app:review_variables' coder_data.id project_data.id %}"
+        method="POST">
+        {% csrf_token %}
+        <input
+            type="hidden"
+            name="completed_variables"
+            value="{{ unreviewed_variables_all }}"/>
+        <input
+            class="btn btn-success"
+            type="submit"
+            name="submit_review_all"
+            value="Review All Mentions"/>
+    </form>
+
+    <div class="table-responsive" style="margin-top: 2%;">
+        <table class="table table-bordered table-hovered table-striped tablesorter">
+            <thead>
+            <tr>
+                <th class="header">Mention URL</th>
+                <th class="header">Variables Completed by {{ coder_data.username }}</th>
+                <th class="header">Review Single Variables</th>
+                <th class="header">Review All Variables</th>
+            </tr>
+            </thead>
+            {% if mention_data %}
+                    <tbody>
+                        {% for mention in mention_data %}
+                            {% if mention.completed_variables_count > 0 %}
+                                <tr>
+                                    <td>
+                                        {% if mention.media_url %}
+                                            {{ mention.media_url }}
+                                        {% else %}
+                                            {{ mention.media_text }}
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {{ mention.completed_variables_count }} out of {{ total_variable_count }}
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <form
+                                            action="{% url 'coder_app:select_variable' coder_data.id project_data.id %}"
+                                            method="POST">
+                                            {% csrf_token %}
+                                            <input
+                                                type="hidden"
+                                                name="completed_variables"
+                                                value="{{ mention.completed_variables }}"/>
+                                            <input
+                                                class="btn btn-success btn-xs"
+                                                type="submit"
+                                                name="submit_review"
+                                                value="Review Single"/>
+                                        </form>
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <form
+                                            action="{% url 'coder_app:review_variables' coder_data.id project_data.id %}"
+                                            method="POST">
+                                            {% csrf_token %}
+                                            <input
+                                                type="hidden"
+                                                name="completed_variables"
+                                                value="{{ mention.completed_variables }}"/>
+                                            <input
+                                                class="btn btn-success btn-xs"
+                                                type="submit"
+                                                name="submit_review_all"
+                                                value="Review All"/>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </tbody>
+            {% else  %}
+                <tbody>
+                    <tr>
+                        <td>There are no completed Mentions for {{ coder_data.username }}</td>
+                    </tr>
+                </tbody>
+            {% endif %}
+        </table>
+    </div>
 {%  endblock %}

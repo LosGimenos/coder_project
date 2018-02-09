@@ -1,0 +1,101 @@
+<div class="progress" style="width: 90%; background-color: #dfe6e9;">
+  <div class="progress-bar progress-bar-warning progress-bar-striped" role="progressbar" aria-valuenow="{{ project_data.percentage_complete }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ project_data.percentage_complete }}%">
+    {{ project_data.percentage_complete }}% complete
+  </div>
+</div>
+
+<div class="progress-category-container">
+    <div class="progress-category-wrapper-top">
+        <div class="progress-category">
+            <div class="category-checkbox">
+                {% if project_data.details_clear %}
+                    <span style="font-size: 1.25em; color: green;" class="glyphicon glyphicon-ok"></span>
+                {% else %}
+                    <span style="font-size: 1.25em; color: red;" class="glyphicon glyphicon-remove"></span>
+                {% endif %}
+            </div>
+            <div class="category-title">
+                <bold>Project Details</bold>
+            </div>
+        </div>
+        <div class="progress-category">
+            <div class="category-checkbox">
+                {% if project_data.variables_clear %}
+                    <span style="font-size: 1.25em; color: green;" class="glyphicon glyphicon-ok"></span>
+                {% else %}
+                    <span style="font-size: 1.25em; color: red;" class="glyphicon glyphicon-remove"></span>
+                {% endif %}
+            </div>
+            <div class="category-title">
+                <bold>Assigned Variables</bold>
+            </div>
+        </div>
+    </div>
+    <div class="progress-category-wrapper-bottom">
+        <div class="progress-category">
+            <div class="category-checkbox">
+                {% if project_data.mentions_clear %}
+                    <span style="font-size: 1.25em; color: green;" class="glyphicon glyphicon-ok"></span>
+                {% else %}
+                    <span style="font-size: 1.25em; color: red;" class="glyphicon glyphicon-remove"></span>
+                {% endif %}
+            </div>
+            <div class="category-title">
+                <bold>Mentions</bold>
+            </div>
+        </div>
+        <div class="progress-category">
+            <div class="category-checkbox">
+                {% if project_data.coders_clear %}
+                    <span style="font-size: 1.25em; color: green;" class="glyphicon glyphicon-ok"></span>
+                {% else %}
+                    <span style="font-size: 1.25em; color: red;" class="glyphicon glyphicon-remove"></span>
+                {% endif %}
+            </div>
+            <div class="category-title">
+                <bold>Coders</bold>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .progress-category-container {
+        width: 75%;
+        height: 10vh;
+    }
+
+    .progress-category {
+        width: 50%;
+        display: flex;
+    }
+
+    .progress-category-wrapper-top {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        height: 50%;
+    }
+
+    .progress-category-wrapper-bottom {
+        display: flex;
+        justify-content: space-around;
+        position: relative;
+        width: 100%;
+        height: 50%;
+    }
+
+    .category-checkbox {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 20%;
+    }
+
+    .category-title {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+</style>

@@ -28,62 +28,62 @@
         <h2>Response</h2>
     </div>
     <div class="row">
-        <div class="col-md-5" style="background-color: #98FB98;">
+        <div class="col-md-5" style="background-color: #dfe6e9;">
             <h3>{{ variable_data.name }}</h3>
-                <h4>Instructions</h4>
-                <span><p>{{ variable_data.instructions }}</p></span>
-                <form action="{{ next_variable_url }}" method="post">
-                    {% csrf_token %}
-                    {% if variable_data.is_freeform %}
-                    <textarea class='form-control' name='variable-freeform' placeholder="Answer here.."></textarea>
-                        {% elif variable_data.is_multiple_choice %}
-                            {% if variable_data.multiple_choice_option_one %}
-        {#                        <label>Choice 1</label><br/>#}
-                                <input name="variable-multiple" type="radio" value="{{ variable_data.multiple_choice_option_one }}">
-                                {{ variable_data.multiple_choice_option_one }}</input>
-                                <br/>
-                            {% endif %}
-                            {% if variable_data.multiple_choice_option_two %}
-        {#                        <label>Choice 2</label><br/>#}
-                                <input name="variable-multiple" type="radio" value="{{ variable_data.multiple_choice_option_two }}">
-                                {{ variable_data.multiple_choice_option_two }}</input>
-                                <br/>
-                            {% endif %}
-                            {% if variable_data.multiple_choice_option_three %}
-        {#                        <label>Choice 3</label><br/>#}
-                                <input name="variable-multiple" type="radio" value="{{ variable_data.multiple_choice_option_three }}">
-                                {{ variable_data.multiple_choice_option_three }}</input>
-                                <br/>
-                            {% endif %}
-                            {% if variable_data.multiple_choice_option_four %}
-        {#                        <label>Choice 4</label><br/>#}
-                                <input name="variable-multiple" type="radio" value="{{ variable_data.multiple_choice_option_four }}">
-                                {{ variable_data.multiple_choice_option_four }}</input>
-                                <br/>
-                            {% endif %}
-                            {% if variable_data.multiple_choice_option_five %}
-        {#                        <label>Choice 5</label><br/>#}
-                                <input name="variable-multiple" type="radio" value="{{ variable_data.multiple_choice_option_five }}">
-                                {{ variable_data.multiple_choice_option_five }}</input>
-                                <br/>
-                            {% endif %}
-                            {% if variable_data.multiple_choice_option_six %}
-        {#                        <label>Choice 6</label><br/>#}
-                                <input name="variable-multiple" type="radio" value="{{ variable_data.multiple_choice_option_six }}">
-                                {{ variable_data.multiple_choice_option_six }}</input>
-                                <br/>
-                            {% endif %}
-                            {% if variable_data.multiple_choice_option_seven %}
-        {#                        <label>Choice 7</label><br/>#}
-                                <input name="variable-multiple" type="radio" value="{{ variable_data.multiple_choice_option_seven }}">
-                                {{ variable_data.multiple_choice_option_seven }}</input>
-                                <br/>
-                            {% endif %}
-                    {% endif %}
-                    <br/>
-                    <label for="variable-adverse-events">Contains Adverse Events?</label>
-                    <input type="checkbox" name="variable-adverse-events" value="True"/>
-                    <br/>
+            <h4>Instructions</h4>
+            <span><p>{{ variable_data.instructions }}</p></span>
+            <form action="{{ next_variable_url }}" method="post">
+                {% csrf_token %}
+                {% if variable_data.is_freeform %}
+                <textarea class='form-control' name='variable-freeform' placeholder="Answer here.."></textarea>
+                    {% elif variable_data.is_multiple_choice %}
+                        {% if variable_data.multiple_choice_option_one %}
+    {#                        <label>Choice 1</label><br/>#}
+                            <input name="variable-multiple" type="radio" value="{{ variable_data.multiple_choice_option_one }}">
+                            {{ variable_data.multiple_choice_option_one }}</input>
+                            <br/>
+                        {% endif %}
+                        {% if variable_data.multiple_choice_option_two %}
+    {#                        <label>Choice 2</label><br/>#}
+                            <input name="variable-multiple" type="radio" value="{{ variable_data.multiple_choice_option_two }}">
+                            {{ variable_data.multiple_choice_option_two }}</input>
+                            <br/>
+                        {% endif %}
+                        {% if variable_data.multiple_choice_option_three %}
+    {#                        <label>Choice 3</label><br/>#}
+                            <input name="variable-multiple" type="radio" value="{{ variable_data.multiple_choice_option_three }}">
+                            {{ variable_data.multiple_choice_option_three }}</input>
+                            <br/>
+                        {% endif %}
+                        {% if variable_data.multiple_choice_option_four %}
+    {#                        <label>Choice 4</label><br/>#}
+                            <input name="variable-multiple" type="radio" value="{{ variable_data.multiple_choice_option_four }}">
+                            {{ variable_data.multiple_choice_option_four }}</input>
+                            <br/>
+                        {% endif %}
+                        {% if variable_data.multiple_choice_option_five %}
+    {#                        <label>Choice 5</label><br/>#}
+                            <input name="variable-multiple" type="radio" value="{{ variable_data.multiple_choice_option_five }}">
+                            {{ variable_data.multiple_choice_option_five }}</input>
+                            <br/>
+                        {% endif %}
+                        {% if variable_data.multiple_choice_option_six %}
+    {#                        <label>Choice 6</label><br/>#}
+                            <input name="variable-multiple" type="radio" value="{{ variable_data.multiple_choice_option_six }}">
+                            {{ variable_data.multiple_choice_option_six }}</input>
+                            <br/>
+                        {% endif %}
+                        {% if variable_data.multiple_choice_option_seven %}
+    {#                        <label>Choice 7</label><br/>#}
+                            <input name="variable-multiple" type="radio" value="{{ variable_data.multiple_choice_option_seven }}">
+                            {{ variable_data.multiple_choice_option_seven }}</input>
+                            <br/>
+                        {% endif %}
+                {% endif %}
+                <br/>
+                <label for="variable-adverse-events">Contains Adverse Events?</label>
+                <input type="checkbox" name="variable-adverse-events" value="True"/>
+                <br/>
             </div>
         </div>
     <div class="row" style="margin-bottom: 4%;">

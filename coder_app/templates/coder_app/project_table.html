@@ -7,7 +7,8 @@
     <input style="margin-top: 3%;" class="btn btn-success" type="submit" value="Add Project"/>
 </a>
 
-<h3>Unconfigured Projects</h3>
+<h3>Pending Projects</h3>
+    <p><small>Configure Project before Activation</small></p>
 
 {% if unconfigured_project_data %}
 <div class="table-responsive" style="margin-top: 2%;">
@@ -20,6 +21,7 @@
 {#            <th class="header">Has AEs</th>#}
 {#            <th class="header">Pause Project</th>#}
             <th class="header">Configure Project</th>
+            <th class="header">Activate Project</th>
 {#            <th class="header">Copy Project</th>#}
             <th class="header">Delete Project</th>
         </tr>
@@ -56,6 +58,23 @@
 {#                        </td>#}
                         <td>
                             <a href={% url 'coder_app:edit_project' project_id=project.id %}><span>Configure</span></a>
+                        </td>
+                        <td style="text-align: center;">
+                            {% if not project.is_active_eligible %}
+                                <a href="{% url 'coder_app:edit_project' project_id=project.id %}">
+                                    <button class="btn btn-success btn-xs">Activate</button>
+                                </a>
+                            {% elif project.is_active_eligible %}
+                                <form active="{% url 'coder_app:view_projects' %}" method="POST">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="project_id" value="{{ project.id }}"/>
+                                    <input
+                                        class="btn btn-success btn-xs"
+                                        type="submit"
+                                        value="Activate"
+                                        name="activate_project" />
+                                </form>
+                            {% endif %}
                         </td>
 {#                        <td>#}
 {#                            <a href="{% url 'coder_app:replicate_project' project.id %}"><span>Copy</span></a>#}

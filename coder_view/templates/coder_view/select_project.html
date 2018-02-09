@@ -13,7 +13,7 @@
                     class="btn btn-default {% if filter_view == 'open' %} filter-toggle-selected {% endif %}"
                     type="submit"
                     name="select-variable-view-button"
-                    value="Open" />
+                    value="Active" />
                 <input style="display: none;" name="pending_projects_view" value="{{ coder_data.id }}" />
             </form>
             <form action={% url 'coder_view:coder_splash' coder_data.id %} method="post">

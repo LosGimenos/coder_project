@@ -10,6 +10,7 @@
             <th class="header">Variables per Mention</th>
             <th class="header">Start</th>
             <th class="header">Info</th>
+            <th class="header">Contact Admin</th>
         </tr>
         </thead>
             {% if filter_view == 'open' %}
@@ -23,7 +24,12 @@
                             <td>{{ project.completed_rows_by_coder }}</td>
                             <td>{{ project.num_variables_in_project }}</td>
                             <td>
-                                <a href="{% url 'coder_view:coder_project_answering' coder_id=coder_data.id project_id=project.id row_id=project.row_id column_id=project.column_data.id %}">
+                                <a
+                                    {% if project.skip_info_start %}
+                                    href="{% url 'coder_view:coder_project_answering' coder_id=coder_data.id project_id=project.id row_id=project.row_id column_id=project.column_data.id %}">
+                                    {% else %}
+                                    href="{% url 'coder_view:coder_project_overview' coder_id=coder_data.id project_id=project.id row_id=project.row_id %}">
+                                    {% endif %}
                                     <button class="btn btn-success btn-xs">Code</button>
                                 </a>
                             </td>
@@ -32,10 +38,16 @@
                                     <button class="btn btn-info btn-xs">Info</button>
                                 </a>
                             </td>
+                            <td>
+                                <a href="{% url 'coder_view:coder_contact_admin' coder_data.id %}?project_id={{ project.id }}">
+                                    Contact
+                                </a>
+                            </td>
                         </tr>
                     </tbody>
                 {% endfor %}
             {% elif filter_view == 'completed' %}
+                {% for project in project_data %}
                  <tbody>
                         <tr>
                             <td>{{ project.name }}</td>
@@ -56,6 +68,7 @@
                             </td>
                         </tr>
                     </tbody>
+                {% endfor %}
             {% endif %}
     </table>
 </div>

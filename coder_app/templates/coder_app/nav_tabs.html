@@ -6,6 +6,12 @@
 {% url 'coder_app:submit_new_project' as submit_new_project %}
 {% url 'coder_app:edit_project' project_id as edit_project %}
 {% url 'coder_app:create_tag' as create_tag %}
+{% url 'coder_app:edit_coder' coder.id as edit_coder %}
+{% url 'coder_app:select_mention' coder_data.id project_data.id as select_mention %}
+{% url 'coder_app:select_variable' coder_data.id project_id as select_variable %}
+{% url "coder_app:review_variables" coder_data.id project_id as review_variables %}
+{% url "coder_app:review_variable" variable_data.id as review_variable %}
+{% url "coder_app:review_tag" tag_data.id as review_tag %}
 
     <ul
       {% if request.path != view_projects and request.path != add_coder and request.path != edit_tags and request.path != edit_variables %}
@@ -22,7 +28,7 @@
                     role="presentation">
           <a href="{{ view_projects }}" aria-controls="home" role="tab">Projects</a></li>
       <li
-              {% if request.path == add_coder %}
+              {% if request.path == add_coder or request.path == edit_coder and source != 'project' or request.path == select_mention or request.path == select_variable or request.path == review_variables %}
                 class='nav-coders active'
               {% else %}
                 class='nav-coders'
@@ -30,7 +36,7 @@
               role="presentation">
           <a href="{{ add_coder }}" aria-controls="coders" role="tab">Coders</a></li>
         <li
-                {% if request.path == edit_tags or request.path == create_tag %}
+                {% if request.path == edit_tags or request.path == create_tag or request.path == review_tag %}
                     class="nav-tags active"
                 {% else %}
                     class="nav-tags"
@@ -38,7 +44,7 @@
                 role="presentation">
             <a href="{{ edit_tags }}" aria-controls="tags" role="tab">Tags</a></li>
         <li
-            {% if request.path == edit_variables or source == 'variable_library' %}
+            {% if request.path == edit_variables or source == 'variable_library' or request.path == review_variable %}
                 class='nav-variables active'
                 {% else %}
                 class='nav-variables'

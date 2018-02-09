@@ -2,10 +2,27 @@
 
 {% block content %}
     <ul class="pager pager-top-left">
-        <li class="previous back-button-updates"><a href="{% url 'coder_app:add_coder' %}"><span aria-hidden="true">&larr;</span> Back to Coder Library</a></li>
+        {% if source == 'project' %}
+        <li class="previous back-button-updates">
+            <a href="{% url 'coder_app:edit_project_coders' project_id %}">
+                <span aria-hidden="true">&larr;</span> Back to Assign Coders</a></li>
+        {% else %}
+        <li class="previous back-button-updates">
+            <a href="{% url 'coder_app:add_coder' %}">
+                <span aria-hidden="true">&larr;</span> Back to Coder Library</a></li>
+        {% endif %}
     </ul>
     <br/>
     {% include 'coder_app/nav_tabs.html' %}
+    <ol class="breadcrumb breadcrumb-top-left" style="margin-top: 2%;">
+        {% if source == 'project' %}
+            <li><a href="#">Projects</a></li>
+            <li><a href="#">Assign Coders</a></li>
+       {% else %}
+            <li><a href="#">Coders</a></li>
+       {% endif %}
+        <li><a href="#">Edit Coder Details</a></li>
+    </ol>
     <div style="margin-left: 1.5%;">
     <div class="row">
         <div class="col-md-3">
@@ -26,22 +43,27 @@
         </form>
         </div>
         <div class="col-md-1"></div>
-        <div class="col-md-3" style="text-align: center;">
-            <h3>Accuracy for <br/>{{ coder.first_name }} {{ coder.last_name }}</h3>
-            <span><p style="font-size: 2em;">{{ coder.rating }}</p></span>
-            <h3>Attached to these Projects:</h3>
-            <div style="margin-left: -30.5%;">
-            <ul style="list-style: none;">
-                {% if projects %}
-                    {% for project in projects %}
-                        <li>{{ project.name }} |
-                            <a href="{% url 'coder_app:select_mention' coder.id project.id %}"><span>review responses</span></a>
-                        </li>
-                    {% endfor %}
-                    {% else %}
-                    <span>No Current Projects</span>
-                {% endif %}
-            </ul>
+        <div class="col-md-5">
+            <div class="col-md-6">
+                <h3>Accuracy for <br/>{{ coder.first_name }} {{ coder.last_name }}</h3>
+                <span><p style="font-size: 2em;">{{ coder.rating }}</p></span>
+            </div>
+            <br />
+            <div class="col-md-12">
+                <h3>Attached to these Projects:</h3>
+                <div style="overflow: scroll; height: 12vh;">
+                    <ul style="list-style: none; padding-left: 0;">
+                        {% if projects %}
+                            {% for project in projects %}
+                                <li style="padding-left: 0;">{{ project.name }} |
+                                    <a href="{% url 'coder_app:select_mention' coder.id project.id %}"><span>review responses</span></a>
+                                </li>
+                            {% endfor %}
+                            {% else %}
+                            <span>No Current Projects</span>
+                        {% endif %}
+                    </ul>
+                </div>
             </div>
         </div>
     </div>

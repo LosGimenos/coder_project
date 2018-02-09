@@ -2,6 +2,15 @@
 
 {% block content %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
+    <ul class="pager pager-top-left">
+        {% if  source == 'project' %}
+            <li class="previous back-button-updates"><a href="{% url 'coder_app:edit_project_variables' project_data.id %}"><span aria-hidden="true">&larr;</span> Back to Assign Variables</a></li>
+        {% elif source == 'variable_library' %}
+            <li class="previous back-button-updates"><a href="{% url 'coder_app:edit_variables' %}"><span aria-hidden="true">&larr;</span> Back to Variable Library</a></li>
+        {% endif %}
+    </ul>
+    <br/>
+
     {% include 'coder_app/nav_tabs.html' %}
 
     <ol class="breadcrumb breadcrumb-top-left" style="margin-top: 2%;">

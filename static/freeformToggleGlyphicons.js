@@ -32,16 +32,19 @@ radioButtons.forEach(button => {
 
                        $(optionsWrapper).append(choiceEntry);
                    });
-
-                   inputData = [];
                }
 
                const addChoiceElement = $('span.shown');
 
-               if ( $(addChoiceElement).length == 0 ) {
+               if ( inputData.length == 0 ) {
+                   choiceNodeInit();
+               }
+
+               if ( $(addChoiceElement).length == 0 && inputData.length < 7 ) {
                     addChoiceNode();
                }
                removeChoiceHandler();
+               inputData = [];
                break;
             }
 
@@ -105,12 +108,10 @@ function removeChoiceHandler() {
 
 function addChoiceNode() {
    const choiceEntry = $('<div class="choice-input-wrapper">');
-   const addChoiceButton = $('<span class="glyphicon glyphicon-plus add-choice shown"></span>')
+   const addChoiceButton = $('<span class="glyphicon glyphicon-plus add-choice shown"></span>');
 
    $(choiceEntry).append(addChoiceButton);
-
    $(optionsWrapper).append(choiceEntry);
-
    addChoiceHandler();
 }
 
@@ -121,4 +122,16 @@ function assignInputNames() {
         $(input).attr('name', `variable-choice-${index + 1}`);
         $(input).attr('placeholder', `Choice ${index + 1}`);
     });
+}
+
+function choiceNodeInit() {
+    const choiceEntry = $('<div class="choice-input-wrapper">');
+    const removeNode = $('<span class="glyphicon glyphicon-minus remove-choice"></span>');
+    const inputNode = $('<input style="float: left;" class="form-control input__answer-style" type="text" />');
+
+    $(choiceEntry).append(removeNode);
+    $(choiceEntry).append(inputNode);
+    $(optionsWrapper).append(choiceEntry);
+
+    assignInputNames();
 }

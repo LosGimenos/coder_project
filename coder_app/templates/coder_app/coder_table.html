@@ -1,5 +1,7 @@
-{% block content %}
 {% url 'coder_app:add_coder' as add_coder %}
+{% url 'coder_app:edit_project_coders' project_data.id as edit_project_coders %}
+
+{% block content %}
 
 <input style="display: none;" name="project_id" value="{{ project_data.id }}" />
 
@@ -50,7 +52,12 @@
                             </td>
                         {% endif %}
                         <td>
-                            <a href="{% url 'coder_app:edit_coder' coder_id=coder.id %}">
+                            <a
+                                {% if request.path == edit_project_coders %}
+                                    href="{% url 'coder_app:edit_coder' coder_id=coder.id %}?source=project&project_id={{ project_data.id }}">
+                                {% else %}
+                                    href="{% url 'coder_app:edit_coder' coder_id=coder.id %}?source=coder_library">
+                                {% endif %}
                                 <span>Edit</span>
                             </a>
                         </td>
@@ -71,19 +78,14 @@
     <table class="table table-bordered table-hovered table-striped tablesorter">
         <thead>
             <tr>
-                <th class="header">First Name</th>
-                <th class="header">Last Name</th>
                 <th class="header">Username</th>
                 <th class="header">Accuracy</th>
                 <th class="header">Add/Remove Coder</th>
-{#                <th class="header">Edit Coder Details</th>#}
             </tr>
         </thead>
         <tbody>
             {% for coder in cambrian_coder_data %}
             <tr>
-                <td>{{ coder.first_name }}</td>
-                <td>{{ coder.last_name }}</td>
                 <td>{{ coder.username }}</td>
                 <td>{{ coder.rating }}</td>
                 <td style="text-align: center;">
@@ -93,11 +95,6 @@
                         <button class="btn btn-success btn-xs">Add</button>
                     {% endif %}
                 </td>
-{#                <td>#}
-{#                    <a href="{% url 'coder_app:edit_coder' coder_id=coder.id %}">#}
-{#                        <span>Edit</span>#}
-{#                    </a>#}
-{#                </td>#}
             </tr>
                 {% endfor %}
         </tbody>

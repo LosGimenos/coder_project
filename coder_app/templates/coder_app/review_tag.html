@@ -1,7 +1,12 @@
 {% extends 'coder_app/base.html' %}
 
 {% block content %}
-    {% include 'coder_app/home_tab.html' %}
+<ul class="pager pager-top-left">
+    <li class="previous back-button-updates">
+        <a href="{% url 'coder_app:edit_tags' %}"><span aria-hidden="true">&larr;</span> Back to Tag Library</a></li>
+</ul>
+<br/>
+    {% include 'coder_app/nav_tabs.html' %}
 
     <h3>Review Tag</h3>
     <h3>"{{ tag_data.name }}"</h3>

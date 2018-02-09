@@ -50,3 +50,21 @@ def send_project_invite_email(user):
                 </body>
             </html>''' % (user.account_name, user.project_name, user.first_name, user.project_name)
     send_email(user, subject, email_html)
+
+def contact_project_admin(user, coder, project, subject, message):
+    subject = "Message from %s %s on Project %s" % (coder.first_name, coder.last_name, project.name)
+    email_html = '''
+        <html>
+            <body>
+                <h4>%s</h4>
+                <p>%s</p>
+                <br />
+                <p>Sent from:</p>
+                <p>%s %s</p>
+                <p>username: %s</p>
+                <p>email: %s</p>
+            </body>
+        </html>
+    ''' % (subject, message, coder.first_name, coder.last_name, coder.username, coder.email)
+
+    send_email(user, subject, email_html)

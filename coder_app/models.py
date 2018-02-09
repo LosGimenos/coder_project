@@ -35,6 +35,7 @@ class Project(models.Model):
     is_active = models.BooleanField(default=False)
     media_url_col_id = models.IntegerField(null=True)
     media_text_col_id = models.IntegerField(null=True)
+    is_active_eligible = models.BooleanField(default=False)
     class Meta:
         permissions = (
             ('is_coding_app_admin', 'Is admin for Coding App'),

@@ -1,0 +1,20 @@
+{% url "coder_app:edit_coder" coder.id as edit_coder %}
+{% url "coder_app:select_mention" coder_data.id project_data.id as select_mention %}
+{% url "coder_app:select_variable" coder_data.id project_id as select_variable %}
+{% url "coder_app:review_variables" coder_data.id project_id as review_variables %}
+
+<ol class="breadcrumb breadcrumb-top-left" style="margin-top: 2%;">
+    <li><a href="#">Coders</a></li>
+   {% if request.path == select_mention %}
+        <li><a href="#">Edit Coder</a></li>
+        <li><a href="#">Select Mention</a></li>
+   {% elif request.path ==  select_variable %}
+        <li><a href="#">Edit Coder</a></li>
+        <li><a href="#">Select Mention</a></li>
+        <li><a href="#">Select Variable</a></li>
+   {% elif request.path == review_variables %}
+        <li><a href="#">Edit Coder</a></li>
+        <li><a href="#">Select Mention</a></li>
+        <li><a href="#">Review Variables</a></li>
+   {% endif %}
+</ol>

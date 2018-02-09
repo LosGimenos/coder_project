@@ -3,6 +3,10 @@
 {% block content %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css">
 
+    <ul class="pager pager-top-left">
+        <li class="previous back-button-updates"><a href="{% url 'coder_app:edit_project_variables' project_data.id %}"><span aria-hidden="true">&larr;</span> Back to Assigned Variables</a></li>
+    </ul>
+    <br/>
     {% include 'coder_app/nav_tabs.html' %}
     {% include 'coder_app/breadcrumb_projects.html' %}
     {% include 'coder_app/edit_project_tabs.html' %}
